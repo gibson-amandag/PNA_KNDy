@@ -1,0 +1,7 @@
+DATA_FOLDER="/path/Data"
+
+OUTPUT_FOLDER="/path/Output"
+
+EXCEL_FILE_NAME="fileName.xlsx"
+
+FILE_PREFIX="outputPrefix"
