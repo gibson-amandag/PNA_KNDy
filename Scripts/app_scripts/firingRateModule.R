@@ -2,8 +2,9 @@
 
 # https://shiny.rstudio.com/articles/modules.html
 
-firingRateUI <- function(id
-                     ){
+firingRateUI <- function(
+  id
+){
   ns <- NS(id)
   tagList(
     
@@ -15,38 +16,44 @@ firingRateUI <- function(id
     zoomAxisUI(ns("zoom_y"), "y"),
     
     tabsetPanel(
-      tabPanel("Con-Adults",
-                h4("Control - Adults"),
-               plotOutput(ns("Con_Adults"), height = "1500px")
-               ),
-      tabPanel("PNA-Adults",
-               h4("PNA - Adults"),
-               plotOutput(ns("PNA_Adults"), height = "1500px")
-               ),
-      tabPanel("Con-Juv",
-               h4("Control - Juveniles"),
-               plotOutput(ns("Con_Juveniles"), height = "1200px")
-               ),
-      tabPanel("PNA-Juv",
-               h4("PNA - Juveniles"),
-               plotOutput(ns("PNA_Juveniles"), height = "1200px")
-               ),
-      tabPanel("Individual Cell",
-               h4("Individual Cell"),
-               p("This hasn't been written yet"),
-               
-               #Need inputs to select which cell
-               plotOutput(ns("individualCell"))
-               )
+      tabPanel(
+        "Con-Adults",
+        h4("Control - Adults"),
+        plotOutput(ns("Con_Adults"), height = "1500px")
+      ),
+      tabPanel(
+        "PNA-Adults",
+        h4("PNA - Adults"),
+        plotOutput(ns("PNA_Adults"), height = "1500px")
+      ),
+      tabPanel(
+        "Con-Juv",
+        h4("Control - Juveniles"),
+        plotOutput(ns("Con_Juveniles"), height = "1200px")
+      ),
+      tabPanel(
+        "PNA-Juv",
+        h4("PNA - Juveniles"),
+        plotOutput(ns("PNA_Juveniles"), height = "1200px")
+      ),
+      tabPanel(
+        "Individual Cell",
+        h4("Individual Cell"),
+        p("This hasn't been written yet"),
+        
+        #Need inputs to select which cell
+        plotOutput(ns("individualCell"))
+      )
       
     )
-
-    )
+    
+  )
 }
 
 
-firingRateServer <- function(id,
-                         KNDy_firingRate
+firingRateServer <- function(
+  id,
+  KNDy_firingRate
 ){
   moduleServer(
     id,
@@ -77,42 +84,50 @@ firingRateServer <- function(id,
       output$Con_Adults <- renderPlot({
         KNDy_firingRate_long() %>%
           filter(TreatxAge == "Con-Adult") %>%
-          firingRatePlotFunc(zoom_x = zoom_x$zoom(),
-                             xmin = zoom_x$min(),
-                             xmax = zoom_x$max(),
-                             zoom_y = zoom_y$zoom(),
-                             ymin = zoom_y$min(),
-                             ymax = zoom_y$max())
+          firingRatePlotFunc(
+            zoom_x = zoom_x$zoom(),
+            xmin = zoom_x$min(),
+            xmax = zoom_x$max(),
+            zoom_y = zoom_y$zoom(),
+            ymin = zoom_y$min(),
+            ymax = zoom_y$max()
+          )
       })
       output$PNA_Adults <- renderPlot({
         KNDy_firingRate_long() %>%
           filter(TreatxAge == "PNA-Adult") %>%
-          firingRatePlotFunc(zoom_x = zoom_x$zoom(),
-                             xmin = zoom_x$min(),
-                             xmax = zoom_x$max(),
-                             zoom_y = zoom_y$zoom(),
-                             ymin = zoom_y$min(),
-                             ymax = zoom_y$max())
+          firingRatePlotFunc(
+            zoom_x = zoom_x$zoom(),
+            xmin = zoom_x$min(),
+            xmax = zoom_x$max(),
+            zoom_y = zoom_y$zoom(),
+            ymin = zoom_y$min(),
+            ymax = zoom_y$max()
+          )
       })
       output$Con_Juveniles <- renderPlot({
         KNDy_firingRate_long() %>%
           filter(TreatxAge == "Con-Juvenile") %>%
-          firingRatePlotFunc(zoom_x = zoom_x$zoom(),
-                             xmin = zoom_x$min(),
-                             xmax = zoom_x$max(),
-                             zoom_y = zoom_y$zoom(),
-                             ymin = zoom_y$min(),
-                             ymax = zoom_y$max())
+          firingRatePlotFunc(
+            zoom_x = zoom_x$zoom(),
+            xmin = zoom_x$min(),
+            xmax = zoom_x$max(),
+            zoom_y = zoom_y$zoom(),
+            ymin = zoom_y$min(),
+            ymax = zoom_y$max()
+          )
       })
       output$PNA_Juveniles <- renderPlot({
         KNDy_firingRate_long() %>%
           filter(TreatxAge == "PNA-Juvenile") %>%
-          firingRatePlotFunc(zoom_x = zoom_x$zoom(),
-                             xmin = zoom_x$min(),
-                             xmax = zoom_x$max(),
-                             zoom_y = zoom_y$zoom(),
-                             ymin = zoom_y$min(),
-                             ymax = zoom_y$max())
+          firingRatePlotFunc(
+            zoom_x = zoom_x$zoom(),
+            xmin = zoom_x$min(),
+            xmax = zoom_x$max(),
+            zoom_y = zoom_y$zoom(),
+            ymin = zoom_y$min(),
+            ymax = zoom_y$max()
+          )
       })
       
     }

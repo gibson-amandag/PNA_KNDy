@@ -8,37 +8,46 @@
 
 # https://shiny.rstudio.com/articles/modules.html
 
-controlDotsUI <- function(id,
-                          dotsize,
-                          binwidth,
-                          positionWidth = 0.9
+controlDotsUI <- function(
+  id,
+  dotsize,
+  binwidth,
+  positionWidth = 0.9
 ){
   ns <- NS(id)
   tagList(
     fluidRow(
-      column(4,
-             #dot size
-             sliderInput(inputId = ns("dotsize"),
-                         label = "Enter dot size:",
-                         step = 0.1,
-                         min = 0,
-                         max = 10,
-                         value = dotsize)
+      column(
+        4,
+        #dot size
+        sliderInput(
+          inputId = ns("dotsize"),
+          label = "Enter dot size:",
+          step = 0.1,
+          min = 0,
+          max = 10,
+          value = dotsize
+        )
       ),
-      column(4,
-             #bin width
-             numericInput(inputId = ns("binwidth"),
-                          label = "Enter binwidth:",
-                          value = binwidth
-             )
+      column(
+        4,
+        #bin width
+        numericInput(
+          inputId = ns("binwidth"),
+          label = "Enter binwidth:",
+          value = binwidth
+        )
       ),
-      column(4,
-             sliderInput(inputId = ns("positionWidth"),
-                         label = "Enter position width:",
-                         min = 0,
-                         max = 1,
-                         value = positionWidth)
-             
+      column(
+        4,
+        sliderInput(
+          inputId = ns("positionWidth"),
+          label = "Enter position width:",
+          min = 0,
+          max = 1,
+          value = positionWidth
+        )
+        
       )
     )
   )

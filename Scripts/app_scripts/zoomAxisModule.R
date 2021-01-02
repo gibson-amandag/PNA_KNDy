@@ -7,25 +7,30 @@
 
 # https://shiny.rstudio.com/articles/modules.html
 
-zoomAxisUI <- function(id, 
-                       whichAxis, #"x" or "y"
-                       startOn = FALSE
+zoomAxisUI <- function(
+  id, 
+  whichAxis, #"x" or "y"
+  startOn = FALSE
 ){
   ns <- NS(id)
   tagList(
     fluidRow(
-      column(4,
-             checkboxInput(ns("zoom"),
-                           paste0("Zoom ", whichAxis, " axis?"),
-                           value = startOn
-             )
+      column(
+        4,
+        checkboxInput(
+          ns("zoom"),
+          paste0("Zoom ", whichAxis, " axis?"),
+          value = startOn
+        )
       ),
-      column(4,
-             uiOutput(ns("min"))
+      column(
+        4,
+        uiOutput(ns("min"))
       ),
-      column(4,
-             uiOutput(ns("max"))
-             
+      column(
+        4,
+        uiOutput(ns("max"))
+        
       )
     )
     
@@ -33,10 +38,12 @@ zoomAxisUI <- function(id,
 }
 
 
-zoomAxisServer <- function(id,
-                           whichAxis,
-                           minVal,
-                           maxVal){
+zoomAxisServer <- function(
+  id,
+  whichAxis,
+  minVal,
+  maxVal
+){
   moduleServer(
     id,
     function(input, output, session) {
@@ -46,9 +53,11 @@ zoomAxisServer <- function(id,
           need(input$zoom == TRUE, FALSE)
         )
         ns <- session$ns
-        numericInput(ns("min"),
-                     paste0("Lower Limit ", whichAxis, "-axis:"),
-                     value = minVal)
+        numericInput(
+          ns("min"),
+          paste0("Lower Limit ", whichAxis, "-axis:"),
+          value = minVal
+        )
         
       })
       
@@ -57,9 +66,11 @@ zoomAxisServer <- function(id,
           need(input$zoom == TRUE, FALSE)
         )
         ns <- session$ns
-        numericInput(ns("max"),
-                     paste0("Upper Limit ", whichAxis, "-axis:"),
-                     value = maxVal)
+        numericInput(
+          ns("max"),
+          paste0("Upper Limit ", whichAxis, "-axis:"),
+          value = maxVal
+        )
         
       })
       

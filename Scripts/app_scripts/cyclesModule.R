@@ -3,7 +3,7 @@
 # https://shiny.rstudio.com/articles/modules.html
 
 cyclesUI <- function(id
-                     ){
+){
   ns <- NS(id)
   tagList(
     
@@ -14,13 +14,14 @@ cyclesUI <- function(id
     
     h4("PNA"),
     plotOutput(ns("PNAPlot"))
-
-    )
+    
+  )
 }
 
 
-cyclesServer <- function(id,
-                         KNDy_cycles
+cyclesServer <- function(
+  id,
+  KNDy_cycles
 ){
   moduleServer(
     id,

@@ -34,7 +34,7 @@ PNA - Adult, PNA - Juvenile, Control - Adult, Control - Juvenile
 If the order of the excel sheet changes, this has to change
 
 ```{r Get Data Ready}
-allDFs = GetDataReadyFunc(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firingRate, rateForQuiet)
+allDFs <- GetDataReadyFunc(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firingRate, rateForQuiet)
 
 KNDyDATA <-  allDFs$KNDyDATA
 KNDy_mouse_demo <- allDFs$KNDy_mouse_demo
@@ -44,16 +44,20 @@ KNDy_firingRate <- allDFs$KNDy_firingRate
 KNDyDATA
 
 #create dataframes with only juvenile recordings and only adult recordings
-sep_by_age(KNDyDATA)
+sepDFs <- sep_by_age(KNDyDATA)
 
+KNDyDATA_juv <- sepDFs$df_juv
+KNDyDATA_adult <- sepDFs$df_adult
 KNDyDATA_juv
 KNDyDATA_adult
 
 #create dataframes with only juvenile firing rate and adult firing rate
-sep_by_age(KNDy_firingRate)
+sepDFs <- sep_by_age(KNDy_firingRate)
 
 KNDy_firingRate
 
+KNDy_firingRate_juv <- sepDFs$df_juv
+KNDy_firingRate_adult <- sepDFs$df_adult
 KNDy_firingRate_juv
 KNDy_firingRate_adult
 
@@ -89,8 +93,9 @@ There is a _quo which is quoted for each variable, or the basename version which
 - cluster 2x2SE_Vars
 - cluster 3x3SE_Vars
 
+
 ```{r Variable Names and Groups}
-KNDy_VarNames = KNDy_varNamesFunc(KNDyDATA)
+KNDy_VarNames <- KNDy_varNamesFunc(KNDyDATA)
 ```
 
 ```{r Cell Count}
@@ -132,7 +137,10 @@ KNDy_firing = KNDyDATA %>%
 KNDy_firing
 
 #Create Firing Rate Separated by Age
-sep_by_age(KNDy_firing)
+sepDFs <- sep_by_age(KNDy_firing)
+KNDy_firing_juv <- sepDFs$df_juv
+KNDy_firing_adult <- sepDFs$df_adult
+
 KNDy_firing_juv
 KNDy_firing_adult
 
@@ -169,15 +177,24 @@ KNDy_burst_spont_BW2 = KNDyDATA %>%
 KNDy_burst_spont_BW2
 
 #Create Burst Separated by Age
-sep_by_age(KNDy_burst_spont)
+sepDFs <- sep_by_age(KNDy_burst_spont)
+KNDy_burst_spont_juv <- sepDFs$df_juv
+KNDy_burst_spont_adult <- sepDFs$df_adult
+#print
 KNDy_burst_spont_juv
 KNDy_burst_spont_adult
 
-sep_by_age(KNDy_burst_spont_BW1)
+sepDFs <- sep_by_age(KNDy_burst_spont_BW1)
+KNDy_burst_spont_BW1_juv <- sepDFs$df_juv
+KNDy_burst_spont_BW1_adult <- sepDFs$df_adult
+#print
 KNDy_burst_spont_BW1_juv
 KNDy_burst_spont_BW1_adult
 
-sep_by_age(KNDy_burst_spont_BW2)
+sepDFs <- sep_by_age(KNDy_burst_spont_BW2)
+KNDy_burst_spont_BW2_juv <- sepDFs$df_juv
+KNDy_burst_spont_BW2_adult <- sepDFs$df_adult
+#print
 KNDy_burst_spont_BW2_juv
 KNDy_burst_spont_BW2_adult
 
@@ -193,7 +210,10 @@ KNDy_cluster = KNDyDATA %>%
 KNDy_cluster
 
 #Create cluster df separated by age
-sep_by_age(KNDy_cluster)
+sepDFs <- sep_by_age(KNDy_cluster)
+KNDy_cluster_juv <- sepDFs$df_juv
+KNDy_cluster_adult <- sepDFs$df_adult
+#print
 KNDy_cluster_juv
 KNDy_cluster_adult
 

@@ -26,18 +26,25 @@ format_dates = function(column){
 
 #### Separate by Age Function
 sep_by_age = function(df){
-  df_nam = ensym(df) #capture name of dataframe
-  df_juv = df%>% #only cells from juvenile mice
+  df_nam <- ensym(df) #capture name of dataframe
+  df_juv  <- df%>% #only cells from juvenile mice
     filter(AgeGroup == "Juvenile")
   
-  df_adult = df%>% #only cells from adult mice
+  df_adult <- df%>% #only cells from adult mice
     filter(AgeGroup == "Adult")
   
-  nam_juv = paste0(df_nam, "_juv") #name for juvenile dataframe
-  nam_adult = paste0(df_nam, "_adult") #name for adult dataframe
+  return(
+    list(
+      "df_juv" = df_juv,
+      "df_adult" = df_adult
+    )
+  )
   
-  assign(nam_juv, df_juv, envir = .GlobalEnv) #assign juvenile df to juv df name in global environment
-  assign(nam_adult, df_adult, envir = .GlobalEnv) #assign adult df to adult df name in global environment
+  # nam_juv = paste0(df_nam, "_juv") #name for juvenile dataframe
+  # nam_adult = paste0(df_nam, "_adult") #name for adult dataframe
+  # 
+  # assign(nam_juv, df_juv, envir = .GlobalEnv) #assign juvenile df to juv df name in global environment
+  # assign(nam_adult, df_adult, envir = .GlobalEnv) #assign adult df to adult df name in global environment
 }
 
 ####Exclude function
@@ -715,9 +722,11 @@ my_KNDy_geoms = function(
   dot_plot, #if want to add dot plot lyaer -> TRUE
   violin_plot, #if want to add violin layer -> TRUE
   zoom_y = FALSE,
-  ylimit = NULL, #if want to zoom y axis, set upper y limit
+  #1/1/2021 - issues with min/max being null. Still get occassional errors with NA, but they at least resolve themselves
+  #get practice may be to always provide both min and max, and not leave either null
+  ylimit = 20, #if want to zoom y axis, set upper y limit
   mean_plot = TRUE, #if want to include mean and SEM
-  ymin = NULL
+  ymin = 0
 ){
   list(
     labs(

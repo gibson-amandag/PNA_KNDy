@@ -51,7 +51,9 @@ KNDy_cells <<- allDFs$KNDy_cells
 KNDy_firingRate2 <<- allDFs$KNDy_firingRate
 
 #create juvenile and adult dataframes
-sep_by_age(KNDyDATA)
+sepDFs <- sep_by_age(KNDyDATA)
+KNDyDATA_juv <<- sepDFs$df_juv
+KNDyDATA_adult <<- sepDFs$df_adult
 
 AppScriptsFolder = file.path(ScriptsFolder, "app_scripts")
 
@@ -78,6 +80,7 @@ sourceModule("burstParamsModule.R")
 sourceModule("cyclesModule.R")
 sourceModule("firingRateModule.R")
 
+sourceModule("summaryPlotsModule.R")
 
 # Define UI for application
 ui <- fluidPage(
@@ -96,276 +99,277 @@ ui <- fluidPage(
     ###Summary Plots Panel ----
     tabPanel(
       "Summary Plots",
-      h2("Create summary plots for variables"),
-      
-      #Show instructions
-      checkboxInput(
-        inputId = "instructions",
-        label = "Show instructions",
-        value = FALSE
-      ),
-      
-      instructions1UI("instructionsText"),
-      
-      #create a row for input selections
-      fluidRow(
-        #column 1
-        column(
-          3, 
-          #variable to plot
-          varSelectInput(
-            inputId = "var_to_plot",
-            label = "Select variable to plot",
-            data = KNDyDATA %>%
-              select(SpontAvgFiring:MaxBurstWindow_senktide)
-          ),
-          #treatment grouping
-          varSelectInput(
-            inputId = "treatment",
-            label = "Select treatment type",
-            data = KNDyDATA %>%
-              select(Treatment, GenTreatment),
-            selected = "GenTreatment"
-          ),
-          #grouping variable (on x axis)
-          
-          #grouping variable separated out so that it depends on which datasets.
-          #If there's only a single group on the x-axis, get a JSON error
-          
-          #if juveniles and all firing
-          conditionalPanel(
-            condition = "input.dataset == 'Juveniles' & input.firing == 'All'",
-            varSelectInput(
-              inputId = "group_juv_All",
-              label = "Select grouping variable",
-              data = KNDyDATA %>%
-                select(
-                  Treatment,
-                  GenTreatment,
-                  Who,
-                  Sac_9plus, Quiet
-                ),
-              selected = "Who"
-            )
-          ),
-          
-          #if juveniles and not all firing
-          conditionalPanel(
-            condition = "input.dataset == 'Juveniles' & input.firing != 'All'",
-            varSelectInput(
-              inputId = "group_juv_notAll",
-              label = "Select grouping variable",
-              data = KNDyDATA %>%
-                select(
-                  Treatment,
-                  GenTreatment,
-                  Who,
-                  Sac_9plus
-                ),
-              selected = "Who"
-            )
-          ),
-          
-          #if adults and all firing
-          conditionalPanel(
-            condition = "input.dataset == 'Adults' & input.firing == 'All'",
-            varSelectInput(
-              inputId = "group_adult_All",
-              label = "Select grouping variable",
-              data = KNDyDATA %>%
-                select(
-                  Treatment,
-                  GenTreatment,
-                  Sac_9plus,
-                  Quiet
-                ),
-              selected = "GenTreatment"
-            )
-          ),
-          
-          #if adults and not all firing
-          conditionalPanel(
-            condition = "input.dataset == 'Adults' & input.firing != 'All'",
-            varSelectInput(
-              inputId = "group_adult_notAll",
-              label = "Select grouping variable",
-              data = KNDyDATA %>%
-                select(
-                  Treatment,
-                  GenTreatment,
-                  Sac_9plus
-                ),
-              selected = "GenTreatment"
-            )
-          ),
-          
-          #if all for both
-          conditionalPanel(
-            condition = "input.dataset == 'All' & input.firing == 'All'",
-            varSelectInput(
-              inputId = "group_All_All",
-              label = "Select grouping variable",
-              data = KNDyDATA %>%
-                select(
-                  Treatment,
-                  GenTreatment,
-                  AgeGroup,
-                  Who,
-                  Sac_9plus, Quiet
-                ),
-              selected = "AgeGroup"
-            )
-          ),
-          
-          #if all for data set, not all for firing
-          conditionalPanel(
-            condition = "input.dataset == 'All' & input.firing != 'All'",
-            varSelectInput(
-              inputId = "group_All_notAll",
-              label = "Select grouping variable",
-              data = KNDyDATA %>%
-                select(
-                  Treatment,
-                  GenTreatment,
-                  AgeGroup,
-                  Who,
-                  Sac_9plus),
-              selected = "AgeGroup"
-            )
-          )
-          
-        ),
-        
-        #column 2
-        column(
-          3,
-          #expand to zero
-          checkboxInput(
-            inputId = "expand_to_zero",
-            "Expand to zero",
-            value = TRUE
-          ),
-          #zoom y axis
-          checkboxInput(
-            inputId = "zoom",
-            label = "Zoom to limit y axis",
-            value = FALSE
-          ),
-          #Zoom Range
-          #only show if zoom is true https://shiny.rstudio.com/articles/dynamic-ui.html
-          conditionalPanel(
-            condition = "input.zoom == true",
-            numericInput(
-              inputId = "ylim",
-              label = "Enter upper y limit:",
-              value = 20
-            )
-          ),
-          #dot plot layer
-          conditionalPanel(
-            condition = "input.zoom == false",
-            checkboxInput(
-              inputId = "dot_plot",
-              label = "Add dot plot layer",
-              value = TRUE
-            )
-          ),
-          
-          #violin plot layer
-          # conditionalPanel(
-          #   condition = "input.zoom == false",
-          #   checkboxInput(
-          #     inputId = "violin_plot",
-          #     label = "Add violin plot layer",
-          #     value = TRUE
-          #   )
-          # )
-          
-          checkboxInput(
-            inputId = "violin_plot",
-            label = "Add violin plot layer",
-            value = TRUE
-          ),
-        ),
-        
-        #column 3
-        column(
-          3,
-          #dot size
-          sliderInput(
-            inputId = "dotsize",
-            label = "Enter dot size:",
-            step = 0.1,
-            min = 0,
-            max = 10,
-            value = 6
-          ),
-          #bin width
-          numericInput(
-            inputId = "binwidth",
-            label = "Enter binwidth:",
-            value = 0.05
-          ),
-          #position width
-          sliderInput(
-            inputId = "positionWidth",
-            label = "Enter position width:",
-            min = 0,
-            max = 1,
-            value = 0.9
-          )
-        ),
-        
-        #column 4
-        column(
-          3,
-          #Exclude
-          checkboxInput(
-            inputId = "exclude",
-            label = "Exclude marked cells",
-            value = TRUE
-          ),
-          
-          #which dataset?
-          radioButtons(
-            inputId = "dataset", 
-            label = "Which ages?",
-            choices = list(
-              "All",
-              "Adults",
-              "Juveniles"
-            ),
-            selected = "All"
-          ),
-          #Which activity levels to include
-          radioButtons(
-            inputId = "firing", 
-            label = "Select level of activity:",
-            choices = list(
-              "All",
-              "Quiescent",
-              "Non-quiescent"
-            ),
-            selected = "All"
-          )
-        )
-        
-      ),
-      
-      #Create a space for the output plot to be placed
-      plotOutput(
-        "plot",
-        click = "plot_click"
-      ),
-      # https://shiny.rstudio.com/articles/plot-interaction.html - interactive plot info. Using click
-      
-      h4("Values within binwidth of click"),
-      
-      #Text output
-      verbatimTextOutput("value_info"),
-      
-      #DataFrame based on click y-value
-      dataTableOutput("plot_info")
+      summaryPlotsUI("summaryPlots", KNDyDATA),
+      # h2("Create summary plots for variables"),
+      # 
+      # #Show instructions
+      # checkboxInput(
+      #   inputId = "instructions",
+      #   label = "Show instructions",
+      #   value = FALSE
+      # ),
+      # 
+      # instructions1UI("instructionsText"),
+      # 
+      # #create a row for input selections
+      # fluidRow(
+      #   #column 1
+      #   column(
+      #     3, 
+      #     #variable to plot
+      #     varSelectInput(
+      #       inputId = "var_to_plot",
+      #       label = "Select variable to plot",
+      #       data = KNDyDATA %>%
+      #         select(SpontAvgFiring:MaxBurstWindow_senktide)
+      #     ),
+      #     #treatment grouping
+      #     varSelectInput(
+      #       inputId = "treatment",
+      #       label = "Select treatment type",
+      #       data = KNDyDATA %>%
+      #         select(Treatment, GenTreatment),
+      #       selected = "GenTreatment"
+      #     ),
+      #     #grouping variable (on x axis)
+      #     
+      #     #grouping variable separated out so that it depends on which datasets.
+      #     #If there's only a single group on the x-axis, get a JSON error
+      #     
+      #     #if juveniles and all firing
+      #     conditionalPanel(
+      #       condition = "input.dataset == 'Juveniles' & input.firing == 'All'",
+      #       varSelectInput(
+      #         inputId = "group_juv_All",
+      #         label = "Select grouping variable",
+      #         data = KNDyDATA %>%
+      #           select(
+      #             Treatment,
+      #             GenTreatment,
+      #             Who,
+      #             Sac_9plus, Quiet
+      #           ),
+      #         selected = "Who"
+      #       )
+      #     ),
+      #     
+      #     #if juveniles and not all firing
+      #     conditionalPanel(
+      #       condition = "input.dataset == 'Juveniles' & input.firing != 'All'",
+      #       varSelectInput(
+      #         inputId = "group_juv_notAll",
+      #         label = "Select grouping variable",
+      #         data = KNDyDATA %>%
+      #           select(
+      #             Treatment,
+      #             GenTreatment,
+      #             Who,
+      #             Sac_9plus
+      #           ),
+      #         selected = "Who"
+      #       )
+      #     ),
+      #     
+      #     #if adults and all firing
+      #     conditionalPanel(
+      #       condition = "input.dataset == 'Adults' & input.firing == 'All'",
+      #       varSelectInput(
+      #         inputId = "group_adult_All",
+      #         label = "Select grouping variable",
+      #         data = KNDyDATA %>%
+      #           select(
+      #             Treatment,
+      #             GenTreatment,
+      #             Sac_9plus,
+      #             Quiet
+      #           ),
+      #         selected = "GenTreatment"
+      #       )
+      #     ),
+      #     
+      #     #if adults and not all firing
+      #     conditionalPanel(
+      #       condition = "input.dataset == 'Adults' & input.firing != 'All'",
+      #       varSelectInput(
+      #         inputId = "group_adult_notAll",
+      #         label = "Select grouping variable",
+      #         data = KNDyDATA %>%
+      #           select(
+      #             Treatment,
+      #             GenTreatment,
+      #             Sac_9plus
+      #           ),
+      #         selected = "GenTreatment"
+      #       )
+      #     ),
+      #     
+      #     #if all for both
+      #     conditionalPanel(
+      #       condition = "input.dataset == 'All' & input.firing == 'All'",
+      #       varSelectInput(
+      #         inputId = "group_All_All",
+      #         label = "Select grouping variable",
+      #         data = KNDyDATA %>%
+      #           select(
+      #             Treatment,
+      #             GenTreatment,
+      #             AgeGroup,
+      #             Who,
+      #             Sac_9plus, Quiet
+      #           ),
+      #         selected = "AgeGroup"
+      #       )
+      #     ),
+      #     
+      #     #if all for data set, not all for firing
+      #     conditionalPanel(
+      #       condition = "input.dataset == 'All' & input.firing != 'All'",
+      #       varSelectInput(
+      #         inputId = "group_All_notAll",
+      #         label = "Select grouping variable",
+      #         data = KNDyDATA %>%
+      #           select(
+      #             Treatment,
+      #             GenTreatment,
+      #             AgeGroup,
+      #             Who,
+      #             Sac_9plus),
+      #         selected = "AgeGroup"
+      #       )
+      #     )
+      #     
+      #   ),
+      #   
+      #   #column 2
+      #   column(
+      #     3,
+      #     #expand to zero
+      #     checkboxInput(
+      #       inputId = "expand_to_zero",
+      #       "Expand to zero",
+      #       value = TRUE
+      #     ),
+      #     #zoom y axis
+      #     checkboxInput(
+      #       inputId = "zoom",
+      #       label = "Zoom to limit y axis",
+      #       value = FALSE
+      #     ),
+      #     #Zoom Range
+      #     #only show if zoom is true https://shiny.rstudio.com/articles/dynamic-ui.html
+      #     conditionalPanel(
+      #       condition = "input.zoom == true",
+      #       numericInput(
+      #         inputId = "ylim",
+      #         label = "Enter upper y limit:",
+      #         value = 20
+      #       )
+      #     ),
+      #     #dot plot layer
+      #     conditionalPanel(
+      #       condition = "input.zoom == false",
+      #       checkboxInput(
+      #         inputId = "dot_plot",
+      #         label = "Add dot plot layer",
+      #         value = TRUE
+      #       )
+      #     ),
+      #     
+      #     #violin plot layer
+      #     # conditionalPanel(
+      #     #   condition = "input.zoom == false",
+      #     #   checkboxInput(
+      #     #     inputId = "violin_plot",
+      #     #     label = "Add violin plot layer",
+      #     #     value = TRUE
+      #     #   )
+      #     # )
+      #     
+      #     checkboxInput(
+      #       inputId = "violin_plot",
+      #       label = "Add violin plot layer",
+      #       value = TRUE
+      #     ),
+      #   ),
+      #   
+      #   #column 3
+      #   column(
+      #     3,
+      #     #dot size
+      #     sliderInput(
+      #       inputId = "dotsize",
+      #       label = "Enter dot size:",
+      #       step = 0.1,
+      #       min = 0,
+      #       max = 10,
+      #       value = 6
+      #     ),
+      #     #bin width
+      #     numericInput(
+      #       inputId = "binwidth",
+      #       label = "Enter binwidth:",
+      #       value = 0.05
+      #     ),
+      #     #position width
+      #     sliderInput(
+      #       inputId = "positionWidth",
+      #       label = "Enter position width:",
+      #       min = 0,
+      #       max = 1,
+      #       value = 0.9
+      #     )
+      #   ),
+      #   
+      #   #column 4
+      #   column(
+      #     3,
+      #     #Exclude
+      #     checkboxInput(
+      #       inputId = "exclude",
+      #       label = "Exclude marked cells",
+      #       value = TRUE
+      #     ),
+      #     
+      #     #which dataset?
+      #     radioButtons(
+      #       inputId = "dataset", 
+      #       label = "Which ages?",
+      #       choices = list(
+      #         "All",
+      #         "Adults",
+      #         "Juveniles"
+      #       ),
+      #       selected = "All"
+      #     ),
+      #     #Which activity levels to include
+      #     radioButtons(
+      #       inputId = "firing", 
+      #       label = "Select level of activity:",
+      #       choices = list(
+      #         "All",
+      #         "Quiescent",
+      #         "Non-quiescent"
+      #       ),
+      #       selected = "All"
+      #     )
+      #   )
+      #   
+      # ),
+      # 
+      # #Create a space for the output plot to be placed
+      # plotOutput(
+      #   "plot",
+      #   click = "plot_click"
+      # ),
+      # # https://shiny.rstudio.com/articles/plot-interaction.html - interactive plot info. Using click
+      # 
+      # h4("Values within binwidth of click"),
+      # 
+      # #Text output
+      # verbatimTextOutput("value_info"),
+      # 
+      # #DataFrame based on click y-value
+      # dataTableOutput("plot_info")
     ),
     ### Scatter Plots ----
     tabPanel(
@@ -707,115 +711,119 @@ server <- function(input, output) {
     KNDyDATA_juv = KNDyDATA_juv
   )
   
-  ### PANEL 1 SERVER -------------------------------------
+  ### SUMMARY PLOTS SERVER -------------------------------------
+  summaryPlotsServer("summaryPlots", KNDyDATA, KNDyDATA_adult, KNDyDATA_juv, KNDy_VarNames)
   
-  # https://groups.google.com/g/shiny-discuss/c/7ZO92Oy30Dw (possibility to add horizontal
-  #line when click. But right now this disappears on me. Even with fix suggested here)
-  
-  # observeEvent(input$plot_click,
-  #              y_click <- input$plot_click$y)
-  
-  output$plot <- renderPlot({
-    data1 <- switch(
-      input$dataset,
-      "All" = KNDyDATA,
-      "Adults" = KNDyDATA_adult,
-      "Juveniles" = KNDyDATA_juv
-      
-    )
-    
-    if(input$firing == "Quiescent"){
-      data1 <- data1 %>%
-        filter(Quiet == TRUE)
-    }
-    
-    if(input$firing == "Non-quiescent"){
-      data1 <- data1 %>%
-        filter(Quiet == FALSE)
-    }
-    
-    if(input$exclude){
-      data1 <- data1 %>%
-        filter(Exclude == FALSE | is.na(Exclude)) #only include cells marked FALSE or NA for Exclude
-    }
-    
-    #grouping variable depending on what datasets
-    if(input$dataset == "All" & input$firing == "All"){
-      grouping_var <- input$group_All_All
-    }else if(input$dataset == "All" & input$firing != "All"){
-      grouping_var <- input$group_All_notAll
-    }else if(input$dataset == "Juveniles" & input$firing == "All"){
-      grouping_var <- input$group_juv_All
-    }else if(input$dataset == "Juveniles" & input$firing != "All"){
-      grouping_var <- input$group_juv_notAll
-    }else if(input$dataset == "Adults" & input$firing == "All"){
-      grouping_var <- input$group_adult_All
-    }else if(input$dataset == "Adults" & input$firing != "All"){
-      grouping_var <- input$group_adult_notAll
-    }
-    
-    data1 <<- data1
-    
-    #https://github.com/rstudio/shiny/issues/2673 getting error warning without print when x is a single value
-    #but printing doesn't let interact. If want to interact (for example, show CellID when hover, needs to not be printed)
-    #https://shiny.rstudio.com/reference/shiny/1.3.1/plotOutput.html
-    data1 %>%
-      filter(!is.na(!! input$var_to_plot)) %>%
-      ggplot(aes(x = !! grouping_var, y = !! input$var_to_plot, fill = !! input$treatment))+
-      my_KNDy_geoms(
-        dotsize = input$dotsize,
-        binwidth = input$binwidth,
-        positionWidth = input$positionWidth,
-        xtitle = NULL,
-        ytitle = NULL,
-        var_to_plot = input$var_to_plot,
-        title = NULL,
-        expand_to_zero = input$expand_to_zero,
-        dot_plot = ifelse(input$zoom, TRUE, input$dot_plot),
-        violin_plot = input$violin_plot,
-        zoom_y = input$zoom,
-        ylimit = input$ylim,
-        mean_plot = TRUE
-      )
-    # if(!is.null(input$plot_click$y))
-    #   geom_hline(yintercept = y_click)
-    
-    
-  })
-  
-  output$value_info <- renderText(
-    if(is.null(input$plot_click$y)){
-      paste("Click on graph")
-    }else({
-      paste0(
-        "Looking for values between ", #one binwidth +/- click y value
-        round(input$plot_click$y - input$binwidth, 3),
-        " and ",
-        round(input$plot_click$y + input$binwidth, 3)
-      )
-    })
-  )
-  
-  
-  output$plot_info <- renderDataTable(
-    if(!is.null(input$plot_click$y)){
-      data1 %>%
-        select(
-          CellID,
-          MouseID,
-          #if the variable to plot is not Spontaneous Firing Rate, also display this column
-          if(input$var_to_plot != sym("SpontAvgFiring")){sym("SpontAvgFiring")},
-          !! input$var_to_plot,
-          Treatment,
-          AgeGroup,
-          Who
-        ) %>%
-        filter(
-          #look for values that are near the click y-value. The tolerance is the binwidth
-          near(!! input$var_to_plot, input$plot_click$y, tol = input$binwidth)
-        )
-    }
-  )
+  # # https://groups.google.com/g/shiny-discuss/c/7ZO92Oy30Dw (possibility to add horizontal
+  # #line when click. But right now this disappears on me. Even with fix suggested here)
+  # 
+  # # observeEvent(input$plot_click,
+  # #              y_click <- input$plot_click$y)
+  # 
+  # output$plot <- renderPlot({
+  #   data1 <- switch(
+  #     input$dataset,
+  #     "All" = KNDyDATA,
+  #     "Adults" = KNDyDATA_adult,
+  #     "Juveniles" = KNDyDATA_juv
+  #     
+  #   )
+  #   
+  #   if(input$firing == "Quiescent"){
+  #     data1 <- data1 %>%
+  #       filter(Quiet == TRUE)
+  #   }
+  #   
+  #   if(input$firing == "Non-quiescent"){
+  #     data1 <- data1 %>%
+  #       filter(Quiet == FALSE)
+  #   }
+  #   
+  #   if(input$exclude){
+  #     data1 <- data1 %>%
+  #       filter(Exclude == FALSE | is.na(Exclude)) #only include cells marked FALSE or NA for Exclude
+  #   }
+  #   
+  #   #grouping variable depending on what datasets
+  #   if(input$dataset == "All" & input$firing == "All"){
+  #     grouping_var <- input$group_All_All
+  #   }else if(input$dataset == "All" & input$firing != "All"){
+  #     grouping_var <- input$group_All_notAll
+  #   }else if(input$dataset == "Juveniles" & input$firing == "All"){
+  #     grouping_var <- input$group_juv_All
+  #   }else if(input$dataset == "Juveniles" & input$firing != "All"){
+  #     grouping_var <- input$group_juv_notAll
+  #   }else if(input$dataset == "Adults" & input$firing == "All"){
+  #     grouping_var <- input$group_adult_All
+  #   }else if(input$dataset == "Adults" & input$firing != "All"){
+  #     grouping_var <- input$group_adult_notAll
+  #   }
+  #   
+  #   data1 <<- data1
+  #   
+  #   #https://github.com/rstudio/shiny/issues/2673 getting error warning without print when x is a single value
+  #   #but printing doesn't let interact. If want to interact (for example, show CellID when hover, needs to not be printed)
+  #   #https://shiny.rstudio.com/reference/shiny/1.3.1/plotOutput.html
+  #   data1 %>%
+  #     filter(!is.na(!! input$var_to_plot)) %>%
+  #     ggplot(aes(x = !! grouping_var, y = !! input$var_to_plot, fill = !! input$treatment))+
+  #     my_KNDy_geoms(
+  #       dotsize = input$dotsize,
+  #       binwidth = input$binwidth,
+  #       positionWidth = input$positionWidth,
+  #       xtitle = NULL,
+  #       ytitle = NULL,
+  #       var_to_plot = input$var_to_plot,
+  #       title = NULL,
+  #       expand_to_zero = input$expand_to_zero,
+  #       dot_plot = ifelse(input$zoom, TRUE, input$dot_plot),
+  #       violin_plot = input$violin_plot,
+  #       zoom_y = input$zoom,
+  #         #ifelse(is.na(input$zoom), FALSE, input$zoom),
+  #         # input$zoom,
+  #       ylimit = 20,
+  #         #input$ylim,
+  #       mean_plot = TRUE
+  #     )
+  #   # if(!is.null(input$plot_click$y))
+  #   #   geom_hline(yintercept = y_click)
+  #   
+  #   
+  # })
+  # 
+  # output$value_info <- renderText(
+  #   if(is.null(input$plot_click$y)){
+  #     paste("Click on graph")
+  #   }else({
+  #     paste0(
+  #       "Looking for values between ", #one binwidth +/- click y value
+  #       round(input$plot_click$y - input$binwidth, 3),
+  #       " and ",
+  #       round(input$plot_click$y + input$binwidth, 3)
+  #     )
+  #   })
+  # )
+  # 
+  # 
+  # output$plot_info <- renderDataTable(
+  #   if(!is.null(input$plot_click$y)){
+  #     data1 %>%
+  #       select(
+  #         CellID,
+  #         MouseID,
+  #         #if the variable to plot is not Spontaneous Firing Rate, also display this column
+  #         if(input$var_to_plot != sym("SpontAvgFiring")){sym("SpontAvgFiring")},
+  #         !! input$var_to_plot,
+  #         Treatment,
+  #         AgeGroup,
+  #         Who
+  #       ) %>%
+  #       filter(
+  #         #look for values that are near the click y-value. The tolerance is the binwidth
+  #         near(!! input$var_to_plot, input$plot_click$y, tol = input$binwidth)
+  #       )
+  #   }
+  # )
   
   
   ### PANEL 2 SERVER -------------------------------------
