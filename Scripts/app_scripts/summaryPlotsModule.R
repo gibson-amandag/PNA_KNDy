@@ -16,13 +16,13 @@ summaryPlotsUI <- function(
     h2("Create summary plots for variables"),
     
     #Show instructions
-    checkboxInput(
-      inputId = ns("instructions"),
-      label = "Show instructions",
-      value = FALSE
-    ),
+    # checkboxInput(
+    #   inputId = ns("instructions"),
+    #   label = "Show instructions",
+    #   value = FALSE
+    # ),
     
-    instructions1UI("instructionsText"),
+    instructionsSummaryUI(ns("instructionsText")),
     
     #create a row for input selections
     fluidRow(
@@ -174,6 +174,9 @@ summaryPlotsServer <- function(
   moduleServer(
     id,
     function(input, output, session) {
+      instructionsSummaryServer("instructionsText")
+      # instructionsSummary1Server("instructionsText")
+      
       zoom_y <- zoomAxisServer("zoom_y", "y", 0, 20)
       
       #ylimit UI to change with checking of zoom input
