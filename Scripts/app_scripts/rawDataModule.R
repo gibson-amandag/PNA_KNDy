@@ -8,7 +8,7 @@ rawDataUI <- function(
 ){
   ns <- NS(id)
   tagList(
-    h2("Explore the Data"),
+    h2("Explore the Data-Amanda"),
     
     #only show if show instructions is checked
     instructionsRawDataUI(ns("instructionsText")),
