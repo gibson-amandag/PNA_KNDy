@@ -88,7 +88,7 @@ sourceModule("maxBurstWindowModule.R")
 
 # Define UI for application
 ui <- fluidPage(
-  titlePanel("PNA KNDy Data - Amanda Changed This"),
+  titlePanel("PNA KNDy Data"),
   
   p("Be sure that the ",
     em("KNDyPNA_DATA.xlsx"), "file is up to date."),
