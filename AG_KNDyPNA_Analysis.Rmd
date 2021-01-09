@@ -411,13 +411,13 @@ df = excludeFunc(KNDy_firing_juv) #use the juvenile dataframe, exclude
 my_KNDy_plot(
   df, #determined above
   SpontAvgFiring, #plot spontaneous average firing rate
-  dotsize = 6, 
+  dotsize = 3, 
   binwidth = 0.05,
   positionWidth = 1,
   group = Who, #group by who recorded
-  add_to_save_name = "JJvAGG_test", 
+  add_to_save_name = "JJvAGG", 
   save = save, 
-  violin_plot = FALSE, 
+  violin_plot = TRUE, 
   toPPT = toPPT, 
   ppt = ppt,
   img_type = imgTypePlots
@@ -1346,6 +1346,15 @@ BurstsPerHour_model <- lm_byTreatxAge(expr(BurstsPerHour_spont), KNDyDATA_contra
 makeANOVA_TreatAge(BurstsPerHour_model)
 ```
 
+Here, the interest is in comparing the firing rate of cells that Amanda recorded and cells that Jenn recorded. These were all juveniles, so only that data frame is going to be used
+```{r ANOVA-by experimenter}
+KNDyDATA_juv_treatWho_contrasts <- makeTreatandWhoContrasts(KNDyDATA_juv)
+SpontAvgFiring_treatWho_model <- lm_byTreatxWho(expr(SpontAvgFiring), KNDyDATA_juv_treatWho_contrasts)
+SpontAvgFiring_treatWho_model <- makeANOVA_TreatWho(SpontAvgFiring_treatWho_model)
+SpontAvgFiring_treatWho_model
+```
+
+
 ```{r Cycles}
 KNDy_cycles_long <- make_cycles_long(KNDy_cycles) %>%
   add_Day_col() %>%
@@ -1384,7 +1393,7 @@ KNDy_firingRate_long %>%
 # Juveniles
 KNDy_firingRate_long %>%
   excludeFunc() %>%
-  filter(AgeGroup == "Juveniles") %>%
+  filter(AgeGroup == "Juvenile") %>%
   firingRatePlotFunc()
 
 

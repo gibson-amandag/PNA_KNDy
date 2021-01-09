@@ -1,0 +1,391 @@
+---
+title: Analysis of Prenatal Androgenization Effects on Extracellular Firing of KNDy
+  Neurons
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+  html_notebook:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# Set-up
+The `AG_KNDyPNA_setup.R` file reads the .REnviron to load the appropriate files for the local computer. It also calls the appropriate libraries and sources the other function files to be used for analysis.
+
+This file also loads the `KNDy_mouse_demo`, `KNDy_cells`, `KNDy_exclude`, `KNDy_firingRate`, and `KNDy_cycles` dataframes by reading the `KNDyPNA_Data` excel file.
+```{r callSetUp, message=FALSE, warning=FALSE}
+#This runs the setup script that loads the appropriate librarys and files
+source("./Scripts/AG_KNDyPNA_setup.R")
+```
+
+## Get Data Ready
+
+The `GetDataReadyFunc` function takes the `KNDy_mouse_demo` and `KNDy_cells` data frame to produce a combined `KNDyDATA` data frame.
+
+This does the following transformations
+
+* reformats the columns with dates into date format
+* Creates a new variable Sac_9plus that is TRUE when the time of sacrifice is more than 9hr after lights on
+* Creates a new variable AgeGroup that is TRUE when the mouse is a juvenile
+* Creates a new variable Quiet that is TRUE when the spontaneous average firing rate is less than a cutoff value
+cutoff value is specified by rateForQuiet
+* Creates a new variable TreatxAge to generate four groups 
+  + PNA - Adult
+  + PNA - Juvenile
+  + Control - Adult
+  + Control - Juvenile
+* Makes AgeGroup a factor, and gives it nice labels, Juvenile or Adult
+* Gets rid of white space in the "Who" variable
+* Makes Treatment a factor variable with orders "Main Colony Control", "Control", "Vehicle", "DHT"
+* Combines the KNDy_exclude information
+*Readjusts the order of variables within the KNDyDATA data frame to be a little more helpful.  
+
+If the order of the excel sheet changes, this function has to change
+```{r Get-Data-Ready}
+allDFs <- GetDataReadyFunc(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firingRate, rateForQuiet)
+
+KNDyDATA <-  allDFs$KNDyDATA
+KNDy_mouse_demo <- allDFs$KNDy_mouse_demo
+KNDy_cells <- allDFs$KNDy_cells
+KNDy_firingRate <- allDFs$KNDy_firingRate
+```
+
+```{r KNDy_VarNames}
+# Creates the KNDy_VarNames data frame with the nice names for each variable
+# Creates the following lists or expressions of variable groups. 
+# There is a _quo which is quoted for each variable, or the basename version which is the exprs (expressions) list
+# 
+# - timingVars
+# - demoVarsAll
+# - BurstVars_spont
+# - numPeaksVars
+# - numNadirsVars
+# - meanPeakDurVars
+# - meanNadirDurVars
+# - totalPeakDurVars
+# - totalNadirDurVars
+# - meanPeakFiringVars
+# - meanNadirFiringVars
+# - allClusterVars
+# - cluster2x2SD_Vars
+# - cluster3x3SD_Vars
+# - cluster 2x2SE_Vars
+# - cluster 3x3SE_Vars
+
+KNDy_VarNames <- KNDy_varNamesFunc(KNDyDATA)
+```
+
+# `KNDyDATA`
+```{r KNDyDATA}
+KNDyDATA
+```
+  
+The KNDyDATA dataframe can be separated into the adult recordings and the juvenile recordings
+```{r separate-by-age-KNDyDATA}
+#create dataframes with only juvenile recordings and only adult recordings
+sepDFs <- sep_by_age(KNDyDATA)
+KNDyDATA_juv <- sepDFs$df_juv
+KNDyDATA_adult <- sepDFs$df_adult
+```
+
+## `KNDyDATA_juv`
+```{r KNDyDATA_juv}
+KNDyDATA_juv
+```
+
+## `KNDyDATA_adult`
+```{r KNDyDATA_adult}
+KNDyDATA_adult
+```
+
+# Number of Cells
+
+This excludes the cells that have been marked for exclusion  
+<em><span style="color:red">Note that the adult cage numbers have to be updated. Not all of the adults came from the same litters</span></em>
+```{r Count-Cells}
+#Determine which df you want you use 
+df = excludeFunc(KNDyDATA) #exclude
+#df = KNDyDATA #include all
+
+KNDy_count = df %>%
+  select( #select only these columns
+    CellID,
+    MouseID,
+    Cage,
+    GenTreatment,
+    AgeGroup,
+    Who
+  )%>%
+  group_by(Who, GenTreatment, AgeGroup)%>% #group by the treatment by age variable
+  summarise(
+    numCells= n(), #count the number of data points for each group
+    numMice = length(unique(MouseID)), #count the number of unique MouseIDs
+    numLitters = length(unique(Cage)), #Count the number of unique cage numbers
+    .groups = 'drop')
+KNDy_count
+
+numCells_Jenn_Con_Juv <- with(KNDy_count, numCells[Who == "Jenn" & GenTreatment == "Control" & AgeGroup == "Juvenile"])
+numCells_Jenn_PNA_Juv <- with(KNDy_count, numCells[Who == "Jenn" & GenTreatment == "PNA" & AgeGroup == "Juvenile"])
+numCells_Amanda_Con_Juv <- with(KNDy_count, numCells[Who == "Amanda" & GenTreatment == "Control" & AgeGroup == "Juvenile"])
+numCells_Amanda_PNA_Juv <- with(KNDy_count, numCells[Who == "Amanda" & GenTreatment == "PNA" & AgeGroup == "Juvenile"])
+numCells_Amanda_Con_Adult <- with(KNDy_count, numCells[Who == "Amanda" & GenTreatment == "Control" & AgeGroup == "Adult"])
+numCells_Amanda_PNA_Adult <- with(KNDy_count, numCells[Who == "Amanda" & GenTreatment == "PNA" & AgeGroup == "Adult"])
+```
+
+Jenn recorded `r numCells_Jenn_Con_Juv` cells from control juvenile mice. She recorded `r numCells_Jenn_PNA_Juv` cells from PNA juvenile mice. Amanda recorded `r numCells_Amanda_Con_Juv` cells from control juvenile mice and `r numCells_Amanda_PNA_Juv` PNA juvenile cells. She recorded `r numCells_Amanda_Con_Adult` cells from control adult mice and `r numCells_Amanda_PNA_Adult` cells from PNA adult mice.  
+
+# PNA Phenotype
+These are the measurements from the surviving littermaters of the juveniles that were recorded.  
+<em><span style="color:red">Amanda will need to go back through her old data to pull out the cycling data for the adults.</span></em> 
+
+<em><span style="color:red">pull in AGD</span></em>
+
+## Cycles
+```{r Cycles-calc}
+KNDy_cycles_long <- make_cycles_long(KNDy_cycles) %>%
+  add_Day_col() %>%
+  drop_na(Stage)
+
+#Control
+KNDy_cycles_control <- KNDy_cycles_long %>%
+  filter(GenTreatment == "Control") %>%
+  cyclesPlotFunc()
+
+#PNA
+KNDy_cycles_PNA <- KNDy_cycles_long %>%
+  filter(GenTreatment == "PNA") %>%
+  cyclesPlotFunc()
+```
+
+### Control
+```{r}
+KNDy_cycles_control
+```
+
+### PNA
+```{r PNA-cycles}
+KNDy_cycles_PNA
+```
+
+
+# `KNDy_firingRate`
+```{r}
+KNDy_firingRate
+```
+```{r}
+KNDy_firingRate_long <- KNDy_firingRate %>%
+  excludeFunc() %>%
+  make_firing_long
+
+KNDy_firingRate_long <- KNDy_firingRate_long %>%
+  add_Min_col()
+
+# Uncomment to print, but 6000+ rows
+# KNDy_firingRate_long
+
+# Adults
+KNDy_firingRate_Adult_Con_plot <- KNDy_firingRate_long %>%
+  excludeFunc() %>%
+  filter(AgeGroup == "Adult" & GenTreatment == "Control") %>%
+  firingRatePlotFunc()
+
+KNDy_firingRate_Adult_PNA_plot <- KNDy_firingRate_long %>%
+  excludeFunc() %>%
+  filter(AgeGroup == "Adult" & GenTreatment == "PNA") %>%
+  firingRatePlotFunc()
+
+# Juveniles
+KNDy_firingRate_Juv_Con_plot <- KNDy_firingRate_long %>%
+  excludeFunc() %>%
+  filter(AgeGroup == "Juvenile" & GenTreatment == "Control") %>%
+  firingRatePlotFunc()
+
+KNDy_firingRate_Juv_PNA_plot <- KNDy_firingRate_long %>%
+  excludeFunc() %>%
+  filter(AgeGroup == "Juvenile" & GenTreatment == "PNA") %>%
+  firingRatePlotFunc()
+```
+
+The KNDy_firingRate dataframe can be separated into the adult recordings and the juvenile recordings
+```{r separate-by-age-firingRate}
+#create dataframes with only juvenile recordings and only adult recordings
+sepDFs <- sep_by_age(KNDy_firingRate)
+KNDy_firingRate_juv <- sepDFs$df_juv
+KNDy_firingRate_adult <- sepDFs$df_adult
+```
+
+## `KNDy_firingRate_juv`
+```{r KNDy_firingRate_juv, fig.width=12, fig.height=18}
+KNDy_firingRate_juv
+```
+### Control
+```{r, fig.width=12, fig.height=18}
+KNDy_firingRate_Juv_Con_plot
+```
+
+### PNA
+```{r, fig.width=12, fig.height=18}
+KNDy_firingRate_Juv_PNA_plot
+```
+
+## `KNDy_firingRate_adult`
+```{r KNDy_firingRate_adult}
+KNDy_firingRate_adult
+```
+
+### Control
+```{r, fig.width=12, fig.height=18}
+KNDy_firingRate_Adult_Con_plot
+```
+
+### PNA
+```{r, fig.width=12, fig.height=18}
+KNDy_firingRate_Adult_PNA_plot
+```
+
+
+# Averaged Firing Rate Data
+
+This table shows the demographic variables and the average firing rate of the spontaneous period for each cell in hertz.
+```{r}
+#Firing Rate
+KNDy_firing = KNDyDATA %>%
+  filter(!is.na(SpontAvgFiring)) %>% #only take rows that are not NA for spontaneous firing rate
+  select(
+    SpontAvgFiring,
+    all_of(demoVarsAll_quo),
+    all_of(timingVars_quo),
+    Quiet
+  )
+
+#Create Firing Rate Separated by Age
+sepDFs <- sep_by_age(KNDy_firing)
+KNDy_firing_juv <- sepDFs$df_juv
+KNDy_firing_adult <- sepDFs$df_adult
+```
+
+```{r}
+KNDy_firing
+```
+
+## Juveniles
+```{r}
+KNDy_firing_juv
+```
+
+### Jenn
+```{r}
+KNDy_firing_juv %>%
+  filter(Who == "Jenn")
+```
+
+### Amanda
+```{r}
+KNDy_firing_juv %>%
+  filter(Who == "Amanda")
+```
+
+
+## Adults
+
+Only Amanda recorded from the adult animals
+```{r}
+KNDy_firing_adult
+```
+
+## Summarize Average Firing
+
+### By Age and Treatment Group
+```{r}
+KNDy_summary_byGroup("SpontAvgFiring", KNDy_firing, c("GenTreatment", "AgeGroup"))
+```
+
+#### ANOVA
+```{r}
+#inspiration here: http://www.understandingdata.net/2017/05/11/anova-tables-in-r/
+KNDyDATA_contrasts <- makeTreatandAgeContrasts(KNDyDATA)
+
+SpontAvgFiring_model <- lm_byTreatxAge(expr(SpontAvgFiring), KNDyDATA_contrasts)
+
+SpontAvgFiring_table <- makeANOVA_TreatAge(SpontAvgFiring_model) %>%
+  kable_styling(
+    font_size = 18,
+    bootstrap_options = c("striped"), full_width = TRUE
+  )
+
+SpontAvgFiring_table
+```
+
+### By Age, Treatment Group, and Experimenter
+```{r}
+KNDy_summary_byGroup("SpontAvgFiring", KNDy_firing, c("Who", "GenTreatment", "AgeGroup"))
+```
+
+#### ANOVA
+This is comparing only the juveniles by treatment group and experimenter
+```{r}
+KNDyDATA_juv_treatWho_contrasts <- makeTreatandWhoContrasts(KNDyDATA_juv)
+SpontAvgFiring_treatWho_model <- lm_byTreatxWho(expr(SpontAvgFiring), KNDyDATA_juv_treatWho_contrasts)
+SpontAvgFiring_treatWho_model <- makeANOVA_TreatWho(SpontAvgFiring_treatWho_model) %>%
+  kable_styling(
+    font_size = 18,
+    bootstrap_options = c("striped"), full_width = TRUE
+  )
+SpontAvgFiring_treatWho_model
+```
+
+This is just the juveniles collapsed by experimenter, which demonstrates the difference in mean firing rate that is reflected in the ANOVA above.
+```{r}
+firingSum_juv_byWho <- KNDy_summary_byGroup("SpontAvgFiring", KNDy_firing_juv, c("Who"))
+firingSum_juv_byWho
+
+avgFiringRate_Jenn <- with(firingSum_juv_byWho, Mean[Who == "Jenn"])
+avgFiringRate_Amanda <- with(firingSum_juv_byWho, Mean[Who == "Amanda"])
+```
+
+The average firing rate for cells that Jenn recorded is `r round(avgFiringRate_Jenn, 2)`Hz, whereas the average firing rate for the juvenile cells that Amanda recorded is `r round(avgFiringRate_Amanda, 2)`Hz.
+
+### Jenn Recordings by Treatment Group and Age
+```{r}
+KNDy_summary_byGroup("SpontAvgFiring", KNDy_firing %>% filter(Who == "Jenn"), c("GenTreatment", "AgeGroup"))
+```
+
+### Amanda Recordings by Treatment Group and Age
+```{r}
+KNDy_summary_byGroup("SpontAvgFiring", KNDy_firing %>% filter(Who == "Amanda"), c("GenTreatment", "AgeGroup"))
+```
+
+#### ANOVA
+This is the ANOVA of treatment by age for just the cells that Amanda recorded
+```{r}
+#inspiration here: http://www.understandingdata.net/2017/05/11/anova-tables-in-r/
+KNDyDATA_AGG_contrasts <- makeTreatandAgeContrasts(KNDyDATA %>% filter(Who == "Amanda"))
+
+SpontAvgFiring_AGG_model <- lm_byTreatxAge(expr(SpontAvgFiring), KNDyDATA_AGG_contrasts)
+
+SpontAvgFiring_AGG_table <- makeANOVA_TreatAge(SpontAvgFiring_AGG_model) %>%
+  kable_styling(
+    font_size = 18,
+    bootstrap_options = c("striped"), full_width = TRUE
+  )
+
+SpontAvgFiring_AGG_table
+```
+
+
+```{r KNDyDATA-toWorkbook}
+#Store the dataframes as excel sheets
+KNDyAnalysisWB = createWorkbook()
+
+writeToWorkbook("KNDyData", KNDyDATA, KNDyAnalysisWB)
+writeToWorkbook("KNDyData_juv", KNDyDATA_juv, KNDyAnalysisWB)
+writeToWorkbook("KNDyData_adult", KNDyDATA_adult, KNDyAnalysisWB)
+writeToWorkbook("KNDy_firingRate", KNDy_firingRate, KNDyAnalysisWB)
+
+#Workbook saved below in the "Save Workbooks" chunk
+```
+

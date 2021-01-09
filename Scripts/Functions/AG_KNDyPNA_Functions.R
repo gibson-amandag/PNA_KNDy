@@ -387,6 +387,46 @@ makeANOVA_TreatAge <- function(
   return(kabled_ANOVA)
 }
 
+# Experimenter by Treatment - use with juvenile only df
+
+makeTreatandWhoContrasts <- function(df){
+  #Make a contrasts data frame for use with anovas
+  df_contrasts <- excludeFunc(df)
+  #Make GenTreatment a factor
+  df_contrasts$GenTreatment = as.factor(df_contrasts$GenTreatment)
+  #Use contr.Sum for contrast
+  contrasts(df_contrasts$GenTreatment) <- contr.Sum
+  #Make AgeGroup a factor
+  df_contrasts$Who <- as.factor(df_contrasts$Who)
+  #use contr.Sum for contrast
+  contrasts(df_contrasts$AgeGroup) <- contr.Sum
+  return(df_contrasts)
+}
+
+lm_byTreatxWho <- function(
+  response_var,
+  df
+){
+  df <- df %>%
+    filter(!is.na(!! response_var))
+  model <- lm(eval(response_var) ~ GenTreatment * Who, data = df)
+}
+
+makeANOVA_TreatWho <- function(
+  lm
+){
+  ANOVA <- Anova(lm, type = "III")
+  #remove intercept and reorder - Interaction, Treatment, Who, Residuals
+  ANOVA <- ANOVA[c(4, 2, 3, 5),]
+  #Update column names and row names
+  colnames(ANOVA) <- c("SS", "df", "<i>F</i>", "<i>p</i>")
+  rownames(ANOVA) <- c("Interaction", "Treatment", "Experimenter", "Residuals")
+  #hide missing values in table
+  options(knitr.kable.NA = '')
+  kabled_ANOVA <- kable(ANOVA, digits = 3, escape = FALSE)
+  return(kabled_ANOVA)
+}
+
 
 ###### PLOTS ##########################
 
@@ -1220,15 +1260,16 @@ firingRatePlotFunc <- function(
   ymin = NULL,
   ymax = NULL
 ){
-  ggplot(df, aes(x = Min_num, y = FiringRate_Hz)) +
+  ggplot(df, aes(x = Min_num, y = FiringRate_Hz, color = Who)) +
     geom_line() +
     my_theme +
-    facet_wrap(CellID ~ ., ncol = 3) + #each plot is a cell
+    facet_wrap(CellID ~ Who, ncol = 3) + #each plot is a cell
     scale_x_continuous(
       breaks = seq(0, 180, 15) #labels every 15 minutes
     )+
     coord_cartesian(if(zoom_x){xlim = c(xmin, xmax)}, if(zoom_y){ylim = c(ymin, ymax)}) + #this just zooms in on the graph, versus scale_[]_continuous actually eliminates data not in the range
-    labs(x = "Time (min)", y = "Firing Rate (Hz)")
+    labs(x = "Time (min)", y = "Firing Rate (Hz)")+
+    scale_color_manual(values = c("Amanda" = "orange", "Jenn" = "blue"))
 }
 
 ### Drafts - not using currently ---------------
