@@ -88,8 +88,7 @@ sourceModule("maxBurstWindowModule.R")
 
 # Define UI for application
 ui <- fluidPage(
-  titlePanel("PNA KNDy Data Jenn"),
-  p("Amanda's new line"),
+  titlePanel("PNA KNDy Data"),
   
   p("Be sure that the ",
     em("KNDyPNA_DATA.xlsx"), "file is up to date."),
@@ -140,7 +139,7 @@ ui <- fluidPage(
     #Firing Rate Graphs ----
     tabPanel(
       "Firing Rate",
-      firingRateUI("firingRate")
+      firingRateUI("firingRate", KNDyDATA)
     )
   ),
 )
@@ -177,7 +176,7 @@ server <- function(input, output) {
   cyclesServer("Cycles", KNDy_cycles = KNDy_cycles)
   
   ### FIRING RATE SERVER -----------
-  firingRateServer("firingRate", KNDy_firingRate = KNDy_firingRate2)
+  firingRateServer("firingRate", KNDy_firingRate = KNDy_firingRate2, KNDyDATA)
 }
 # Run the application 
 shinyApp(ui = ui, server = server)

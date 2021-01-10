@@ -3,7 +3,8 @@
 # https://shiny.rstudio.com/articles/modules.html
 
 firingRateUI <- function(
-  id
+  id,
+  KNDyDATA
 ){
   ns <- NS(id)
   tagList(
@@ -39,7 +40,16 @@ firingRateUI <- function(
       tabPanel(
         "Individual Cell",
         h4("Individual Cell"),
-        p("This hasn't been written yet"),
+        p("Select the individual cell whose firing rate you want to look at. If you do not have Zoom X or Y selected above,
+          this will default to values for both axes appropriate for the firing rate of the cell."),
+        p("This list includes cells that have been excluded. A line of text will print to alert you if you have selected an excluded cell"),
+        selectInput(
+          ns("selectedCell"),
+          label = "Select Cell: ",
+          choices = KNDyDATA$CellID
+        ),
+        
+        htmlOutput(ns("excludeStatus")),
         
         #Need inputs to select which cell
         plotOutput(ns("individualCell"))
@@ -53,7 +63,8 @@ firingRateUI <- function(
 
 firingRateServer <- function(
   id,
-  KNDy_firingRate
+  KNDy_firingRate,
+  KNDyDATA
 ){
   moduleServer(
     id,
@@ -128,6 +139,32 @@ firingRateServer <- function(
             ymin = zoom_y$min(),
             ymax = zoom_y$max()
           )
+      })
+      output$individualCell <- renderPlot({
+        KNDy_firingRate_long_all <- KNDy_firingRate %>%
+          make_firing_long()
+        
+        KNDy_firingRate_long_all <- KNDy_firingRate_long_all %>%
+          add_Min_col()
+        
+        KNDy_firingRate_long_all %>%
+          filter(CellID == input$selectedCell) %>%
+          firingRatePlotFunc(
+            zoom_x = zoom_x$zoom(),
+            xmin = zoom_x$min(),
+            xmax = zoom_x$max(),
+            zoom_y = zoom_y$zoom(),
+            ymin = zoom_y$min(),
+            ymax = zoom_y$max()
+          )
+      })
+      output$excludeStatus <- renderUI({
+        isExcluded = with(KNDyDATA, Exclude[CellID == input$selectedCell])
+        if(isExcluded){
+          HTML("<h3><span style='color:red;'>This cell is excluded</span></h3>")
+        }else {
+          em("This cell is not excluded")
+        }
       })
       
     }
