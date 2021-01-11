@@ -151,15 +151,17 @@ scatterPlotsServer <- function(
         
         data2 %>%
           filter(!is.na(!! input$yaxis)) %>%
-          ggplot(aes(x = !! input$xaxis, y = !! input$yaxis, colour = !! input$treatment))+
+          ggplot(aes(x = !! input$xaxis, y = !! input$yaxis, colour = !! input$treatment, shape = Who))+
           geom_point(size = 3)+
-          geom_smooth(method = lm, se = FALSE, formula = y ~ x)+
+          geom_smooth(method = lm, se = FALSE, formula = y ~ x, aes(linetype = Who))+
           labs(
             x = KNDy_VarNames[, as.character(input$xaxis)], 
             y = KNDy_VarNames[, as.character(input$yaxis)], 
             title = KNDy_VarNames[, as.character(input$yaxis)], 
             subtitle = "By Firing Rate", 
-            fill = "Treatment"
+            fill = "Treatment",
+            shape = "Experimenter",
+            linetype = "Experimenter"
           )+
           my_theme
         
@@ -181,7 +183,8 @@ scatterPlotsServer <- function(
                 {sym("SpontAvgFiring")},
                 !! input$xaxis,
                 !! input$yaxis,
-                Treatment
+                Treatment,
+                Who
               ),
             input$scatterPlot_click
           )
