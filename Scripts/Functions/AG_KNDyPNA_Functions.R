@@ -884,7 +884,9 @@ my_KNDy_plot_fill = function(
   ppt = NULL, #powerpoint object to add to
   zoom_y = FALSE,
   ylimit = NULL,
-  img_type = ".png"
+  img_type = ".png",
+  figWidth = 10,
+  figHeight = NA
 ){
   var_to_plot = ensym(var_to_plot)
   treatment = ensym(treatment)
@@ -916,7 +918,8 @@ my_KNDy_plot_fill = function(
       var_to_plot = var_to_plot, 
       add_to_save_name = add_to_save_name, 
       plot = viz, 
-      width = 10,
+      width = figWidth,
+      height = figHeight,
       img_type = img_type
     )
   }
@@ -947,7 +950,9 @@ my_KNDy_plot = function(
   ppt = NULL, #powerpoint object to add to
   zoom_y = FALSE,
   ylimit = NULL,
-  img_type = ".png" #type of image to save
+  img_type = ".png", #type of image to save
+  figWidth = 10,
+  figHeight = NA
 ){
   var_to_plot = ensym(var_to_plot)
   treatment = ensym(treatment)
@@ -976,7 +981,8 @@ my_KNDy_plot = function(
       var_to_plot = var_to_plot, 
       add_to_save_name = add_to_save_name, 
       plot = viz, 
-      width = 10,
+      width = figWidth,
+      height = figHeight,
       img_type = img_type
     )
   }
