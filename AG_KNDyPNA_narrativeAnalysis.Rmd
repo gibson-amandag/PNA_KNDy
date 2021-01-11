@@ -10,7 +10,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
 ```
 
 # Set-up
@@ -20,6 +20,21 @@ This file also loads the `KNDy_mouse_demo`, `KNDy_cells`, `KNDy_exclude`, `KNDy_
 ```{r callSetUp, message=FALSE, warning=FALSE}
 #This runs the setup script that loads the appropriate librarys and files
 source("./Scripts/AG_KNDyPNA_setup.R")
+```
+
+```{r ppt-setUp}
+#create a new powerpoint
+KNDy_PPT = read_pptx()
+
+#add a new title slide
+KNDy_PPT = add_slide(KNDy_PPT, layout = "Title Slide", master = "Office Theme")
+
+#Write "KNDy - PNA DATA" in the title slot
+KNDy_PPT = ph_with(KNDy_PPT, value = "KNDy - PNA Data", location = ph_location_label(ph_label = "Title 1"))
+
+#view the possible layout properties 
+#layout_properties(x = KNDy_PPT, layout = "Title Slide")
+
 ```
 
 ## Get Data Ready
@@ -176,9 +191,10 @@ KNDy_cycles_PNA
 ```{r}
 KNDy_firingRate
 ```
+
 ```{r}
 KNDy_firingRate_long <- KNDy_firingRate %>%
-  excludeFunc() %>%
+  # excludeFunc() %>% #for now, plot all
   make_firing_long
 
 KNDy_firingRate_long <- KNDy_firingRate_long %>%
@@ -189,23 +205,23 @@ KNDy_firingRate_long <- KNDy_firingRate_long %>%
 
 # Adults
 KNDy_firingRate_Adult_Con_plot <- KNDy_firingRate_long %>%
-  excludeFunc() %>%
+  # excludeFunc() %>%
   filter(AgeGroup == "Adult" & GenTreatment == "Control") %>%
   firingRatePlotFunc()
 
 KNDy_firingRate_Adult_PNA_plot <- KNDy_firingRate_long %>%
-  excludeFunc() %>%
+  # excludeFunc() %>%
   filter(AgeGroup == "Adult" & GenTreatment == "PNA") %>%
   firingRatePlotFunc()
 
 # Juveniles
 KNDy_firingRate_Juv_Con_plot <- KNDy_firingRate_long %>%
-  excludeFunc() %>%
+  # excludeFunc() %>%
   filter(AgeGroup == "Juvenile" & GenTreatment == "Control") %>%
   firingRatePlotFunc()
 
 KNDy_firingRate_Juv_PNA_plot <- KNDy_firingRate_long %>%
-  excludeFunc() %>%
+  # excludeFunc() %>%
   filter(AgeGroup == "Juvenile" & GenTreatment == "PNA") %>%
   firingRatePlotFunc()
 ```
@@ -219,7 +235,7 @@ KNDy_firingRate_adult <- sepDFs$df_adult
 ```
 
 ## `KNDy_firingRate_juv`
-```{r KNDy_firingRate_juv, fig.width=12, fig.height=18}
+```{r KNDy-firingRate-juv, fig.width=12, fig.height=18}
 KNDy_firingRate_juv
 ```
 ### Control
@@ -233,7 +249,7 @@ KNDy_firingRate_Juv_PNA_plot
 ```
 
 ## `KNDy_firingRate_adult`
-```{r KNDy_firingRate_adult}
+```{r KNDy-firingRate-adult}
 KNDy_firingRate_adult
 ```
 
@@ -286,9 +302,9 @@ KNDy_firing_juv %>%
 ### Amanda
 ```{r}
 KNDy_firing_juv %>%
-  filter(Who == "Amanda")
+  filter(Who == "Amanda") %>%
+  arrange(SpontAvgFiring)
 ```
-
 
 ## Adults
 
@@ -303,8 +319,13 @@ KNDy_firing_adult
 ```{r}
 KNDy_summary_byGroup("SpontAvgFiring", KNDy_firing, c("GenTreatment", "AgeGroup"))
 ```
+#### Excluding marked cells
+```{r}
+KNDy_summary_byGroup("SpontAvgFiring", KNDy_firing %>% excludeFunc(), c("GenTreatment", "AgeGroup"))
+```
 
 #### ANOVA
+Excludes marked cells
 ```{r}
 #inspiration here: http://www.understandingdata.net/2017/05/11/anova-tables-in-r/
 KNDyDATA_contrasts <- makeTreatandAgeContrasts(KNDyDATA)
@@ -320,9 +341,81 @@ SpontAvgFiring_table <- makeANOVA_TreatAge(SpontAvgFiring_model) %>%
 SpontAvgFiring_table
 ```
 
+#### Firing Rate Graph - by age and general treatment
+```{r}
+#Add a new title slide to the KNDy_PPT powerpoint
+KNDy_PPT = add_slide(KNDy_PPT, layout = "Title Slide", master = "Office Theme")
+
+#Add "Firing Rate Graphs" to the title slot
+KNDy_PPT = ph_with(KNDy_PPT, value = "Firing Rate Graphs", location = ph_location_label(ph_label = "Title 1"))
+
+#Save the plots as individual files?
+save = savePlots #defined in first chunk. Also defines img_type
+#Print to powerpoint?
+toPPT = TRUE
+#Which powerpoint?
+ppt = KNDy_PPT
+
+#Determine which df you want you use 
+df = excludeFunc(KNDy_firing) #exclude
+#df = KNDy_firing #include all
+
+my_KNDy_plot(
+  data = df, #data frame
+  var_to_plot = SpontAvgFiring, #which variable to plot
+  dotsize = 4, 
+  binwidth = 0.03,
+  positionWidth = 1, #dodge position
+  group = AgeGroup, #Default separate by AgeGroup
+  treatment = GenTreatment, #which treatment variable to use. Default to general treatment (PNA/Control)
+  ytitle = NULL, #y axis label
+  title = NULL, #title
+  expand_to_zero = TRUE, #expand axis to 0 
+  save = save, #Save file
+  add_to_save_name = NULL, #append something additional to file name
+  dot_plot = TRUE, #use the dot_plot layer
+  violin_plot = FALSE, #add the violin plot layer
+  toPPT = toPPT, #add to a powerpoint
+  ppt = ppt, #powerpoint object to add to
+  zoom_y = FALSE,
+  ylimit = NULL,
+  img_type = imgTypePlots,
+  figWidth = 10,
+  figHeight = 4
+)
+```
+
+#### Firing Rate Graph - by specific treatment
+```{r}
+my_KNDy_plot(
+  data = df, #data frame
+  var_to_plot = SpontAvgFiring, #which variable to plot
+  dotsize = 4, 
+  binwidth = 0.03,
+  positionWidth = 1, #dodge position
+  group = AgeGroup, #Default separate by AgeGroup
+  treatment = Treatment, #specific treatment
+  save = save, #Save file
+  add_to_save_name = "_bySpecTxt", #append something additional to file name
+  dot_plot = TRUE, #use the dot_plot layer
+  violin_plot = FALSE, #add the violin plot layer
+  toPPT = toPPT, #add to a powerpoint
+  ppt = ppt, #powerpoint object to add to
+  img_type = imgTypePlots,
+  figWidth = 12,
+  figHeight = 4
+)
+```
+
+
 ### By Age, Treatment Group, and Experimenter
 ```{r}
 KNDy_summary_byGroup("SpontAvgFiring", KNDy_firing, c("Who", "GenTreatment", "AgeGroup"))
+```
+
+#### Excluding marked cells
+```{r}
+KNDy_summary_byGroup("SpontAvgFiring", KNDy_firing %>% excludeFunc(), c("Who", "GenTreatment", "AgeGroup"))
 ```
 
 #### ANOVA
@@ -349,9 +442,48 @@ avgFiringRate_Amanda <- with(firingSum_juv_byWho, Mean[Who == "Amanda"])
 
 The average firing rate for cells that Jenn recorded is `r round(avgFiringRate_Jenn, 2)`Hz, whereas the average firing rate for the juvenile cells that Amanda recorded is `r round(avgFiringRate_Amanda, 2)`Hz.
 
+### Jenn vs. Amanda
+```{r}
+
+df <- excludeFunc(KNDy_firing_juv)
+
+my_KNDy_plot(
+  data = df, #data frame
+  var_to_plot = SpontAvgFiring, #which variable to plot
+  dotsize = 4, 
+  binwidth = 0.03,
+  positionWidth = .8, #dodge position
+  group = Who, #group by experimenter
+  treatment = GenTreatment, #which treatment variable to use. Default to general treatment (PNA/Control)
+  ytitle = NULL, #y axis label
+  title = NULL, #title
+  expand_to_zero = TRUE, #expand axis to 0 
+  save = save, #Save file
+  add_to_save_name = NULL, #append something additional to file name
+  dot_plot = TRUE, #use the dot_plot layer
+  violin_plot = FALSE, #add the violin plot layer
+  toPPT = toPPT, #add to a powerpoint
+  ppt = ppt, #powerpoint object to add to
+  zoom_y = FALSE,
+  ylimit = NULL,
+  img_type = imgTypePlots,
+  figWidth = 10,
+  figHeight = 4
+)
+```
+
 ### Jenn Recordings by Treatment Group and Age
 ```{r}
 KNDy_summary_byGroup("SpontAvgFiring", KNDy_firing %>% filter(Who == "Jenn"), c("GenTreatment", "AgeGroup"))
+```
+
+#### Excluding marked cells
+```{r}
+KNDy_summary_byGroup(
+  "SpontAvgFiring", 
+  KNDy_firing %>% filter(Who == "Jenn") %>% excludeFunc(), 
+  c("GenTreatment", "AgeGroup")
+)
 ```
 
 ### Amanda Recordings by Treatment Group and Age
@@ -359,8 +491,13 @@ KNDy_summary_byGroup("SpontAvgFiring", KNDy_firing %>% filter(Who == "Jenn"), c(
 KNDy_summary_byGroup("SpontAvgFiring", KNDy_firing %>% filter(Who == "Amanda"), c("GenTreatment", "AgeGroup"))
 ```
 
+#### Excluding marked cells
+```{r}
+KNDy_summary_byGroup("SpontAvgFiring", KNDy_firing %>% filter(Who == "Amanda") %>% excludeFunc(), c("GenTreatment", "AgeGroup"))
+```
+
 #### ANOVA
-This is the ANOVA of treatment by age for just the cells that Amanda recorded
+This is the ANOVA of treatment by age for just the cells that Amanda recorded. This excludes marked cells
 ```{r}
 #inspiration here: http://www.understandingdata.net/2017/05/11/anova-tables-in-r/
 KNDyDATA_AGG_contrasts <- makeTreatandAgeContrasts(KNDyDATA %>% filter(Who == "Amanda"))
@@ -376,6 +513,197 @@ SpontAvgFiring_AGG_table <- makeANOVA_TreatAge(SpontAvgFiring_AGG_model) %>%
 SpontAvgFiring_AGG_table
 ```
 
+#### Firing Rate Graph - Amanda's Recordings
+```{r}
+#Determine which df you want you use 
+df = excludeFunc(KNDy_firing %>% filter(Who == "Amanda")) #exclude
+#df = KNDy_firing #include all
+
+my_KNDy_plot(
+  data = df, #data frame
+  var_to_plot = SpontAvgFiring, #which variable to plot
+  dotsize = 4, 
+  binwidth = 0.03,
+  positionWidth = 1, #dodge position
+  group = AgeGroup, #Default separate by AgeGroup
+  treatment = GenTreatment, #which treatment variable to use. Default to general treatment (PNA/Control)
+  ytitle = NULL, #y axis label
+  title = NULL, #title
+  expand_to_zero = TRUE, #expand axis to 0 
+  save = save, #Save file
+  add_to_save_name = NULL, #append something additional to file name
+  dot_plot = TRUE, #use the dot_plot layer
+  violin_plot = FALSE, #add the violin plot layer
+  toPPT = toPPT, #add to a powerpoint
+  ppt = ppt, #powerpoint object to add to
+  zoom_y = FALSE,
+  ylimit = NULL,
+  img_type = imgTypePlots,
+  figWidth = 10,
+  figHeight = 4
+)
+```
+
+# Burst Window
+This graph plots the number of bursts that occur at each burst window when averaged across all cells in a group. This means that it is more influenced by high-bursting cells than the alternative, which is to average the burst window at which the maximum number of bursts occurs for each cell.
+```{r}
+VBW_BurstsPerHour <- KNDyDATA %>%
+  select(all_of(demoVarsAll_quo), all_of(timingVars_quo), MaxBurstWindow_spont, BurstsPerHour_0.01:BurstsPerHour_1.00)
+VBW_BurstsPerHour <- excludeFunc(VBW_BurstsPerHour)
+
+VBW_BurstsPerHour_long <- make_long_form_burstsPerWindow(VBW_BurstsPerHour)
+VBW_BurstsPerHour_long <- VBW_BurstsPerHour_long %>%
+  filter(!is.na(BurstsPerHour))
+
+VBW_BurstsPerHour_long <- make_BW_col(VBW_BurstsPerHour_long)
+```
+
+```{r}
+#Using the lines function with individual lines turned off
+VBW_plot_lines(VBW_BurstsPerHour_long, individualLines = FALSE)
+```
+
+## With Individual Lines
+This graph shows each individual cell plotted with the means in bold
+```{r}
+#INDIVIDUAL LINES
+VBW_plot_lines(VBW_BurstsPerHour_long, individualLines = TRUE)
+```
+
+```{r eval=FALSE, include=FALSE}
+# How to combine legend
+#TreatxAge for legend https://stackoverflow.com/questions/37140266/how-to-merge-color-line-style-and-shape-legends-in-ggplot
+ggplot(VBW_BurstsPerHour_long, aes(BW_msec, BurstsPerHour, color = TreatxAge, linetype = TreatxAge)) +
+  stat_summary(fun = "mean", geom = "line")+
+  labs(x = "Burst Window (in msec)", y = "Bursts Per Hour") +
+  #scale_color_brewer(type = "qual", palette = "Paired")+
+  scale_linetype_manual(values = c(2, 1, 2, 1))+
+  scale_color_manual(values = c("#F8766D", "#F8766D", "#00BFC4", "#00BFC4"))+
+  my_theme 
+```
+
+## Bursting Peaks for Each Group
+This finds the maximum for each group (control-adult, control-juvenile, PNA-adult, PNA_juvenile), then it searches the rows for each group to find the first row where the bursts per hour equals the maximum for that group.
+```{r}
+#Group by treatment and age group first
+VBW_BurstsPerHour_grouped <- getAvgByTreatAge(
+  VBW_BurstsPerHour %>% 
+    select(-Sac_hr, - Record_start_hr, -Record_end_hr))
+
+VBW_BurstsPerHour_grouped_long <- make_long_form_burstsPerWindow(VBW_BurstsPerHour_grouped)
+VBW_BurstsPerHour_grouped_long <- VBW_BurstsPerHour_grouped_long %>%
+  filter(!is.na(BurstsPerHour))
+
+VBW_BurstsPerHour_grouped_long <- make_BW_col(VBW_BurstsPerHour_grouped_long)
+
+#Find peaks
+VBW_group_max <- VBW_BurstsPerHour_grouped_long %>%
+  group_by(GenTreatment, AgeGroup) %>%
+  summarize(
+    Max = max(BurstsPerHour, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+#info about "which" https://stackoverflow.com/questions/24831580/return-row-of-data-frame-based-on-value-in-a-column-r
+
+#Control juvenile data frame from the grouped, long-form data
+VBW_ConJuv <- VBW_BurstsPerHour_grouped_long %>%
+  filter(GenTreatment == "Control" & AgeGroup == "Juvenile")
+
+#Find the row where the maximum bursts per hour occurs for this df
+VBW_ConJuv_peak <- VBW_ConJuv[which(VBW_ConJuv$BurstsPerHour == max(VBW_ConJuv$BurstsPerHour, na.rm = TRUE)),]
+
+#Control adult data frame from the grouped, long-form data
+VBW_ConAdult <- VBW_BurstsPerHour_grouped_long %>%
+  filter(GenTreatment == "Control" & AgeGroup == "Adult")
+
+#Find the row where the maximum bursts per hour occurs for this df
+VBW_ConAdult_peak <- VBW_ConAdult[which(VBW_ConAdult$BurstsPerHour == max(VBW_ConAdult$BurstsPerHour, na.rm = TRUE)),]
+
+#PNA Juvenile data frame from the grouped, long-form data
+VBW_PNAJuv <- VBW_BurstsPerHour_grouped_long %>%
+  filter(GenTreatment == "PNA" & AgeGroup == "Juvenile")
+
+#Find the row where the maximum bursts per hour occurs for this df
+VBW_PNAJuv_peak <- VBW_PNAJuv[which(VBW_PNAJuv$BurstsPerHour == max(VBW_PNAJuv$BurstsPerHour, na.rm = TRUE)),]
+
+#PNA adult data frame from the grouped, long-form data
+VBW_PNAAdult <- VBW_BurstsPerHour_grouped_long %>%
+  filter(GenTreatment == "PNA" & AgeGroup == "Adult")
+
+#Find the row where the maximum bursts per hour occurs for this df
+VBW_PNAAdult_peak <- VBW_PNAAdult[which(VBW_PNAAdult$BurstsPerHour == max(VBW_PNAAdult$BurstsPerHour, na.rm = TRUE)),]
+
+#Pull into one dataframe
+VBW_group_peaks <- rbind.data.frame(VBW_ConJuv_peak, VBW_ConAdult_peak, VBW_PNAJuv_peak, VBW_PNAAdult_peak) %>%
+  select(-Flagged) # remove the flagged column
+VBW_group_peaks
+```
+
+The `MaxBurstWindow_spont` column is the group average of the maximum burst window for _each individual cell_. For example, say that one cell had a maximum number of bursts at the 250 ms burst window and another cell in that group had a maximum number of bursts at the 750 ms burst window. For this value, it doesn't matter how many bursts each cell had at that window, we're simply taking the average of the individual maximum burst windows. Compared to the approach demonstrated in the graphs above, this could be swayed more by cells that have a low total number of bursts, as each cell is "weighted" evenly. 
+
+```{r}
+roundToNearest <- function(x, to=10){
+  to * round(x / to)
+}
+
+MaxBurstWindow_spont_CON_juv <- roundToNearest(
+  with(
+    VBW_group_peaks, 
+    MaxBurstWindow_spont[GenTreatment == "Control" & AgeGroup == "Juvenile"]
+  ) * 1000
+)
+
+MaxBurstWindow_spont_CON_adult <- roundToNearest(
+  with(
+    VBW_group_peaks, 
+    MaxBurstWindow_spont[GenTreatment == "Control" & AgeGroup == "Adult"]
+  ) * 1000
+)
+
+MaxBurstWindow_spont_PNA_juv <- roundToNearest(
+  with(
+    VBW_group_peaks, 
+    MaxBurstWindow_spont[GenTreatment == "PNA" & AgeGroup == "Juvenile"]
+  ) * 1000
+)
+
+MaxBurstWindow_spont_PNA_adult <- roundToNearest(
+  with(
+    VBW_group_peaks, 
+    MaxBurstWindow_spont[GenTreatment == "PNA" & AgeGroup == "Adult"]
+  ) * 1000
+)
+
+BW_ms_CON_juv <- with(
+  VBW_group_peaks, 
+  BW_msec[GenTreatment == "Control" & AgeGroup == "Juvenile"]
+)
+
+BW_ms_CON_adult <- with(
+  VBW_group_peaks, 
+  BW_msec[GenTreatment == "Control" & AgeGroup == "Adult"]
+)
+
+BW_ms_PNA_juv <- with(
+  VBW_group_peaks, 
+  BW_msec[GenTreatment == "PNA" & AgeGroup == "Juvenile"]
+)
+
+BW_ms_PNA_adult <- with(
+  VBW_group_peaks, 
+  BW_msec[GenTreatment == "PNA" & AgeGroup == "Adult"]
+)
+```
+
+For the **adult control** group, the peak number of bursts per hour occurs at a burst window of **`r BW_ms_CON_adult` ms**, whereas the average maximum burst window across cells is **`r MaxBurstWindow_spont_CON_adult` ms**. 
+
+For the **adult PNA** group, the peak number of bursts per hour occurs at a burst window of **`r BW_ms_PNA_adult`** ms, whereas the average maximum burst window across cells is **`r MaxBurstWindow_spont_PNA_adult` ms**.
+
+For the **juvenile control** group, the peak number of bursts per hour occurs at a burst window of **`r BW_ms_CON_juv`** ms, whereas the average maximum burst window across cells is **`r MaxBurstWindow_spont_CON_juv` ms**.
+
+For the **juvenile PNA** group, the peak number of bursts per hour occurs at a burst window of **`r BW_ms_PNA_juv`** ms, whereas the average maximum burst window across cells is **`r MaxBurstWindow_spont_PNA_juv` ms**.
+
 
 ```{r KNDyDATA-toWorkbook}
 #Store the dataframes as excel sheets
@@ -386,6 +714,36 @@ writeToWorkbook("KNDyData_juv", KNDyDATA_juv, KNDyAnalysisWB)
 writeToWorkbook("KNDyData_adult", KNDyDATA_adult, KNDyAnalysisWB)
 writeToWorkbook("KNDy_firingRate", KNDy_firingRate, KNDyAnalysisWB)
 
+writeToWorkbook("KNDy_firing", KNDy_firing, KNDyAnalysisWB)
+writeToWorkbook("KNDy_firing_juv", KNDy_firing_juv, KNDyAnalysisWB)
+writeToWorkbook("KNDy_firing_adult", KNDy_firing_adult, KNDyAnalysisWB)
+
 #Workbook saved below in the "Save Workbooks" chunk
 ```
 
+
+```{r Save-Workbooks}
+# saveWorkbook(
+#   wb_firing_sums, 
+#   file.path(DataOutputFolder, paste0("KNDy_firing_summaries_", dateToday, ".xlsx")), 
+#   overwrite = TRUE
+# )
+# saveWorkbook(
+#   wb_bursting_sums, 
+#   file.path(DataOutputFolder, paste0("KNDy_bursting_summaries_", dateToday, ".xlsx")), 
+#   overwrite = TRUE
+# )
+saveWorkbook(
+  KNDyAnalysisWB, 
+  file = file.path(DataOutputFolder, paste0("KNDy_analysis_data_", dateToday, ".xlsx")), 
+  overwrite = TRUE)
+
+```
+
+```{r Save-Powerpoints}
+#save the powerpoints
+print(KNDy_PPT, target = file.path(DataOutputFolder, "KNDy Graphs.pptx"))
+# print(byFiring_PPT, target = file.path(DataOutputFolder, "By Firing Rate.pptx"))
+# print(byRecStart_PPT, target = file.path(DataOutputFolder, "By Recording Start.pptx"))
+
+```
