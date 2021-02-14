@@ -10,4 +10,6 @@ my_theme = theme(
   legend.background = element_rect(fill = "transparent"), # get rid of legend bg
   legend.box.background = element_rect(fill = "transparent"), # get rid of legend panel bg
   axis.line = element_line(colour = "black")
-)
+) 
+
+#scale_color_manual(values = c("Amanda" = "orange", "Jenn" = "blue"))
