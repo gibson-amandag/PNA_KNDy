@@ -16,7 +16,7 @@
 
 #Returns a list with the three data frames
 
-GetDataReadyFunc = function(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firingRate, rateForQuiet){
+GetDataReadyFunc = function(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firingRate, KNDy_burstData, KNDy_clusterData, rateForQuiet){
   #Reformat dates into year-month-day
   #I think not needed with reading of excel files
   # KNDy_mouse_demo$Date_of_birth = format_dates(KNDy_mouse_demo$Date_of_birth)
@@ -40,10 +40,64 @@ GetDataReadyFunc = function(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firi
       by = "CellID" #merge by CellID
     )
   
-  #Add the demographic information to the KNDy_cell dataframe
+  #Add the mouse demographic information to the KNDy_cell dataframe
   KNDyDATA = KNDy_cells %>%
     select(-Daylight_Savings)%>%
     left_join(KNDy_mouse_demo, by = "MouseID")
+  
+  #Average firing rate df
+  KNDy_avgFiring = KNDy_firingRate %>%
+    select(CellID:SenktideFiring)
+  
+  # #Calculate 20 min firing rate bins
+  #0-20
+  KNDy_avgFiring <- KNDy_firingRate %>%
+    select(FreqHz_0:FreqHz_19) %>%
+    rowMeans(.) %>%
+    bind_cols(KNDy_avgFiring, FiringRate_0_20min = .)
+ 
+  #20-40
+  KNDy_avgFiring <- KNDy_firingRate %>%
+    select(FreqHz_20:FreqHz_39) %>%
+    rowMeans(.) %>%
+    bind_cols(KNDy_avgFiring, FiringRate_20_40min = .) 
+  
+  #40-60
+  KNDy_avgFiring <- KNDy_firingRate %>%
+    select(FreqHz_40:FreqHz_59) %>%
+    rowMeans(.) %>%
+    bind_cols(KNDy_avgFiring, FiringRate_40_60min = .)
+  
+  #60-80
+  KNDy_avgFiring <- KNDy_firingRate %>%
+    select(FreqHz_60:FreqHz_79) %>%
+    rowMeans(.) %>%
+    bind_cols(KNDy_avgFiring, FiringRate_60_80min = .)
+  
+  #80-100
+  KNDy_avgFiring <- KNDy_firingRate %>%
+    select(FreqHz_80:FreqHz_99) %>%
+    rowMeans(.) %>%
+    bind_cols(KNDy_avgFiring, FiringRate_80_100min = .)
+  
+  #100-120
+  KNDy_avgFiring <- KNDy_firingRate %>%
+    select(FreqHz_100:FreqHz_119) %>%
+    rowMeans(.) %>%
+    bind_cols(KNDy_avgFiring, FiringRate_100_120min = .)
+  
+  #Add the avg firing rate information to KNDyDATA
+  KNDyDATA <- KNDyDATA %>%
+    left_join(KNDy_avgFiring, by = "CellID")
+  
+  #Add the selected burst data information to KNDyDATA
+  # Does not include the bursts per hour at each burst window
+  KNDyDATA <- KNDyDATA %>%
+    left_join(KNDy_burstData %>% select(CellID:ssDoubtsPerc_senktide_BW2), by = "CellID")
+  
+  #TO-DO - add cluster data
+  # KNDyDATA <- KNDyDATA %>%
+  #   left_join(KNDy_clusterData, by = "CellID")
   
   #Mark cells that are quiescent; Firing rate of less than 0.001 Hz - May want to adjust
   KNDyDATA = KNDyDATA %>%
@@ -79,9 +133,11 @@ GetDataReadyFunc = function(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firi
   
   #Get rid of white space in the names
   KNDyDATA$Who = gsub('\\s+', '', KNDyDATA$Who)
+  KNDyDATA$WhoRecorded = gsub('\\s+', '', KNDyDATA$WhoRecorded)
   
-  #Make "Who" recorded variable a factor
+  #Make "Who" sliced/recorded variable a factor
   KNDyDATA$Who = factor(KNDyDATA$Who, levels = c("Jenn", "Amanda"))
+  KNDyDATA$WhoRecorded = factor(KNDyDATA$WhoRecorded, levels = c("Jenn", "Amanda"))
   
   #Make Treatment a factor variable with orders
   KNDyDATA$Treatment = factor(
@@ -96,27 +152,71 @@ GetDataReadyFunc = function(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firi
       CellID:MouseID,
       Cage:GenTreatment, 
       Exclude, 
-      AgeGroup, 
-      Who, 
+      AgeGroup,
+      Zygosity,
+      Who,
+      WhoRecorded,
       Record_start:Flagged, 
       BodyMass_g:Sac_hr, 
       Sac_9plus, 
       Quiet, 
       TreatxAge, 
       CycleStage, 
-      SpontAvgFiring:MaxBurstWindow_senktide, 
-      BurstsPerHour_0.01:BurstsPerHour_spont_BW2
+      SpontAvgFiring:FiringRate_100_120min,
+      Mbd_spont:ssDoubtsPerc_senktide_BW2
     )
   
-  #Add demographic information
+  #Add demographic information and remove the average info in the KNDy_firingRate df
   KNDy_firingRate <- KNDy_firingRate %>%
+    select(-(SpontAvgFiring:SenktideFiring)) %>%
     left_join(KNDyDATA %>% select(CellID:CycleStage), by = "CellID")
+  
+  #BurstsPerHour
+  VBW_BurstsPerHour <- KNDyDATA %>%
+    select(
+      CellID,
+      Treatment,
+      GenTreatment,
+      AgeGroup,
+      TreatxAge,
+      Flagged,
+      Who,
+      WhoRecorded,
+      Zygosity,
+      Exclude,
+      Sac_hr,
+      Record_start_hr,
+      Record_end_hr,
+      Sac_9plus,
+      MaxBurstWindow_spont) %>%
+    left_join(KNDy_burstData %>% select(CellID, BurstsPerHour_0.01:BurstsPerHour_1.00), by = "CellID")
+  
+  VBW_BurstsPerHour_hour1 <- KNDyDATA %>%
+    select(
+      CellID,
+      Treatment,
+      GenTreatment,
+      AgeGroup,
+      TreatxAge,
+      Flagged,
+      Who,
+      WhoRecorded,
+      Zygosity,
+      Exclude,
+      Sac_hr,
+      Record_start_hr,
+      Record_end_hr,
+      Sac_9plus,
+      MaxBurstWindow_hour1) %>%
+    left_join(KNDy_burstData %>% select(CellID, BurstsHour1_0.01:BurstsHour1_1.00), by = "CellID")
   
   my_list = list(
     "KNDyDATA" = KNDyDATA, 
     "KNDy_mouse_demo" = KNDy_mouse_demo, 
     "KNDy_cells" = KNDy_cells,
-    "KNDy_firingRate" = KNDy_firingRate
+    "KNDy_firingRate" = KNDy_firingRate,
+    "VBW_BurstsPerHour" = VBW_BurstsPerHour,
+    "VBW_BurstsPerHour_hour1" = VBW_BurstsPerHour_hour1
   )
   
   return(my_list)

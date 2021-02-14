@@ -18,9 +18,17 @@ KNDy_varNamesFunc = function(dataframe) {
   
   KNDy_VarNames$SpontLength_min = "Spontaneous Recording Length (min)"
   KNDy_VarNames$Flagged = "Flagged?"
+  KNDy_VarNames$WhoRecorded = "Recorded By"
   
   KNDy_VarNames$SpontAvgFiring = "Spont Firing Rate (Hz)"
+  KNDy_VarNames$hour1Firing = "Hour 1 Firing Rate (Hz)"
   KNDy_VarNames$SenktideFiring = "Senktide Firing Rate (Hz)"
+  KNDy_VarNames$FiringRate_0_20min = "Firing Rate (Hz) - 0-20min"
+  KNDy_VarNames$FiringRate_20_40min = "Firing Rate (Hz) - 20-40min"
+  KNDy_VarNames$FiringRate_40_60min = "Firing Rate (Hz) - 40-60min"
+  KNDy_VarNames$FiringRate_60_80min = "Firing Rate (Hz) - 60-80min"
+  KNDy_VarNames$FiringRate_80_100min = "Firing Rate (Hz) - 90-100min"
+  KNDy_VarNames$FiringRate_100_120min = "Firing Rate (Hz) - 100-120min"
   
   KNDy_VarNames$Mbd_spont = "Spont Mean Burst Duration"
   KNDy_VarNames$SpikesPerBurst_spont = "Spont Spikes per Burst"
@@ -32,17 +40,124 @@ KNDy_varNamesFunc = function(dataframe) {
   KNDy_VarNames$IntraBurst_spont = "Spont Intraburst Interval"
   KNDy_VarNames$BurstsPerHour_spont = "Spont Bursts per Hour"
   KNDy_VarNames$MaxBurstWindow_spont = "Spont Maximum Burst Window"
+  KNDy_VarNames$bDoubts_spont = "Spont Bursts with Doubts"
+  KNDy_VarNames$ssDoubts_spont = "Spont Single Spikes with Doubts"
+  KNDy_VarNames$bDoubtsPerc_spont = "Spont % Bursts with Doubts"
+  KNDy_VarNames$ssDoubtsPerc_spont = "Spont % Single Spikes with Doubts"
+  
+  KNDy_VarNames$Mbd_spont_BW1 = "Spont Mean Burst Duration"
+  KNDy_VarNames$SpikesPerBurst_spont_BW1 = "Spont Spikes per Burst"
+  KNDy_VarNames$SingleSpikeFreq_spont_BW1 = "Spont Single Spike Frequency"
+  KNDy_VarNames$SingleSpikeNum_spont_BW1 = "Spont Single Spike Number"
+  KNDy_VarNames$BurstFreq_spont_BW1 = "Spont Burst Frequency"
+  KNDy_VarNames$TotalFreq_spont_BW1 = "Spont Total Frequency"
+  KNDy_VarNames$InterBurst_spont_BW1 = "Spont Interburst Interval"
+  KNDy_VarNames$IntraBurst_spont_BW1 = "Spont Intraburst Interval"
+  KNDy_VarNames$BurstsPerHour_spont_BW1 = "Spont Bursts per Hour"
+  KNDy_VarNames$bDoubts_spont_BW1 = "Spont Bursts with Doubts"
+  KNDy_VarNames$ssDoubts_spont_BW1 = "Spont Single Spikes with Doubts"
+  KNDy_VarNames$bDoubtsPerc_spont_BW1 = "Spont % Bursts with Doubts"
+  KNDy_VarNames$ssDoubtsPerc_spont_BW1 = "Spont % Single Spikes with Doubts"
+  
+  KNDy_VarNames$Mbd_spont_BW2 = "Spont Mean Burst Duration"
+  KNDy_VarNames$SpikesPerBurst_spont_BW2 = "Spont Spikes per Burst"
+  KNDy_VarNames$SingleSpikeFreq_spont_BW2 = "Spont Single Spike Frequency"
+  KNDy_VarNames$SingleSpikeNum_spont_BW2 = "Spont Single Spike Number"
+  KNDy_VarNames$BurstFreq_spont_BW2 = "Spont Burst Frequency"
+  KNDy_VarNames$TotalFreq_spont_BW2 = "Spont Total Frequency"
+  KNDy_VarNames$InterBurst_spont_BW2 = "Spont Interburst Interval"
+  KNDy_VarNames$IntraBurst_spont_BW2 = "Spont Intraburst Interval"
+  KNDy_VarNames$BurstsPerHour_spont_BW2 = "Spont Bursts per Hour"
+  KNDy_VarNames$bDoubts_spont_BW2 = "Spont Bursts with Doubts"
+  KNDy_VarNames$ssDoubts_spont_BW2 = "Spont Single Spikes with Doubts"
+  KNDy_VarNames$bDoubtsPerc_spont_BW2 = "Spont % Bursts with Doubts"
+  KNDy_VarNames$ssDoubtsPerc_spont_BW2 = "Spont % Single Spikes with Doubts"
+  
+  KNDy_VarNames$Mbd_hour1 = "Hour 1 Mean Burst Duration"
+  KNDy_VarNames$SpikesPerBurst_hour1 = "Hour 1 Spikes per Burst"
+  KNDy_VarNames$SingleSpikeFreq_hour1 = "Hour 1 Single Spike Frequency"
+  KNDy_VarNames$SingleSpikeNum_hour1 = "Hour 1 Single Spike Number"
+  KNDy_VarNames$BurstFreq_hour1 = "Hour 1 Burst Frequency"
+  KNDy_VarNames$TotalFreq_hour1 = "Hour 1 Total Frequency"
+  KNDy_VarNames$InterBurst_hour1 = "Hour 1 Interburst Interval"
+  KNDy_VarNames$IntraBurst_hour1 = "Hour 1 Intraburst Interval"
+  KNDy_VarNames$BurstsPerHour_hour1 = "Hour 1 Bursts per Hour"
+  KNDy_VarNames$MaxBurstWindow_hour1 = "Hour 1 Maximum Burst Window"
+  KNDy_VarNames$bDoubts_hour1 = "Hour 1 Bursts with Doubts"
+  KNDy_VarNames$ssDoubts_hour1 = "Hour 1 Single Spikes with Doubts"
+  KNDy_VarNames$bDoubtsPerc_hour1 = "Hour 1 % Bursts with Doubts"
+  KNDy_VarNames$ssDoubtsPerc_hour1 = "Hour 1 % Single Spikes with Doubts"
+  
+  KNDy_VarNames$Mbd_hour1_BW1 = "Hour 1 Mean Burst Duration"
+  KNDy_VarNames$SpikesPerBurst_hour1_BW1 = "Hour 1 Spikes per Burst"
+  KNDy_VarNames$SingleSpikeFreq_hour1_BW1 = "Hour 1 Single Spike Frequency"
+  KNDy_VarNames$SingleSpikeNum_hour1_BW1 = "Hour 1 Single Spike Number"
+  KNDy_VarNames$BurstFreq_hour1_BW1 = "Hour 1 Burst Frequency"
+  KNDy_VarNames$TotalFreq_hour1_BW1 = "Hour 1 Total Frequency"
+  KNDy_VarNames$InterBurst_hour1_BW1 = "Hour 1 Interburst Interval"
+  KNDy_VarNames$IntraBurst_hour1_BW1 = "Hour 1 Intraburst Interval"
+  KNDy_VarNames$BurstsPerHour_hour1_BW1 = "Hour 1 Bursts per Hour"
+  KNDy_VarNames$bDoubts_hour1_BW1 = "Hour 1 Bursts with Doubts"
+  KNDy_VarNames$ssDoubts_hour1_BW1 = "Hour 1 Single Spikes with Doubts"
+  KNDy_VarNames$bDoubtsPerc_hour1_BW1 = "Hour 1 % Bursts with Doubts"
+  KNDy_VarNames$ssDoubtsPerc_hour1_BW1 = "Hour 1 % Single Spikes with Doubts"
+  
+  KNDy_VarNames$Mbd_hour1_BW2 = "Hour 1 Mean Burst Duration"
+  KNDy_VarNames$SpikesPerBurst_hour1_BW2 = "Hour 1 Spikes per Burst"
+  KNDy_VarNames$SingleSpikeFreq_hour1_BW2 = "Hour 1 Single Spike Frequency"
+  KNDy_VarNames$SingleSpikeNum_hour1_BW2 = "Hour 1 Single Spike Number"
+  KNDy_VarNames$BurstFreq_hour1_BW2 = "Hour 1 Burst Frequency"
+  KNDy_VarNames$TotalFreq_hour1_BW2 = "Hour 1 Total Frequency"
+  KNDy_VarNames$InterBurst_hour1_BW2 = "Hour 1 Interburst Interval"
+  KNDy_VarNames$IntraBurst_hour1_BW2 = "Hour 1 Intraburst Interval"
+  KNDy_VarNames$BurstsPerHour_hour1_BW2 = "Hour 1 Bursts per Hour"
+  KNDy_VarNames$bDoubts_hour1_BW2 = "Hour 1 Bursts with Doubts"
+  KNDy_VarNames$ssDoubts_hour1_BW2 = "Hour 1 Single Spikes with Doubts"
+  KNDy_VarNames$bDoubtsPerc_hour1_BW2 = "Hour 1 % Bursts with Doubts"
+  KNDy_VarNames$ssDoubtsPerc_hour1_BW2 = "Hour 1 % Single Spikes with Doubts"
   
   KNDy_VarNames$Mbd_senktide = "Senktide Mean Burst Duration"
-  KNDy_VarNames$SpikesPerBurst_senktide = "Senktide spikes per Burst"
+  KNDy_VarNames$SpikesPerBurst_senktide = "Senktide Spikes per Burst"
   KNDy_VarNames$SingleSpikeFreq_senktide = "Senktide Single Spike Frequency"
   KNDy_VarNames$SingleSpikeNum_senktide = "Senktide Single Spike Number"
   KNDy_VarNames$BurstFreq_senktide = "Senktide Burst Frequency"
-  KNDy_VarNames$TotalFreq_senktide = "SenktideTotal Frequency"
+  KNDy_VarNames$TotalFreq_senktide = "Senktide Total Frequency"
   KNDy_VarNames$InterBurst_senktide = "Senktide Interburst Interval"
-  KNDy_VarNames$IntraBurst_senktide = "Sentkide Intraburst Interval"
+  KNDy_VarNames$IntraBurst_senktide = "Senktide Intraburst Interval"
   KNDy_VarNames$BurstsPerHour_senktide = "Senktide Bursts per Hour"
   KNDy_VarNames$MaxBurstWindow_senktide = "Senktide Maximum Burst Window"
+  KNDy_VarNames$bDoubts_senktide = "Senktide Bursts with Doubts"
+  KNDy_VarNames$ssDoubts_senktide = "Senktide Single Spikes with Doubts"
+  KNDy_VarNames$bDoubtsPerc_senktide = "Senktide % Bursts with Doubts"
+  KNDy_VarNames$ssDoubtsPerc_senktide = "Senktide % Single Spikes with Doubts"
+  
+  KNDy_VarNames$Mbd_senktide_BW1 = "Senktide Mean Burst Duration"
+  KNDy_VarNames$SpikesPerBurst_senktide_BW1 = "Senktide Spikes per Burst"
+  KNDy_VarNames$SingleSpikeFreq_senktide_BW1 = "Senktide Single Spike Frequency"
+  KNDy_VarNames$SingleSpikeNum_senktide_BW1 = "Senktide Single Spike Number"
+  KNDy_VarNames$BurstFreq_senktide_BW1 = "Senktide Burst Frequency"
+  KNDy_VarNames$TotalFreq_senktide_BW1 = "Senktide Total Frequency"
+  KNDy_VarNames$InterBurst_senktide_BW1 = "Senktide Interburst Interval"
+  KNDy_VarNames$IntraBurst_senktide_BW1 = "Senktide Intraburst Interval"
+  KNDy_VarNames$BurstsPerHour_senktide_BW1 = "Senktide Bursts per Hour"
+  KNDy_VarNames$bDoubts_senktide_BW1 = "Senktide Bursts with Doubts"
+  KNDy_VarNames$ssDoubts_senktide_BW1 = "Senktide Single Spikes with Doubts"
+  KNDy_VarNames$bDoubtsPerc_senktide_BW1 = "Senktide % Bursts with Doubts"
+  KNDy_VarNames$ssDoubtsPerc_senktide_BW1 = "Senktide % Single Spikes with Doubts"
+  
+  KNDy_VarNames$Mbd_senktide_BW2 = "Senktide Mean Burst Duration"
+  KNDy_VarNames$SpikesPerBurst_senktide_BW2 = "Senktide Spikes per Burst"
+  KNDy_VarNames$SingleSpikeFreq_senktide_BW2 = "Senktide Single Spike Frequency"
+  KNDy_VarNames$SingleSpikeNum_senktide_BW2 = "Senktide Single Spike Number"
+  KNDy_VarNames$BurstFreq_senktide_BW2 = "Senktide Burst Frequency"
+  KNDy_VarNames$TotalFreq_senktide_BW2 = "Senktide Total Frequency"
+  KNDy_VarNames$InterBurst_senktide_BW2 = "Senktide Interburst Interval"
+  KNDy_VarNames$IntraBurst_senktide_BW2 = "Senktide Intraburst Interval"
+  KNDy_VarNames$BurstsPerHour_senktide_BW2 = "Senktide Bursts per Hour"
+  KNDy_VarNames$bDoubts_senktide_BW2 = "Senktide Bursts with Doubts"
+  KNDy_VarNames$ssDoubts_senktide_BW2 = "Senktide Single Spikes with Doubts"
+  KNDy_VarNames$bDoubtsPerc_senktide_BW2 = "Senktide % Bursts with Doubts"
+  KNDy_VarNames$ssDoubtsPerc_senktide_BW2 = "Senktide % Single Spikes with Doubts"
   
   KNDy_VarNames$numPeaks_2x2SD = "# Peaks / Hour - 2x2SD"
   KNDy_VarNames$numPeaks_3x3SD = "# Peaks / Hour - 3x3SD"
@@ -103,30 +218,11 @@ KNDy_varNamesFunc = function(dataframe) {
   KNDy_VarNames$Sac_hr = "Time of Sacrifice (hr after lights on)"
   KNDy_VarNames$Sac_9plus = "Was sacrifice 9 hrs+ after lights on?"
   KNDy_VarNames$AgeGroup = "Age Group"
-  KNDy_VarNames$Who = "Recording Conducted By"
+  KNDy_VarNames$Who = "Sliced By"
+  KNDy_VarNames$Zygosity = "Zygosity"
   
   KNDy_VarNames$Quiet = "Quiescent Cells"
   KNDy_VarNames$TreatxAge = "Treatment and Age"
-  
-  KNDy_VarNames$Mbd_spont_BW1 = "Spont Mean Burst Duration"
-  KNDy_VarNames$SpikesPerBurst_spont_BW1 = "Spont Spikes per Burst"
-  KNDy_VarNames$SingleSpikeFreq_spont_BW1 = "Spont Single Spike Frequency"
-  KNDy_VarNames$SingleSpikeNum_spont_BW1 = "Spont Single Spike Number"
-  KNDy_VarNames$BurstFreq_spont_BW1 = "Spont Burst Frequency"
-  KNDy_VarNames$TotalFreq_spont_BW1 = "Spont Total Frequency"
-  KNDy_VarNames$InterBurst_spont_BW1 = "Spont Interburst Interval"
-  KNDy_VarNames$IntraBurst_spont_BW1 = "Spont Intraburst Interval"
-  KNDy_VarNames$BurstsPerHour_spont_BW1 = "Spont Bursts per Hour"
-  
-  KNDy_VarNames$Mbd_spont_BW2 = "Spont Mean Burst Duration"
-  KNDy_VarNames$SpikesPerBurst_spont_BW2 = "Spont Spikes per Burst"
-  KNDy_VarNames$SingleSpikeFreq_spont_BW2 = "Spont Single Spike Frequency"
-  KNDy_VarNames$SingleSpikeNum_spont_BW2 = "Spont Single Spike Number"
-  KNDy_VarNames$BurstFreq_spont_BW2 = "Spont Burst Frequency"
-  KNDy_VarNames$TotalFreq_spont_BW2 = "Spont Total Frequency"
-  KNDy_VarNames$InterBurst_spont_BW2 = "Spont Interburst Interval"
-  KNDy_VarNames$IntraBurst_spont_BW2 = "Spont Intraburst Interval"
-  KNDy_VarNames$BurstsPerHour_spont_BW2 = "Spont Bursts per Hour"
   
   return(KNDy_VarNames)
 }
@@ -154,6 +250,8 @@ demoVarsAll_quo = c(
   "TreatxAge",
   "Flagged",
   "Who",
+  "WhoRecorded",
+  "Zygosity",
   "Exclude"
 )
 demoVarsAll = exprs(
@@ -164,7 +262,31 @@ demoVarsAll = exprs(
   TreatxAge,
   Flagged,
   Who,
+  WhoRecorded,
+  Zygosity,
   Exclude
+)
+
+firingRateVars_quo = c(
+  "SpontAvgFiring",
+  "hour1Firing",
+  "FiringRate_0_20min",
+  "FiringRate_20_40min",
+  "FiringRate_40_60min",
+  "FiringRate_60_80min",
+  "FiringRate_80_100min",
+  "FiringRate_100_120min"
+)
+
+firingRateVars = exprs(
+  SpontAvgFiring,
+  hour1Firing,
+  FiringRate_0_20min,
+  FiringRate_20_40min,
+  FiringRate_40_60min,
+  FiringRate_60_80min,
+  FiringRate_80_100min,
+  FiringRate_100_120min
 )
 
 #BurstVariables

@@ -26,6 +26,8 @@ CellInfoSheetName = "CellInfo"
 ExclusionSheetName = "Exclusion"
 FiringRateSheetName = "FiringData"
 CyclesSheetName = "Cycles"
+BurstSheetName = "BurstData"
+ClusterSheetName = "ClusterData"
 
 file_prefix = Sys.getenv("FILE_PREFIX")
 
@@ -73,5 +75,7 @@ KNDy_cells <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, CellInfoSheetName)
 KNDy_exclude <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, ExclusionSheetName)
 KNDy_firingRate <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, FiringRateSheetName)
 KNDy_cycles <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, CyclesSheetName)
+KNDy_burstData <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, BurstSheetName)
+KNDy_clusterData <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, ClusterSheetName)
 
 dateToday = Sys.Date()
