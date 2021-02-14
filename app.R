@@ -42,13 +42,15 @@ source(file.path(FunctionsFolder, GetDataReadyFileName))
 # - Readjusts the order of variables within the KNDyDATA data frame to be a little more helpful. 
 # If the order of the excel sheet changes, this has to change
 
-allDFs = GetDataReadyFunc(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firingRate, rateForQuiet)
+allDFs = GetDataReadyFunc(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firingRate, KNDy_burstData, KNDy_clusterData, rateForQuiet)
 
 #<<- assigns at a higher environment level
 KNDyDATA <<- allDFs$KNDyDATA
 KNDy_mouse_demo <<- allDFs$KNDy_mouse_demo
 KNDy_cells <<- allDFs$KNDy_cells
 KNDy_firingRate2 <<- allDFs$KNDy_firingRate
+VBW_BurstsPerHour <<- allDFs$VBW_BurstsPerHour
+VBW_BurstsPerHour_hour1 <<- allDFs$VBW_BurstsPerHour_hour1
 
 #create juvenile and adult dataframes
 sepDFs <- sep_by_age(KNDyDATA)
@@ -170,7 +172,7 @@ server <- function(input, output) {
   rawDataServer("rawData", KNDyDATA, KNDyDATA_adult, KNDyDATA_juv)
   
   ### BURST WINDOW SERVER ---------------
-  maxBurstWindowServer("maxBurstWindow", KNDyDATA)
+  maxBurstWindowServer("maxBurstWindow", KNDyDATA, VBW_BurstsPerHour, VBW_BurstsPerHour_hour1)
   
   ### CYCLES SERVER ---------------
   cyclesServer("Cycles", KNDy_cycles = KNDy_cycles)
