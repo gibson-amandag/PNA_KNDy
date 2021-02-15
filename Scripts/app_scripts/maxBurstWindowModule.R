@@ -10,7 +10,7 @@ maxBurstWindowUI <- function(
     h3("Maximum Burst Window"),
     fluidRow(
       column(
-        4,
+        3,
         checkboxInput(
           ns("VBW_exclude"),
           "Exclude marked cells?",
@@ -18,7 +18,7 @@ maxBurstWindowUI <- function(
         )
       ),
       column(
-        4,
+        3,
         checkboxInput(
           ns("VBW_individualLines"),
           "Plot individual cells?",
@@ -26,11 +26,19 @@ maxBurstWindowUI <- function(
         )
       ),
       column(
-        4,
+        3,
         checkboxInput(
           ns("VBW_meanLines"),
           "Plot mean lines?",
           value = TRUE
+        )
+      ),
+      column(
+        3,
+        checkboxInput(
+          ns("VBW_hour1"),
+          "Plot only bursts from first 60 min?",
+          value = FALSE
         )
       )
     ),
@@ -43,27 +51,41 @@ maxBurstWindowUI <- function(
 
 maxBurstWindowServer <- function(
   id,
-  KNDyDATA
+  KNDyDATA,
+  VBW_BurstsPerHour,
+  VBW_BurstPerHour_hour1
 ){
   moduleServer(
     id,
     function(input, output, session) {
-      VBW_BurstsPerHour <- reactive({
-        VBW_BurstsPerHour <- KNDyDATA %>%
-          select(all_of(demoVarsAll_quo), all_of(timingVars_quo), MaxBurstWindow_spont, BurstsPerHour_0.01:BurstsPerHour_1.00)
-        if(input$VBW_exclude){
-          VBW_BurstsPerHour <- excludeFunc(VBW_BurstsPerHour)
+      VBW_BurstsPerHour_react <- reactive({
+        if(input$VBW_hour1){
+          VBW_df <- VBW_BurstPerHour_hour1
+        } else {
+          VBW_df <- VBW_BurstsPerHour
         }
-        VBW_BurstsPerHour
+        if(input$VBW_exclude){
+          VBW_df <- excludeFunc(VBW_df)
+        }
+        VBW_df
       })
       
       VBW_BurstsPerHour_long <- reactive({
-        VBW_BurstsPerHour_long <- make_long_form_burstsPerWindow(VBW_BurstsPerHour())
-        VBW_BurstsPerHour_long <- VBW_BurstsPerHour_long %>%
-          filter(!is.na(BurstsPerHour))
-        
-        VBW_BurstsPerHour_long <- make_BW_col(VBW_BurstsPerHour_long)
-        VBW_BurstsPerHour_long
+        if(input$VBW_hour1){
+          VBW_BurstsPerHour_long <- make_long_form_burstsPerWindow_hour1(VBW_BurstsPerHour_react())
+          VBW_BurstsPerHour_long <- VBW_BurstsPerHour_long %>%
+            filter(!is.na(BurstsPerHour))
+          
+          VBW_BurstsPerHour_long <- make_BW_col_hour1(VBW_BurstsPerHour_long)
+          VBW_BurstsPerHour_long
+        } else {
+          VBW_BurstsPerHour_long <- make_long_form_burstsPerWindow(VBW_BurstsPerHour_react())
+          VBW_BurstsPerHour_long <- VBW_BurstsPerHour_long %>%
+            filter(!is.na(BurstsPerHour))
+          
+          VBW_BurstsPerHour_long <- make_BW_col(VBW_BurstsPerHour_long)
+          VBW_BurstsPerHour_long
+        }
       })
       
       output$VBW_plot <- renderPlot({
@@ -76,17 +98,27 @@ maxBurstWindowServer <- function(
       
       output$VBW_peak_table <- renderDataTable({
         VBW_BurstsPerHour_grouped <- getAvgByTreatAge(
-          VBW_BurstsPerHour() %>%
+          VBW_BurstsPerHour_react() %>%
             select(-Sac_hr, - Record_start_hr, -Record_end_hr))
         VBW_BurstsPerHour_grouped
         
-        VBW_BurstsPerHour_grouped_long <- make_long_form_burstsPerWindow(VBW_BurstsPerHour_grouped)
-        VBW_BurstsPerHour_grouped_long <- VBW_BurstsPerHour_grouped_long %>%
-          filter(!is.na(BurstsPerHour))
-        VBW_BurstsPerHour_grouped_long
-        
-        VBW_BurstsPerHour_grouped_long <- make_BW_col(VBW_BurstsPerHour_grouped_long)
-        VBW_BurstsPerHour_grouped_long
+        if(input$VBW_hour1) {
+          VBW_BurstsPerHour_grouped_long <- make_long_form_burstsPerWindow_hour1(VBW_BurstsPerHour_grouped)
+          VBW_BurstsPerHour_grouped_long <- VBW_BurstsPerHour_grouped_long %>%
+            filter(!is.na(BurstsPerHour))
+          VBW_BurstsPerHour_grouped_long
+          
+          VBW_BurstsPerHour_grouped_long <- make_BW_col_hour1(VBW_BurstsPerHour_grouped_long)
+          VBW_BurstsPerHour_grouped_long
+        } else {
+          VBW_BurstsPerHour_grouped_long <- make_long_form_burstsPerWindow(VBW_BurstsPerHour_grouped)
+          VBW_BurstsPerHour_grouped_long <- VBW_BurstsPerHour_grouped_long %>%
+            filter(!is.na(BurstsPerHour))
+          VBW_BurstsPerHour_grouped_long
+          
+          VBW_BurstsPerHour_grouped_long <- make_BW_col(VBW_BurstsPerHour_grouped_long)
+          VBW_BurstsPerHour_grouped_long
+        }
         
         #Control juvenile data frame from the grouped, long-form data
         VBW_ConJuv <- VBW_BurstsPerHour_grouped_long %>%
