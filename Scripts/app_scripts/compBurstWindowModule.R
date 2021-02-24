@@ -12,7 +12,7 @@ compBurstWindowUI <- function(
   ns <- NS(id)
   tagList(
     
-    h2("Comparing Burst Parameters at Different Windows"),
+    h2("Burst Parameters - Full Spontaneous Length"),
     
     #Enter the burst window values in msec. These then print with graph descriptions
     fluidRow(
@@ -99,8 +99,8 @@ compBurstWindowUI <- function(
         uiOutput(ns("totalFreq"))
       ),
       tabPanel(
-        "Interburst Interval",
-        uiOutput(ns("interBurst"))
+        "InterEvent Interval",
+        uiOutput(ns("InterEvent"))
       ),
       tabPanel(
         "Intraburst interval",
@@ -335,25 +335,25 @@ compBurstWindowServer <- function(
       )
       
       
-      output$interBurst <- renderUI({
+      output$InterEvent <- renderUI({
         ns <- session$ns
         burstParamsUI(
-          ns("interBurst"),
+          ns("InterEvent"),
           bw1 = input$BW1,
           bw2 = input$BW2,
-          whichVariable = "Interburst Interval", #as string
+          whichVariable = "InterEvent Interval", #as string
           dotsize = 2,
           binwidth = 0.5,
           positionWidth = 0.9
         )
       })
       
-      interBurst_plots <- burstParamsServer(
-        "interBurst",
+      InterEvent_plots <- burstParamsServer(
+        "InterEvent",
         df = KNDyDATA_filtered, #use a reactive df, but don't include ()
-        var_to_plot = expr(InterBurst_spont), #as expr()
-        var_to_plot_BW1 = expr(InterBurst_spont_BW1), #as expr()
-        var_to_plot_BW2 = expr(InterBurst_spont_BW2), #as expr()
+        var_to_plot = expr(InterEvent_spont), #as expr()
+        var_to_plot_BW1 = expr(InterEvent_spont_BW1), #as expr()
+        var_to_plot_BW2 = expr(InterEvent_spont_BW2), #as expr()
         treatment = selectData$treatment, #reactive value, but don't include ()
         grouping_var = selectData$grouping_var, #reactive value, but don't include ()
         expand_to_zero = reactive({ input$expand_to_zero }), #TRUE/FALSE
