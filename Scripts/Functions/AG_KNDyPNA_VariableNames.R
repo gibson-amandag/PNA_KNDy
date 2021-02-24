@@ -36,7 +36,7 @@ KNDy_varNamesFunc = function(dataframe) {
   KNDy_VarNames$SingleSpikeNum_spont = "Spont Single Spike Number"
   KNDy_VarNames$BurstFreq_spont = "Spont Burst Frequency"
   KNDy_VarNames$TotalFreq_spont = "Spont Total Frequency"
-  KNDy_VarNames$InterBurst_spont = "Spont Interburst Interval"
+  KNDy_VarNames$InterEvent_spont = "Spont InterEvent Interval"
   KNDy_VarNames$IntraBurst_spont = "Spont Intraburst Interval"
   KNDy_VarNames$BurstsPerHour_spont = "Spont Bursts per Hour"
   KNDy_VarNames$MaxBurstWindow_spont = "Spont Maximum Burst Window"
@@ -51,7 +51,7 @@ KNDy_varNamesFunc = function(dataframe) {
   KNDy_VarNames$SingleSpikeNum_spont_BW1 = "Spont Single Spike Number"
   KNDy_VarNames$BurstFreq_spont_BW1 = "Spont Burst Frequency"
   KNDy_VarNames$TotalFreq_spont_BW1 = "Spont Total Frequency"
-  KNDy_VarNames$InterBurst_spont_BW1 = "Spont Interburst Interval"
+  KNDy_VarNames$InterEvent_spont_BW1 = "Spont InterEvent Interval"
   KNDy_VarNames$IntraBurst_spont_BW1 = "Spont Intraburst Interval"
   KNDy_VarNames$BurstsPerHour_spont_BW1 = "Spont Bursts per Hour"
   KNDy_VarNames$bDoubts_spont_BW1 = "Spont Bursts with Doubts"
@@ -65,7 +65,7 @@ KNDy_varNamesFunc = function(dataframe) {
   KNDy_VarNames$SingleSpikeNum_spont_BW2 = "Spont Single Spike Number"
   KNDy_VarNames$BurstFreq_spont_BW2 = "Spont Burst Frequency"
   KNDy_VarNames$TotalFreq_spont_BW2 = "Spont Total Frequency"
-  KNDy_VarNames$InterBurst_spont_BW2 = "Spont Interburst Interval"
+  KNDy_VarNames$InterEvent_spont_BW2 = "Spont InterEvent Interval"
   KNDy_VarNames$IntraBurst_spont_BW2 = "Spont Intraburst Interval"
   KNDy_VarNames$BurstsPerHour_spont_BW2 = "Spont Bursts per Hour"
   KNDy_VarNames$bDoubts_spont_BW2 = "Spont Bursts with Doubts"
@@ -79,7 +79,7 @@ KNDy_varNamesFunc = function(dataframe) {
   KNDy_VarNames$SingleSpikeNum_hour1 = "Hour 1 Single Spike Number"
   KNDy_VarNames$BurstFreq_hour1 = "Hour 1 Burst Frequency"
   KNDy_VarNames$TotalFreq_hour1 = "Hour 1 Total Frequency"
-  KNDy_VarNames$InterBurst_hour1 = "Hour 1 Interburst Interval"
+  KNDy_VarNames$InterEvent_hour1 = "Hour 1 InterEvent Interval"
   KNDy_VarNames$IntraBurst_hour1 = "Hour 1 Intraburst Interval"
   KNDy_VarNames$BurstsPerHour_hour1 = "Hour 1 Bursts per Hour"
   KNDy_VarNames$MaxBurstWindow_hour1 = "Hour 1 Maximum Burst Window"
@@ -94,7 +94,7 @@ KNDy_varNamesFunc = function(dataframe) {
   KNDy_VarNames$SingleSpikeNum_hour1_BW1 = "Hour 1 Single Spike Number"
   KNDy_VarNames$BurstFreq_hour1_BW1 = "Hour 1 Burst Frequency"
   KNDy_VarNames$TotalFreq_hour1_BW1 = "Hour 1 Total Frequency"
-  KNDy_VarNames$InterBurst_hour1_BW1 = "Hour 1 Interburst Interval"
+  KNDy_VarNames$InterEvent_hour1_BW1 = "Hour 1 InterEvent Interval"
   KNDy_VarNames$IntraBurst_hour1_BW1 = "Hour 1 Intraburst Interval"
   KNDy_VarNames$BurstsPerHour_hour1_BW1 = "Hour 1 Bursts per Hour"
   KNDy_VarNames$bDoubts_hour1_BW1 = "Hour 1 Bursts with Doubts"
@@ -108,7 +108,7 @@ KNDy_varNamesFunc = function(dataframe) {
   KNDy_VarNames$SingleSpikeNum_hour1_BW2 = "Hour 1 Single Spike Number"
   KNDy_VarNames$BurstFreq_hour1_BW2 = "Hour 1 Burst Frequency"
   KNDy_VarNames$TotalFreq_hour1_BW2 = "Hour 1 Total Frequency"
-  KNDy_VarNames$InterBurst_hour1_BW2 = "Hour 1 Interburst Interval"
+  KNDy_VarNames$InterEvent_hour1_BW2 = "Hour 1 InterEvent Interval"
   KNDy_VarNames$IntraBurst_hour1_BW2 = "Hour 1 Intraburst Interval"
   KNDy_VarNames$BurstsPerHour_hour1_BW2 = "Hour 1 Bursts per Hour"
   KNDy_VarNames$bDoubts_hour1_BW2 = "Hour 1 Bursts with Doubts"
@@ -122,7 +122,7 @@ KNDy_varNamesFunc = function(dataframe) {
   KNDy_VarNames$SingleSpikeNum_senktide = "Senktide Single Spike Number"
   KNDy_VarNames$BurstFreq_senktide = "Senktide Burst Frequency"
   KNDy_VarNames$TotalFreq_senktide = "Senktide Total Frequency"
-  KNDy_VarNames$InterBurst_senktide = "Senktide Interburst Interval"
+  KNDy_VarNames$InterEvent_senktide = "Senktide InterEvent Interval"
   KNDy_VarNames$IntraBurst_senktide = "Senktide Intraburst Interval"
   KNDy_VarNames$BurstsPerHour_senktide = "Senktide Bursts per Hour"
   KNDy_VarNames$MaxBurstWindow_senktide = "Senktide Maximum Burst Window"
@@ -137,7 +137,7 @@ KNDy_varNamesFunc = function(dataframe) {
   KNDy_VarNames$SingleSpikeNum_senktide_BW1 = "Senktide Single Spike Number"
   KNDy_VarNames$BurstFreq_senktide_BW1 = "Senktide Burst Frequency"
   KNDy_VarNames$TotalFreq_senktide_BW1 = "Senktide Total Frequency"
-  KNDy_VarNames$InterBurst_senktide_BW1 = "Senktide Interburst Interval"
+  KNDy_VarNames$InterEvent_senktide_BW1 = "Senktide InterEvent Interval"
   KNDy_VarNames$IntraBurst_senktide_BW1 = "Senktide Intraburst Interval"
   KNDy_VarNames$BurstsPerHour_senktide_BW1 = "Senktide Bursts per Hour"
   KNDy_VarNames$bDoubts_senktide_BW1 = "Senktide Bursts with Doubts"
@@ -151,7 +151,7 @@ KNDy_varNamesFunc = function(dataframe) {
   KNDy_VarNames$SingleSpikeNum_senktide_BW2 = "Senktide Single Spike Number"
   KNDy_VarNames$BurstFreq_senktide_BW2 = "Senktide Burst Frequency"
   KNDy_VarNames$TotalFreq_senktide_BW2 = "Senktide Total Frequency"
-  KNDy_VarNames$InterBurst_senktide_BW2 = "Senktide Interburst Interval"
+  KNDy_VarNames$InterEvent_senktide_BW2 = "Senktide InterEvent Interval"
   KNDy_VarNames$IntraBurst_senktide_BW2 = "Senktide Intraburst Interval"
   KNDy_VarNames$BurstsPerHour_senktide_BW2 = "Senktide Bursts per Hour"
   KNDy_VarNames$bDoubts_senktide_BW2 = "Senktide Bursts with Doubts"
@@ -297,7 +297,7 @@ BurstVars_spont_quo = c(
   "SingleSpikeNum_spont",
   "BurstFreq_spont",
   "TotalFreq_spont",
-  "InterBurst_spont",
+  "InterEvent_spont",
   "IntraBurst_spont",
   "BurstsPerHour_spont",
   "MaxBurstWindow_spont"
@@ -309,7 +309,7 @@ BurstVars_spont = exprs(
   SingleSpikeNum_spont,
   BurstFreq_spont,
   TotalFreq_spont,
-  InterBurst_spont,
+  InterEvent_spont,
   IntraBurst_spont,
   BurstsPerHour_spont,
   MaxBurstWindow_spont
@@ -322,7 +322,7 @@ BurstVars_spont_quo_BW1 = c(
   "SingleSpikeNum_spont_BW1",
   "BurstFreq_spont_BW1",
   "TotalFreq_spont_BW1",
-  "InterBurst_spont_BW1",
+  "InterEvent_spont_BW1",
   "IntraBurst_spont_BW1",
   "BurstsPerHour_spont_BW1",
   "MaxBurstWindow_spont"
@@ -334,7 +334,7 @@ BurstVars_spont_BW1 = exprs(
   SingleSpikeNum_spont_BW1,
   BurstFreq_spont_BW1,
   TotalFreq_spont_BW1,
-  InterBurst_spont_BW1,
+  InterEvent_spont_BW1,
   IntraBurst_spont_BW1,
   BurstsPerHour_spont_BW1,
   MaxBurstWindow_spont
@@ -347,7 +347,7 @@ BurstVars_spont_quo_BW2 = c(
   "SingleSpikeNum_spont_BW2",
   "BurstFreq_spont_BW2",
   "TotalFreq_spont_BW2",
-  "InterBurst_spont_BW2",
+  "InterEvent_spont_BW2",
   "IntraBurst_spont_BW2",
   "BurstsPerHour_spont_BW2",
   "MaxBurstWindow_spont"
@@ -359,7 +359,7 @@ BurstVars_spont_BW2 = exprs(
   SingleSpikeNum_spont_BW2,
   BurstFreq_spont_BW2,
   TotalFreq_spont_BW2,
-  InterBurst_spont_BW2,
+  InterEvent_spont_BW2,
   IntraBurst_spont_BW2,
   BurstsPerHour_spont_BW2,
   MaxBurstWindow_spont
