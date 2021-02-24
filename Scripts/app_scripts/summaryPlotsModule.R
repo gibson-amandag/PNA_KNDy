@@ -219,9 +219,10 @@ summaryPlotsServer <- function(
                 Treatment,
                 GenTreatment,
                 Who,
+                WhoRecorded,
                 Sac_9plus, Quiet
               ),
-            selected = "Who"
+            selected = "WhoRecorded"
           )
           #if juveniles and not all firing
         } else if (input$dataset == "Juveniles" & input$firing != "All"){
@@ -233,9 +234,10 @@ summaryPlotsServer <- function(
                 Treatment,
                 GenTreatment,
                 Who,
+                WhoRecorded,
                 Sac_9plus
               ),
-            selected = "Who"
+            selected = "WhoRecorded"
           )
           #if adults and all firing
         } else if (input$dataset == "Adults" & input$firing == "All"){
@@ -275,6 +277,7 @@ summaryPlotsServer <- function(
                 GenTreatment,
                 AgeGroup,
                 Who,
+                WhoRecorded,
                 Sac_9plus, Quiet
               ),
             selected = "AgeGroup"
@@ -290,6 +293,7 @@ summaryPlotsServer <- function(
                 GenTreatment,
                 AgeGroup,
                 Who,
+                WhoRecorded,
                 Sac_9plus),
             selected = "AgeGroup"
           )
@@ -396,7 +400,8 @@ summaryPlotsServer <- function(
               !! input$var_to_plot,
               Treatment,
               AgeGroup,
-              Who
+              Who,
+              WhoRecorded
             ) %>%
             filter(
               #look for values that are near the click y-value. The tolerance is the binwidth
