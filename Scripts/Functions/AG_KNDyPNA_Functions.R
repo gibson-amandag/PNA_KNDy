@@ -1415,10 +1415,13 @@ firingRatePlotFunc <- function(
   xmax = NULL,
   zoom_y = FALSE,
   ymin = NULL,
-  ymax = NULL
+  ymax = NULL,
+  excludeLineType = TRUE # changes line-type based on whether or not cell is marked for exclusion 
 ){
   ggplot(df, aes(x = Min_num, y = FiringRate_Hz, color = interaction(Who, WhoRecorded))) +
-    geom_line() +
+    geom_line(
+      if(excludeLineType){aes(linetype = Exclude)}
+    ) +
     my_theme +
     facet_wrap(CellID ~ WhoRecorded, ncol = 3) + #each plot is a cell
     scale_x_continuous(
@@ -1430,7 +1433,12 @@ firingRatePlotFunc <- function(
       values = c("Amanda.Amanda" = "orange", "Jenn.Amanda" = "red", "Jenn.Jenn" = "blue", "Amanda.Jenn" = "lightblue"),
       breaks = c("Amanda.Amanda", "Jenn.Amanda", "Jenn.Jenn", "Amanda.Jenn"),
       labels = c("Amanda slice + record", "Jenn slice; Amanda record", "Jenn slice + record", "Amanda slice; Jenn record")
-      )
+      ) + 
+    scale_linetype_manual(
+      values = c("FALSE" = "solid", "TRUE" = "dotted"),
+      breaks = c("FALSE", "TRUE"),
+      labels = c("Included", "Excluded")
+    )
 }
 
 ### Drafts - not using currently ---------------
