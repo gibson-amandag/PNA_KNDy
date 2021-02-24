@@ -48,7 +48,7 @@ allDFs = GetDataReadyFunc(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firing
 KNDyDATA <<- allDFs$KNDyDATA
 KNDy_mouse_demo <<- allDFs$KNDy_mouse_demo
 KNDy_cells <<- allDFs$KNDy_cells
-KNDy_firingRate2 <<- allDFs$KNDy_firingRate
+KNDy_firingRate <<- allDFs$KNDy_firingRate
 VBW_BurstsPerHour <<- allDFs$VBW_BurstsPerHour
 VBW_BurstsPerHour_hour1 <<- allDFs$VBW_BurstsPerHour_hour1
 
@@ -74,6 +74,7 @@ sourceModule("instructionsSumTableModule.R")
 sourceModule("instructionsRawDataModule.R")
 
 sourceModule("compBurstWindowModule.R")
+sourceModule("burstHour1Module.R")
 sourceModule("selectDataModule.R")
 sourceModule("zoomAxisModule.R")
 sourceModule("controlDotsModule.R")
@@ -135,8 +136,13 @@ ui <- fluidPage(
     ),
     #Comparing Burst Window ----
     tabPanel(
-      "Comp BW",
+      "Spont Bursts",
       compBurstWindowUI("compBW")
+    ),
+    #Hour 1 Burst Window ----
+    tabPanel(
+      "Hour 1 Bursts",
+      burstHour1UI("burstHour1")
     ),
     #Firing Rate Graphs ----
     tabPanel(
@@ -153,6 +159,13 @@ server <- function(input, output) {
   
   compBurstWindowServer(
     "compBW",
+    KNDyDATA,
+    KNDyDATA_adult = KNDyDATA_adult,
+    KNDyDATA_juv = KNDyDATA_juv
+  )
+  
+  burstHour1Server(
+    "burstHour1",
     KNDyDATA,
     KNDyDATA_adult = KNDyDATA_adult,
     KNDyDATA_juv = KNDyDATA_juv
@@ -178,7 +191,7 @@ server <- function(input, output) {
   cyclesServer("Cycles", KNDy_cycles = KNDy_cycles)
   
   ### FIRING RATE SERVER -----------
-  firingRateServer("firingRate", KNDy_firingRate = KNDy_firingRate2, KNDyDATA)
+  firingRateServer("firingRate", KNDy_firingRate = KNDy_firingRate, KNDyDATA)
 }
 # Run the application 
 shinyApp(ui = ui, server = server)
