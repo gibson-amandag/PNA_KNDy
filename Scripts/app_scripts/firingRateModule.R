@@ -15,6 +15,7 @@ firingRateUI <- function(
     
     zoomAxisUI(ns("zoom_x"), "x"),
     zoomAxisUI(ns("zoom_y"), "y"),
+    # tableOutput(ns("testTable")),
     
     tabsetPanel(
       tabPanel(
@@ -79,18 +80,23 @@ firingRateServer <- function(
       
       KNDy_firingRate_long <- reactive({
         KNDy_firingRate_long <- KNDy_firingRate %>%
-          excludeFunc() %>%
+          # excludeFunc() %>%
           # filter(Exclude == FALSE | is.na(Exclude)) %>% #remove excluded cells
           make_firing_long()
         
         KNDy_firingRate_long <- KNDy_firingRate_long %>%
           add_Min_col()
         
-        KNDy_firingRate_long <- KNDy_firingRate_long %>%
-          excludeFunc()
+        # KNDy_firingRate_long <- KNDy_firingRate_long %>%
+          # excludeFunc()
         
         return(KNDy_firingRate_long)
       })
+      
+      output$testTable <- renderTable({
+        KNDy_firingRate_long()
+      })
+      
       #Add ylimit filters
       output$Con_Adults <- renderPlot({
         KNDy_firingRate_long() %>%
