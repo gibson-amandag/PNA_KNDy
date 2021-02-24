@@ -266,6 +266,27 @@ KNDyDATA_juv %>%
   scale_fill_manual(values = c("Amanda" = "orange", "Jenn" = "blue"))
 ```
 
+## Without Excluded Cell
+This removes cells excluded for reasons other than length of recording
+```{r}
+df <- excludeFunc(KNDyDATA_juv) 
+
+df %>%
+  ggplot(aes(x = SpontLength_min, fill = WhoRecorded)) +
+  geom_histogram(
+    position = "dodge", 
+    binwidth = 10,
+    boundary = 0,
+    closed = "left",
+    color = "black"
+    ) +
+  my_theme + 
+  scale_x_continuous(name="Spontaneous Length (min)", breaks = seq(0, 180, 10), limits = c(0, 180)) + 
+  ylab("Number of Cells") +
+  scale_fill_manual(values = c("Amanda" = "orange", "Jenn" = "blue"))
+```
+
+
 ## Amanda - adults
 ```{r}
 KNDyDATA_adult %>%
