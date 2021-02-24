@@ -54,6 +54,19 @@ firingRateUI <- function(
         
         #Need inputs to select which cell
         plotOutput(ns("individualCell"))
+      ),
+      tabPanel(
+        "Avg Firing over Time",
+        h4("Average Firing"),
+        checkboxInput(
+          ns("individualLines"), 
+          "Plot individual lines?"
+        ),
+        checkboxInput(
+          ns("excludeCells"),
+          "Exclude marked cells?"
+        ),
+        plotOutput((ns("avgFiring")))
       )
       
     )
@@ -173,6 +186,38 @@ firingRateServer <- function(
         }
       })
       
+      output$avgFiring <- renderPlot({
+        if(input$excludeCells){
+          df <- KNDy_firingRate_long() %>%
+            excludeFunc()
+        } else {
+          df <- KNDy_firingRate_long()
+        }
+        ggplot(
+          df, 
+          aes(
+            Min_num, 
+            FiringRate_Hz, 
+            color = GenTreatment, 
+            group = interaction(GenTreatment, AgeGroup)
+          )
+        ) + 
+          my_KNDy_VBW_geoms(
+            useLinetype = TRUE,
+            linetype_var = expr(AgeGroup),
+            lineGroup_var = expr(CellID),
+            xtitle = "Time (min)",
+            ytitle = "Frequency (Hz)",
+            individualLines = input$individualLines,
+            mean_lines = TRUE,
+            zoom_x = zoom_x$zoom(),
+            xmin = zoom_x$min(),
+            xmax = zoom_x$max(),
+            zoom_y = zoom_y$zoom(),
+            ymin = zoom_y$min(),
+            ymax = zoom_y$max()
+          )
+      })
     }
   )
 }
