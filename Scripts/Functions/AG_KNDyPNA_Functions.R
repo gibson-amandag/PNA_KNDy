@@ -967,6 +967,7 @@ my_ggsave = function(
   add_to_save_name, #append additional info
   plot, #plot to be saved
   img_type = ".png", #type of image to save
+  path = PlotOutputFolder, #PlotOutputFolder defined in set up and .Renviron
   ...
 ){
   plot_name = naming_plot(
@@ -979,7 +980,7 @@ my_ggsave = function(
   ggsave(
     plot_name, 
     plot = plot, 
-    path = PlotOutputFolder, #PlotOutputFolder defined in second chunk
+    path = path, 
     bg = "transparent", 
     units = "in", ...
   )
@@ -1416,9 +1417,17 @@ firingRatePlotFunc <- function(
   zoom_y = FALSE,
   ymin = NULL,
   ymax = NULL,
-  excludeLineType = TRUE # changes line-type based on whether or not cell is marked for exclusion 
+  excludeLineType = TRUE, # changes line-type based on whether or not cell is marked for exclusion
+  save = FALSE, #Save png
+  add_to_save_name = NULL, #append something additional to file name
+  toPPT = FALSE, #add to a powerpoint
+  ppt = NULL, #powerpoint object to add to
+  img_type = ".png",
+  figWidth = 10,
+  figHeight = NA,
+  cellID = ""
 ){
-  ggplot(df, aes(x = Min_num, y = FiringRate_Hz, color = interaction(Who, WhoRecorded))) +
+  viz <- ggplot(df, aes(x = Min_num, y = FiringRate_Hz, color = interaction(Who, WhoRecorded))) +
     geom_line(
       if(excludeLineType){aes(linetype = Exclude)}
     ) +
@@ -1438,6 +1447,61 @@ firingRatePlotFunc <- function(
       values = c("FALSE" = "solid", "TRUE" = "dotted"),
       breaks = c("FALSE", "TRUE"),
       labels = c("Included", "Excluded")
+    )
+  
+  if(save){ #if save is true
+    my_ggsave(
+      plot_type = "firingRate", 
+      var_to_plot = cellID, 
+      add_to_save_name = add_to_save_name, 
+      plot = viz, 
+      width = figWidth,
+      height = figHeight,
+      img_type = img_type,
+      path = file.path(PlotOutputFolder, "firingRate")
+    )
+  }
+  
+  if(toPPT){ #if toPPT is true
+    ppt_GraphFunc(ppt, viz)
+  }
+  return(viz) #return the viz plot
+}
+
+# To plot a single cell
+firingRatePlot_SingleCellFunc <- function(
+  cellID,
+  df,
+  zoom_x = FALSE,
+  xmin = NULL,
+  xmax = NULL,
+  zoom_y = FALSE,
+  ymin = NULL,
+  ymax = NULL,
+  excludeLineType = TRUE, # changes line-type based on whether or not cell is marked for exclusion
+  save = FALSE, #Save png
+  zoomInfo = NULL, #append something additional to file name
+  toPPT = FALSE, #add to a powerpoint
+  ppt = NULL, #powerpoint object to add to
+  img_type = ".png",
+  figWidth = 10,
+  figHeight = NA
+){
+  df %>%
+    filter(CellID == cellID) %>%
+    firingRatePlotFunc(
+      zoom_x = zoom_x,
+      xmin = xmin,
+      xmax = xmax,
+      zoom_y = zoom_y,
+      ymin = ymin,
+      ymax = ymax,
+      save = save,
+      add_to_save = zoomInfo,
+      toPPT = toPPT,
+      ppt = ppt,
+      img_type = img_type,
+      cellID = cellID
     )
 }
 

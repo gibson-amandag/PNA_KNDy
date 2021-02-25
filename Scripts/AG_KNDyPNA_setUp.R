@@ -34,7 +34,7 @@ file_prefix = Sys.getenv("FILE_PREFIX")
 rateForQuiet = 0.001
 
 #type of images to save for plots. .png or .svg, for example
-imgTypePlots = ".svg"
+imgTypePlots = ".png"
 
 #save individual plot files?
 savePlots = TRUE
