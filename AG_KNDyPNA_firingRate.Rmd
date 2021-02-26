@@ -323,7 +323,7 @@ toPPT = TRUE
 #Make a list of the adult control cell ids
 adultConCellIDs <- KNDyDATA %>%
   filter(AgeGroup == "Adult" & GenTreatment == "Control") %>%
-  select(CellID)
+  select(CellID, Flagged)
 
 #Get the number of adult control cells (disregards marks for exclusion)
 numAdultConCells <- length(adultConCellIDs$CellID)
@@ -331,7 +331,7 @@ numAdultConCells <- length(adultConCellIDs$CellID)
 #Make a list of the adult PNA cell ids
 adultPNACellIDs <- KNDyDATA %>%
   filter(AgeGroup == "Adult" & GenTreatment == "PNA") %>%
-  select(CellID)
+  select(CellID, Flagged)
 
 #Get the number of adult PNA cells (disregards marks for exclusion)
 numAdultPNACells <- length(adultPNACellIDs$CellID)
@@ -339,7 +339,7 @@ numAdultPNACells <- length(adultPNACellIDs$CellID)
 #Make a list of the juvenile control cell ids
 juvConCellIDs <- KNDyDATA %>%
   filter(AgeGroup == "Juvenile" & GenTreatment == "Control") %>%
-  select(CellID)
+  select(CellID, Flagged)
 
 #Get the number of juvenile control cells (disregards marks for exclusion)
 numJuvConCells <- length(juvConCellIDs$CellID)
@@ -347,7 +347,7 @@ numJuvConCells <- length(juvConCellIDs$CellID)
 #Make a list of the juvenile PNA cell ids
 juvPNACellIDs <- KNDyDATA %>%
   filter(AgeGroup == "Juvenile" & GenTreatment == "PNA") %>%
-  select(CellID)
+  select(CellID, Flagged)
 
 #Get the number of juvenile PNA cells (disregards marks for exclusion)
 numJuvPNACells <- length(juvPNACellIDs$CellID)
@@ -395,42 +395,53 @@ KNDy_PPT_20Hz <- ph_with(
 ```
 
 ```{r Adult-Con-Individual}
-walk(
-  adultConCellIDs$CellID, 
+
+pwalk(
+  list(
+    cellID = adultConCellIDs$CellID,
+    flagText = adultConCellIDs$Flagged
+  ),
   firingRatePlot_SingleCellFunc, 
-  ..1, # CellID is first argument
+  # cellID = cellID - completed by pwalk
   df = KNDy_firingRate_long, 
   zoom_x = TRUE,
   xmin = 0,
-  xmax = 165,
+  xmax = 180,
   zoom_y = TRUE,
   ymin = 0,
   ymax = 1,
-  save = savePlots,
+  save = FALSE, #savePlots,
   zoomInfo = "_1Hz",
   toPPT = toPPT,
   ppt = KNDy_PPT_1Hz,
   img_type = imgTypePlots,
-  excludeLineType = FALSE
+  excludeLineType = FALSE,
+  addFlag = TRUE,
+  # flagText = flagText - completed by pwalk
   )
 
-walk(
-  adultConCellIDs$CellID, 
+pwalk(
+  list(
+    cellID = adultConCellIDs$CellID,
+    flagText = adultConCellIDs$Flagged
+  ),
   firingRatePlot_SingleCellFunc, 
-  ..1, # CellID is first argument
+  # cellID = cellID - completed by pwalk
   df = KNDy_firingRate_long, 
   zoom_x = TRUE,
   xmin = 0,
-  xmax = 165,
+  xmax = 180,
   zoom_y = TRUE,
   ymin = 0,
   ymax = 20,
-  save = savePlots,
+  save = FALSE, #savePlots,
   zoomInfo = "_20Hz",
   toPPT = toPPT,
   ppt = KNDy_PPT_20Hz,
   img_type = imgTypePlots,
-  excludeLineType = FALSE
+  excludeLineType = FALSE,
+  addFlag = TRUE,
+  # flagText = flagText - completed by pwalk
   )
 ```
 
@@ -475,42 +486,52 @@ KNDy_PPT_20Hz <- ph_with(
 ```
 
 ```{r Adult-PNA-Individual}
-walk(
-  adultPNACellIDs$CellID, 
+pwalk(
+  list(
+    cellID = adultPNACellIDs$CellID,
+    flagText = adultPNACellIDs$Flagged
+  ),
   firingRatePlot_SingleCellFunc, 
-  ..1, # CellID is first argument
+  # cellID = cellID - completed by pwalk
   df = KNDy_firingRate_long, 
   zoom_x = TRUE,
   xmin = 0,
-  xmax = 165,
+  xmax = 180,
   zoom_y = TRUE,
   ymin = 0,
   ymax = 1,
-  save = savePlots,
+  save = FALSE, #savePlots,
   zoomInfo = "_1Hz",
   toPPT = toPPT,
   ppt = KNDy_PPT_1Hz,
   img_type = imgTypePlots,
-  excludeLineType = FALSE
+  excludeLineType = FALSE,
+  addFlag = TRUE,
+  # flagText = flagText - completed by pwalk
   )
 
-walk(
-  adultPNACellIDs$CellID, 
+pwalk(
+  list(
+    cellID = adultPNACellIDs$CellID,
+    flagText = adultPNACellIDs$Flagged
+  ),
   firingRatePlot_SingleCellFunc, 
-  ..1, # CellID is first argument
+  # cellID = cellID - completed by pwalk
   df = KNDy_firingRate_long, 
   zoom_x = TRUE,
   xmin = 0,
-  xmax = 165,
+  xmax = 180,
   zoom_y = TRUE,
   ymin = 0,
   ymax = 20,
-  save = savePlots,
+  save = FALSE, #savePlots,
   zoomInfo = "_20Hz",
   toPPT = toPPT,
   ppt = KNDy_PPT_20Hz,
   img_type = imgTypePlots,
-  excludeLineType = FALSE
+  excludeLineType = FALSE,
+  addFlag = TRUE,
+  # flagText = flagText - completed by pwalk
   )
 ```
 
@@ -558,42 +579,52 @@ KNDy_PPT_20Hz <- ph_with(
 ```
 
 ```{r Juv-Con-Individual}
-walk(
-  juvConCellIDs$CellID, 
+pwalk(
+  list(
+    cellID = juvConCellIDs$CellID,
+    flagText = juvConCellIDs$Flagged
+  ),
   firingRatePlot_SingleCellFunc, 
-  ..1, # CellID is first argument
+  # cellID = cellID - completed by pwalk
   df = KNDy_firingRate_long, 
   zoom_x = TRUE,
   xmin = 0,
-  xmax = 165,
+  xmax = 180,
   zoom_y = TRUE,
   ymin = 0,
   ymax = 1,
-  save = savePlots,
+  save = FALSE, #savePlots,
   zoomInfo = "_1Hz",
   toPPT = toPPT,
   ppt = KNDy_PPT_1Hz,
   img_type = imgTypePlots,
-  excludeLineType = FALSE
+  excludeLineType = FALSE,
+  addFlag = TRUE,
+  # flagText = flagText - completed by pwalk
   )
 
-walk(
-  juvConCellIDs$CellID, 
+pwalk(
+  list(
+    cellID = juvConCellIDs$CellID,
+    flagText = juvConCellIDs$Flagged
+  ),
   firingRatePlot_SingleCellFunc, 
-  ..1, # CellID is first argument
+  # cellID = cellID - completed by pwalk
   df = KNDy_firingRate_long, 
   zoom_x = TRUE,
   xmin = 0,
-  xmax = 165,
+  xmax = 180,
   zoom_y = TRUE,
   ymin = 0,
   ymax = 20,
-  save = savePlots,
+  save = FALSE, #savePlots,
   zoomInfo = "_20Hz",
   toPPT = toPPT,
   ppt = KNDy_PPT_20Hz,
   img_type = imgTypePlots,
-  excludeLineType = FALSE
+  excludeLineType = FALSE,
+  addFlag = TRUE,
+  # flagText = flagText - completed by pwalk
   )
 ```
 
@@ -635,7 +666,7 @@ KNDy_PPT_1Hz <- ph_with(
   location = ph_location_type(type = "body")
   ) 
 KNDy_PPT_20Hz <- ph_with(
-  KNDy_PPT_1Hz, 
+  KNDy_PPT_20Hz, 
   value = PNAJuvInfoText,
   location = ph_location_type(type = "body")
   ) 
@@ -643,42 +674,52 @@ KNDy_PPT_20Hz <- ph_with(
 ```
 
 ```{r Juv-PNA-Individual}
-walk(
-  juvPNACellIDs$CellID, 
+pwalk(
+  list(
+    cellID = juvPNACellIDs$CellID,
+    flagText = juvPNACellIDs$Flagged
+  ),
   firingRatePlot_SingleCellFunc, 
-  ..1, # CellID is first argument
+  # cellID = cellID - completed by pwalk
   df = KNDy_firingRate_long, 
   zoom_x = TRUE,
   xmin = 0,
-  xmax = 165,
+  xmax = 180,
   zoom_y = TRUE,
   ymin = 0,
   ymax = 1,
-  save = savePlots,
+  save = FALSE, #savePlots,
   zoomInfo = "_1Hz",
   toPPT = toPPT,
   ppt = KNDy_PPT_1Hz,
   img_type = imgTypePlots,
-  excludeLineType = FALSE
+  excludeLineType = FALSE,
+  addFlag = TRUE,
+  # flagText = flagText - completed by pwalk
   )
 
-walk(
-  juvPNACellIDs$CellID, 
+pwalk(
+  list(
+    cellID = juvPNACellIDs$CellID,
+    flagText = juvPNACellIDs$Flagged
+  ),
   firingRatePlot_SingleCellFunc, 
-  ..1, # CellID is first argument
+  # cellID = cellID - completed by pwalk
   df = KNDy_firingRate_long, 
   zoom_x = TRUE,
   xmin = 0,
-  xmax = 165,
+  xmax = 180,
   zoom_y = TRUE,
   ymin = 0,
   ymax = 20,
-  save = savePlots,
+  save = FALSE, #savePlots,
   zoomInfo = "_20Hz",
   toPPT = toPPT,
   ppt = KNDy_PPT_20Hz,
   img_type = imgTypePlots,
-  excludeLineType = FALSE
+  excludeLineType = FALSE,
+  addFlag = TRUE,
+  # flagText = flagText - completed by pwalk
   )
 ```
 

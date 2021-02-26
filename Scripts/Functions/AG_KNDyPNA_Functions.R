@@ -1002,6 +1002,29 @@ ppt_GraphFunc = function(ppt, viz){
   )
 }
 
+ppt_GraphFunc_flag = function(ppt, viz, flag){
+  #add a new slide
+  ppt = add_slide(
+    ppt, 
+    layout = "Blank", #use the blank layout
+    master = "Office Theme"
+  )
+  ppt = ph_with(
+    ppt, 
+    value = viz, #add the visualization to the powerpoint
+    location = ph_location_fullsize() #plot it on the entire slide
+  )
+  ppt = ph_with(
+    ppt, 
+    value = block_list(
+      fpar(
+        ftext(flag, prop = fp_text(font.size = 20))
+      )
+    ),
+    location = ph_location(left = 7, width = 3)
+  )
+}
+
 #### Main KNDy plot function
 #Use the above components to create and save the graph as desired
 #Can add a dot_plot layer (bins the dots)
@@ -1425,7 +1448,9 @@ firingRatePlotFunc <- function(
   img_type = ".png",
   figWidth = 10,
   figHeight = NA,
-  cellID = ""
+  cellID = "",
+  addFlag = FALSE,
+  flagText = NULL
 ){
   viz <- ggplot(df, aes(x = Min_num, y = FiringRate_Hz, color = interaction(Who, WhoRecorded))) +
     geom_line(
@@ -1442,12 +1467,16 @@ firingRatePlotFunc <- function(
       values = c("Amanda.Amanda" = "orange", "Jenn.Amanda" = "red", "Jenn.Jenn" = "blue", "Amanda.Jenn" = "lightblue"),
       breaks = c("Amanda.Amanda", "Jenn.Amanda", "Jenn.Jenn", "Amanda.Jenn"),
       labels = c("Amanda slice + record", "Jenn slice; Amanda record", "Jenn slice + record", "Amanda slice; Jenn record")
-      ) + 
-    scale_linetype_manual(
-      values = c("FALSE" = "solid", "TRUE" = "dotted"),
-      breaks = c("FALSE", "TRUE"),
-      labels = c("Included", "Excluded")
-    )
+      )
+  
+  if(excludeLineType){
+    viz <- viz +
+      scale_linetype_manual(
+        values = c("FALSE" = "solid", "TRUE" = "dotted"),
+        breaks = c("FALSE", "TRUE"),
+        labels = c("Included", "Excluded")
+      )
+  }
   
   if(save){ #if save is true
     my_ggsave(
@@ -1462,9 +1491,12 @@ firingRatePlotFunc <- function(
     )
   }
   
-  if(toPPT){ #if toPPT is true
+  if(toPPT && addFlag){ #if toPPT is true
+    ppt_GraphFunc_flag(ppt, viz, flagText)
+  }else if(toPPT){
     ppt_GraphFunc(ppt, viz)
   }
+  
   return(viz) #return the viz plot
 }
 
@@ -1485,8 +1517,13 @@ firingRatePlot_SingleCellFunc <- function(
   ppt = NULL, #powerpoint object to add to
   img_type = ".png",
   figWidth = 10,
-  figHeight = NA
+  figHeight = NA,
+  addFlag = FALSE,
+  flagText = NULL
 ){
+  if(is.na(flagText)) {
+    addFlag = FALSE
+  }
   df %>%
     filter(CellID == cellID) %>%
     firingRatePlotFunc(
@@ -1496,12 +1533,15 @@ firingRatePlot_SingleCellFunc <- function(
       zoom_y = zoom_y,
       ymin = ymin,
       ymax = ymax,
+      excludeLineType = excludeLineType,
       save = save,
       add_to_save = zoomInfo,
       toPPT = toPPT,
       ppt = ppt,
       img_type = img_type,
-      cellID = cellID
+      cellID = cellID,
+      addFlag = addFlag,
+      flagText = flagText
     )
 }
 
