@@ -267,7 +267,7 @@ KNDyDATA_juv %>%
 ```
 
 ## Without Excluded Cell
-This removes cells excluded for reasons other than length of recording
+This removes cells we've marked for excluded
 ```{r}
 df <- excludeFunc(KNDyDATA_juv) 
 
@@ -288,8 +288,10 @@ df %>%
 
 
 ## Amanda - adults
+With excluded cells removed
 ```{r}
 KNDyDATA_adult %>%
+  excludeFunc() %>%
   ggplot(aes(x = SpontLength_min, fill = WhoRecorded)) +
   geom_histogram(
     position = "dodge", 
@@ -305,8 +307,10 @@ KNDyDATA_adult %>%
 ```
 
 ## Firing Rate by Length
+With marked cells excluded
 ```{r}
 KNDyDATA %>%
+  excludeFunc() %>%
   ggplot(aes(x = SpontLength_min, y = SpontAvgFiring, shape = AgeGroup, color = WhoRecorded)) + 
   geom_point() +
   ylab(yTitleFunc(var_to_plot = "SpontAvgFiring")) + 
@@ -314,10 +318,12 @@ KNDyDATA %>%
   my_theme
 ```
 
-This next graph plots the total spontaneous recording length, but it plots the firing rate during the first 60 minutes of recording, for cells that were recorded for at least 60 min
+This next graph plots the total spontaneous recording length, but it plots the firing rate during the first 60 minutes of recording, for cells that were recorded for at least 60 min.
+Marked cells are excluded
 
 ```{r}
 KNDyDATA %>%
+  excludeFunc() %>%
   ggplot(aes(x = SpontLength_min, y = hour1Firing, shape = AgeGroup, color = WhoRecorded)) + 
   geom_point() +
   ylab(yTitleFunc(var_to_plot = "hour1Firing")) + 
@@ -326,9 +332,10 @@ KNDyDATA %>%
 ```
 
 # All Firing Rate Plots
+This graph removed cells marked for exclusion
 ```{r}
 ggplot(
-    KNDy_firingRate_long, 
+    KNDy_firingRate_long %>% excludeFunc(), 
     aes(
       Min_num, 
       FiringRate_Hz, 
@@ -353,11 +360,11 @@ my_KNDy_VBW_geoms(
 )
 ```
 
-We can focus in here on the first 60 minutes of recording and just the average firing rates for each group
+We can focus in here on the first 60 minutes of recording and just the average firing rates for each group. Again, the marked cells are excluded.
 
 ```{r}
 ggplot(
-    KNDy_firingRate_long, 
+    KNDy_firingRate_long %>% excludeFunc(), 
     aes(
       Min_num, 
       FiringRate_Hz, 
@@ -399,10 +406,11 @@ KNDy_firingRate_long_adult <- sepDFs$df_adult
 ```
 
 ## `KNDy_firingRate_juv`
+The marked cells are excluded
 ```{r KNDy-firingRate-juv}
 #plot juvenile firing rate
 ggplot(
-    KNDy_firingRate_long_juv, 
+    KNDy_firingRate_long_juv %>% excludeFunc(), 
     aes(
       Min_num, 
       FiringRate_Hz, 
@@ -425,23 +433,26 @@ my_KNDy_VBW_geoms(
   ymin = 0,
   ymax = 15
 )
-KNDy_firingRate_juv
+KNDy_firingRate_juv %>% excludeFunc()
 ```
 ### Control
+Excluded cells are plotted in dashed lines here
 ```{r, fig.width=12, fig.height=18}
 KNDy_firingRate_Juv_Con_plot
 ```
 
 ### PNA
+Excluded cells are plotted with dashed lines here
 ```{r, fig.width=12, fig.height=18}
 KNDy_firingRate_Juv_PNA_plot
 ```
 
 ## `KNDy_firingRate_adult`
+Cells marked for exclusion are removed
 ```{r KNDy-firingRate-adult}
 # plot adult firing rate
 ggplot(
-    KNDy_firingRate_long_adult, 
+    KNDy_firingRate_long_adult %>% excludeFunc(), 
     aes(
       Min_num, 
       FiringRate_Hz, 
@@ -466,15 +477,17 @@ my_KNDy_VBW_geoms(
 )
 
 
-KNDy_firingRate_adult
+KNDy_firingRate_adult %>% excludeFunc()
 ```
 
 ### Control
+The cells marked for exclusion are plotted with a dotted line here.
 ```{r, fig.width=12, fig.height=18}
 KNDy_firingRate_Adult_Con_plot
 ```
 
 ### PNA
+The cells marked for exclusion are plotted with dotted lines here
 ```{r, fig.width=12, fig.height=18}
 KNDy_firingRate_Adult_PNA_plot
 ```
@@ -645,9 +658,26 @@ KNDy_summary_byGroup("SpontAvgFiring", KNDy_firing, c("Who", "WhoRecorded", "Gen
 ```{r}
 KNDy_summary_byGroup("SpontAvgFiring", KNDy_firing %>% excludeFunc(), c("Who", "WhoRecorded", "GenTreatment", "AgeGroup"))
 ```
+### By Age, Treatment Group, and Recording Experimenter
+```{r}
+KNDy_summary_byGroup("SpontAvgFiring", KNDy_firing, c("WhoRecorded", "GenTreatment", "AgeGroup"))
+```
 
+#### Excluding marked cells
+```{r}
+KNDy_summary_byGroup("SpontAvgFiring", KNDy_firing %>% excludeFunc(), c("WhoRecorded", "GenTreatment", "AgeGroup"))
+```
+### By Age, Treatment Group, and Slicing Experimenter
+```{r}
+KNDy_summary_byGroup("SpontAvgFiring", KNDy_firing, c("Who", "GenTreatment", "AgeGroup"))
+```
+
+#### Excluding marked cells
+```{r}
+KNDy_summary_byGroup("SpontAvgFiring", KNDy_firing %>% excludeFunc(), c("Who", "GenTreatment", "AgeGroup"))
+```
 #### ANOVA
-This is comparing only the juveniles by treatment group and slicing experimenter
+This is comparing only the juveniles by treatment group and slicing experimenter. This excludes marked cells
 ```{r}
 KNDyDATA_juv_treatWho_contrasts <- makeTreatandWhoContrasts(KNDyDATA_juv)
 SpontAvgFiring_treatWho_model <- lm_byTreatxWho(expr(SpontAvgFiring), KNDyDATA_juv_treatWho_contrasts)
@@ -660,11 +690,11 @@ SpontAvgFiring_treatWho_model
 ```
 
 #### ANOVA
-This is comparing only the juveniles by treatment group and recording experimenter
+This is comparing only the juveniles by treatment group and recording experimenter. This excludes marked cells
 ```{r}
 KNDyDATA_juv_treatWhoRecorded_contrasts <- makeTreatandWhoRecordedContrasts(KNDyDATA_juv)
-SpontAvgFiring_treatWhoRecorded_model <- lm_byTreatxWho(expr(SpontAvgFiring), KNDyDATA_juv_treatWhoRecorded_contrasts)
-SpontAvgFiring_treatWhoRecorded_model <- makeANOVA_TreatWho(SpontAvgFiring_treatWhoRecorded_model) %>%
+SpontAvgFiring_treatWhoRecorded_model <- lm_byTreatxWhoRecorded(expr(SpontAvgFiring), KNDyDATA_juv_treatWhoRecorded_contrasts)
+SpontAvgFiring_treatWhoRecorded_model <- makeANOVA_TreatWhoRecorded(SpontAvgFiring_treatWhoRecorded_model) %>%
   kable_styling(
     font_size = 18,
     bootstrap_options = c("striped"), full_width = TRUE
@@ -716,6 +746,7 @@ The average firing rate from mice that Amanda sliced and recorded is `r round(av
 The average firing rate from mice that Jenn sliced and Amanda recorded is `r round(avgFiringRate_JennSlicedAmandaRecorded, 2)`Hz.
 
 ### Jenn vs. Amanda
+This removed marked cells for exclusion
 ```{r}
 
 df <- excludeFunc(KNDy_firing_juv)
@@ -746,6 +777,7 @@ my_KNDy_plot(
 ```
 
 ### Recordings from Mice Jenn Sliced by Treatment Group and Age
+Removes cells marked for exclusion
 ```{r}
 KNDy_summary_byGroup("SpontAvgFiring", KNDy_firing %>% filter(Who == "Jenn"), c("GenTreatment", "AgeGroup"))
 ```
@@ -809,8 +841,23 @@ SpontAvgFiring_AGG_table <- makeANOVA_TreatAge(SpontAvgFiring_AGG_model) %>%
 
 SpontAvgFiring_AGG_table
 ```
+This is the ANOVA of treatment by age for just the cells that Amanda recorded. This excludes marked cells
+```{r}
+#inspiration here: http://www.understandingdata.net/2017/05/11/anova-tables-in-r/
+KNDyDATA_AGGRecorded_contrasts <- makeTreatandAgeContrasts(KNDyDATA %>% filter(WhoRecorded == "Amanda"))
 
+SpontAvgFiring_AGGRecorded_model <- lm_byTreatxAge(expr(SpontAvgFiring), KNDyDATA_AGGRecorded_contrasts)
+
+SpontAvgFiring_AGGRecorded_table <- makeANOVA_TreatAge(SpontAvgFiring_AGGRecorded_model) %>%
+  kable_styling(
+    font_size = 18,
+    bootstrap_options = c("striped"), full_width = TRUE
+  )
+
+SpontAvgFiring_AGGRecorded_table
+```
 #### Firing Rate Graph - Amanda's Recordings
+Amanda recorded _and_ sliced
 ```{r}
 #Determine which df you want you use 
 df = excludeFunc(KNDy_firing %>% filter(Who == "Amanda" & WhoRecorded == "Amanda")) #exclude
@@ -840,7 +887,36 @@ my_KNDy_plot(
   figHeight = 4
 )
 ```
+Amanda recorded
+```{r}
+#Determine which df you want you use 
+df = excludeFunc(KNDy_firing %>% filter(WhoRecorded == "Amanda")) #exclude
+#df = KNDy_firing #include all
 
+my_KNDy_plot(
+  data = df, #data frame
+  var_to_plot = SpontAvgFiring, #which variable to plot
+  dotsize = 4, 
+  binwidth = 0.03,
+  positionWidth = 1, #dodge position
+  group = AgeGroup, #Default separate by AgeGroup
+  treatment = GenTreatment, #which treatment variable to use. Default to general treatment (PNA/Control)
+  ytitle = NULL, #y axis label
+  title = NULL, #title
+  expand_to_zero = TRUE, #expand axis to 0 
+  save = save, #Save file
+  add_to_save_name = NULL, #append something additional to file name
+  dot_plot = TRUE, #use the dot_plot layer
+  violin_plot = FALSE, #add the violin plot layer
+  toPPT = toPPT, #add to a powerpoint
+  ppt = ppt, #powerpoint object to add to
+  zoom_y = FALSE,
+  ylimit = NULL,
+  img_type = imgTypePlots,
+  figWidth = 10,
+  figHeight = 4
+)
+```
 # Burst Window
 This graph plots the number of bursts that occur at each burst window when averaged across all cells in a group. This means that it is more influenced by high-bursting cells than the alternative, which is to average the burst window at which the maximum number of bursts occurs for each cell.
 ```{r}
