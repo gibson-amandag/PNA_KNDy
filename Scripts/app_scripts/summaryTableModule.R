@@ -96,7 +96,13 @@ summaryTableUI <- function(
       selected = "SpontAvgFiring"
     ),
     
-    htmlOutput(ns("ANOVA_table"))
+    htmlOutput(ns("ANOVA_table")),
+    
+    h4("By Who Recorded"),
+    htmlOutput(ns("ANOVA_table_whoRecorded")),
+    
+    h4("By Who Sliced"),
+    htmlOutput(ns("ANOVA_table_who"))
     
   )
 }
@@ -151,11 +157,59 @@ summaryTableServer <- function(
       })
       
       output$ANOVA_table <- renderText({
+        # The makeTreatandAgeContrasts function excludes cells
         KNDyDATA_contrasts <- makeTreatandAgeContrasts(KNDyDATA)
         
         Model <- lm_byTreatxAge(input$ANOVA_var, KNDyDATA_contrasts)
         
         ANOVA_table <- makeANOVA_TreatAge(Model)
+        ANOVA_table %>%
+          kable_styling(
+            font_size = 18,
+            bootstrap_options = c("striped"), full_width = TRUE
+          )
+      })
+      
+      output$ANOVA_table_whoRecorded <- renderText({
+        
+        data <- switch(
+          input$dataset3,
+          "All" = KNDyDATA,
+          "Adults" = KNDyDATA_adult,
+          "Juveniles" = KNDyDATA_juv
+          
+        )
+        
+        # The makeTreatandAgeContrasts function excludes cells
+        KNDyDATA_contrasts <- makeTreatandWhoRecordedContrasts(data)
+        
+        Model <- lm_byTreatxWhoRecorded(input$ANOVA_var, KNDyDATA_contrasts)
+        
+        ANOVA_table <- makeANOVA_TreatWhoRecorded(Model)
+        ANOVA_table %>%
+          kable_styling(
+            font_size = 18,
+            bootstrap_options = c("striped"), full_width = TRUE
+          )
+      })
+      
+      output$ANOVA_table_who <- renderText({
+        
+        
+        data <- switch(
+          input$dataset3,
+          "All" = KNDyDATA,
+          "Adults" = KNDyDATA_adult,
+          "Juveniles" = KNDyDATA_juv
+          
+        )
+        
+        # The makeTreatandAgeContrasts function excludes cells
+        KNDyDATA_contrasts <- makeTreatandWhoContrasts(data)
+        
+        Model <- lm_byTreatxWho(input$ANOVA_var, KNDyDATA_contrasts)
+        
+        ANOVA_table <- makeANOVA_TreatWho(Model)
         ANOVA_table %>%
           kable_styling(
             font_size = 18,
