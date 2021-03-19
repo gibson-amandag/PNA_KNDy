@@ -31,6 +31,8 @@ KNDy_cells <- allDFs$KNDy_cells
 KNDy_firingRate <- allDFs$KNDy_firingRate
 VBW_BurstsPerHour <- allDFs$VBW_BurstsPerHour
 VBW_BurstsPerHour_hour1 <- allDFs$VBW_BurstsPerHour_hour1
+
+KNDy_firingRate
 ```
 
 ```{r KNDy_VarNames}
@@ -317,13 +319,16 @@ bold_font <- update(normal_font, font.size = 20)
 bold_red_font <- update(bold_font, color = "red")
 ```
 
-```{r}
+```{r prepDFsForPPT}
 toPPT = TRUE
 
 #Make a list of the adult control cell ids
 adultConCellIDs <- KNDyDATA %>%
   filter(AgeGroup == "Adult" & GenTreatment == "Control") %>%
-  select(CellID, Flagged)
+  select(CellID, StatusComments, GenTreatment, AgeGroup)
+
+# Reorder by cellID
+adultConCellIDs <- adultConCellIDs[order(adultConCellIDs$CellID),]
 
 #Get the number of adult control cells (disregards marks for exclusion)
 numAdultConCells <- length(adultConCellIDs$CellID)
@@ -331,7 +336,10 @@ numAdultConCells <- length(adultConCellIDs$CellID)
 #Make a list of the adult PNA cell ids
 adultPNACellIDs <- KNDyDATA %>%
   filter(AgeGroup == "Adult" & GenTreatment == "PNA") %>%
-  select(CellID, Flagged)
+  select(CellID, StatusComments, GenTreatment, AgeGroup)
+
+# Reorder by cellID
+adultPNACellIDs <- adultPNACellIDs[order(adultPNACellIDs$CellID),]
 
 #Get the number of adult PNA cells (disregards marks for exclusion)
 numAdultPNACells <- length(adultPNACellIDs$CellID)
@@ -339,7 +347,10 @@ numAdultPNACells <- length(adultPNACellIDs$CellID)
 #Make a list of the juvenile control cell ids
 juvConCellIDs <- KNDyDATA %>%
   filter(AgeGroup == "Juvenile" & GenTreatment == "Control") %>%
-  select(CellID, Flagged)
+  select(CellID, StatusComments, GenTreatment, AgeGroup)
+
+# Reorder by cellID
+juvConCellIDs <- juvConCellIDs[order(juvConCellIDs$CellID),]
 
 #Get the number of juvenile control cells (disregards marks for exclusion)
 numJuvConCells <- length(juvConCellIDs$CellID)
@@ -347,7 +358,10 @@ numJuvConCells <- length(juvConCellIDs$CellID)
 #Make a list of the juvenile PNA cell ids
 juvPNACellIDs <- KNDyDATA %>%
   filter(AgeGroup == "Juvenile" & GenTreatment == "PNA") %>%
-  select(CellID, Flagged)
+  select(CellID, StatusComments, GenTreatment, AgeGroup)
+
+# Reorder by cellID
+juvPNACellIDs <- juvPNACellIDs[order(juvPNACellIDs$CellID),]
 
 #Get the number of juvenile PNA cells (disregards marks for exclusion)
 numJuvPNACells <- length(juvPNACellIDs$CellID)
@@ -396,52 +410,73 @@ KNDy_PPT_20Hz <- ph_with(
 
 ```{r Adult-Con-Individual}
 
+# pwalk(
+#   list(
+#     cellID = adultConCellIDs$CellID,
+#     flagText = adultConCellIDs$StatusComments
+#   ),
+#   firingRatePlot_SingleCellFunc, 
+#   # cellID = cellID - completed by pwalk
+#   df = KNDy_firingRate_long, 
+#   zoom_x = TRUE,
+#   xmin = 0,
+#   xmax = 180,
+#   zoom_y = TRUE,
+#   ymin = 0,
+#   ymax = 1,
+#   save = FALSE, #savePlots,
+#   zoomInfo = "_1Hz",
+#   toPPT = toPPT,
+#   ppt = KNDy_PPT_1Hz,
+#   img_type = imgTypePlots,
+#   excludeLineType = FALSE,
+#   addFlag = TRUE,
+#   # flagText = flagText - completed by pwalk
+#   )
+# 
+# pwalk(
+#   list(
+#     cellID = adultConCellIDs$CellID,
+#     flagText = adultConCellIDs$StatusComments
+#   ),
+#   firingRatePlot_SingleCellFunc, 
+#   # cellID = cellID - completed by pwalk
+#   df = KNDy_firingRate_long, 
+#   zoom_x = TRUE,
+#   xmin = 0,
+#   xmax = 180,
+#   zoom_y = TRUE,
+#   ymin = 0,
+#   ymax = 20,
+#   save = FALSE, #savePlots,
+#   zoomInfo = "_20Hz",
+#   toPPT = toPPT,
+#   ppt = KNDy_PPT_20Hz,
+#   img_type = imgTypePlots,
+#   excludeLineType = FALSE,
+#   addFlag = TRUE,
+#   # flagText = flagText - completed by pwalk
+#   )
+
 pwalk(
   list(
     cellID = adultConCellIDs$CellID,
-    flagText = adultConCellIDs$Flagged
+    flagText = adultConCellIDs$StatusComments,
+    genTreatment = adultConCellIDs$GenTreatment,
+    ageGroup = adultConCellIDs$AgeGroup
   ),
-  firingRatePlot_SingleCellFunc, 
+  firingRatePlot_SingleCellFunc_1_20, 
   # cellID = cellID - completed by pwalk
   df = KNDy_firingRate_long, 
-  zoom_x = TRUE,
-  xmin = 0,
-  xmax = 180,
-  zoom_y = TRUE,
-  ymin = 0,
-  ymax = 1,
   save = FALSE, #savePlots,
-  zoomInfo = "_1Hz",
   toPPT = toPPT,
   ppt = KNDy_PPT_1Hz,
   img_type = imgTypePlots,
   excludeLineType = FALSE,
   addFlag = TRUE,
   # flagText = flagText - completed by pwalk
-  )
-
-pwalk(
-  list(
-    cellID = adultConCellIDs$CellID,
-    flagText = adultConCellIDs$Flagged
-  ),
-  firingRatePlot_SingleCellFunc, 
-  # cellID = cellID - completed by pwalk
-  df = KNDy_firingRate_long, 
-  zoom_x = TRUE,
-  xmin = 0,
-  xmax = 180,
-  zoom_y = TRUE,
-  ymin = 0,
-  ymax = 20,
-  save = FALSE, #savePlots,
-  zoomInfo = "_20Hz",
-  toPPT = toPPT,
-  ppt = KNDy_PPT_20Hz,
-  img_type = imgTypePlots,
-  excludeLineType = FALSE,
-  addFlag = TRUE,
-  # flagText = flagText - completed by pwalk
+  # genTreatment - by pwalk
+  # ageGroup - by pwalk
   )
 ```
 
@@ -486,52 +521,73 @@ KNDy_PPT_20Hz <- ph_with(
 ```
 
 ```{r Adult-PNA-Individual}
+# pwalk(
+#   list(
+#     cellID = adultPNACellIDs$CellID,
+#     flagText = adultPNACellIDs$StatusComments
+#   ),
+#   firingRatePlot_SingleCellFunc, 
+#   # cellID = cellID - completed by pwalk
+#   df = KNDy_firingRate_long, 
+#   zoom_x = TRUE,
+#   xmin = 0,
+#   xmax = 180,
+#   zoom_y = TRUE,
+#   ymin = 0,
+#   ymax = 1,
+#   save = FALSE, #savePlots,
+#   zoomInfo = "_1Hz",
+#   toPPT = toPPT,
+#   ppt = KNDy_PPT_1Hz,
+#   img_type = imgTypePlots,
+#   excludeLineType = FALSE,
+#   addFlag = TRUE,
+#   # flagText = flagText - completed by pwalk
+#   )
+# 
+# pwalk(
+#   list(
+#     cellID = adultPNACellIDs$CellID,
+#     flagText = adultPNACellIDs$StatusComments
+#   ),
+#   firingRatePlot_SingleCellFunc, 
+#   # cellID = cellID - completed by pwalk
+#   df = KNDy_firingRate_long, 
+#   zoom_x = TRUE,
+#   xmin = 0,
+#   xmax = 180,
+#   zoom_y = TRUE,
+#   ymin = 0,
+#   ymax = 20,
+#   save = FALSE, #savePlots,
+#   zoomInfo = "_20Hz",
+#   toPPT = toPPT,
+#   ppt = KNDy_PPT_20Hz,
+#   img_type = imgTypePlots,
+#   excludeLineType = FALSE,
+#   addFlag = TRUE,
+#   # flagText = flagText - completed by pwalk
+#   )
+
 pwalk(
   list(
     cellID = adultPNACellIDs$CellID,
-    flagText = adultPNACellIDs$Flagged
+    flagText = adultPNACellIDs$StatusComments,
+    genTreatment = adultPNACellIDs$GenTreatment,
+    ageGroup = adultPNACellIDs$AgeGroup
   ),
-  firingRatePlot_SingleCellFunc, 
+  firingRatePlot_SingleCellFunc_1_20, 
   # cellID = cellID - completed by pwalk
   df = KNDy_firingRate_long, 
-  zoom_x = TRUE,
-  xmin = 0,
-  xmax = 180,
-  zoom_y = TRUE,
-  ymin = 0,
-  ymax = 1,
   save = FALSE, #savePlots,
-  zoomInfo = "_1Hz",
   toPPT = toPPT,
   ppt = KNDy_PPT_1Hz,
   img_type = imgTypePlots,
   excludeLineType = FALSE,
   addFlag = TRUE,
   # flagText = flagText - completed by pwalk
-  )
-
-pwalk(
-  list(
-    cellID = adultPNACellIDs$CellID,
-    flagText = adultPNACellIDs$Flagged
-  ),
-  firingRatePlot_SingleCellFunc, 
-  # cellID = cellID - completed by pwalk
-  df = KNDy_firingRate_long, 
-  zoom_x = TRUE,
-  xmin = 0,
-  xmax = 180,
-  zoom_y = TRUE,
-  ymin = 0,
-  ymax = 20,
-  save = FALSE, #savePlots,
-  zoomInfo = "_20Hz",
-  toPPT = toPPT,
-  ppt = KNDy_PPT_20Hz,
-  img_type = imgTypePlots,
-  excludeLineType = FALSE,
-  addFlag = TRUE,
-  # flagText = flagText - completed by pwalk
+  # genTreatment - by pwalk
+  # ageGroup - by pwalk
   )
 ```
 
@@ -579,52 +635,73 @@ KNDy_PPT_20Hz <- ph_with(
 ```
 
 ```{r Juv-Con-Individual}
+# pwalk(
+#   list(
+#     cellID = juvConCellIDs$CellID,
+#     flagText = juvConCellIDs$StatusComments
+#   ),
+#   firingRatePlot_SingleCellFunc, 
+#   # cellID = cellID - completed by pwalk
+#   df = KNDy_firingRate_long, 
+#   zoom_x = TRUE,
+#   xmin = 0,
+#   xmax = 180,
+#   zoom_y = TRUE,
+#   ymin = 0,
+#   ymax = 1,
+#   save = FALSE, #savePlots,
+#   zoomInfo = "_1Hz",
+#   toPPT = toPPT,
+#   ppt = KNDy_PPT_1Hz,
+#   img_type = imgTypePlots,
+#   excludeLineType = FALSE,
+#   addFlag = TRUE,
+#   # flagText = flagText - completed by pwalk
+#   )
+# 
+# pwalk(
+#   list(
+#     cellID = juvConCellIDs$CellID,
+#     flagText = juvConCellIDs$StatusComments
+#   ),
+#   firingRatePlot_SingleCellFunc, 
+#   # cellID = cellID - completed by pwalk
+#   df = KNDy_firingRate_long, 
+#   zoom_x = TRUE,
+#   xmin = 0,
+#   xmax = 180,
+#   zoom_y = TRUE,
+#   ymin = 0,
+#   ymax = 20,
+#   save = FALSE, #savePlots,
+#   zoomInfo = "_20Hz",
+#   toPPT = toPPT,
+#   ppt = KNDy_PPT_20Hz,
+#   img_type = imgTypePlots,
+#   excludeLineType = FALSE,
+#   addFlag = TRUE,
+#   # flagText = flagText - completed by pwalk
+#   )
+
 pwalk(
   list(
     cellID = juvConCellIDs$CellID,
-    flagText = juvConCellIDs$Flagged
+    flagText = juvConCellIDs$StatusComments,
+    genTreatment = juvConCellIDs$GenTreatment,
+    ageGroup = juvConCellIDs$AgeGroup
   ),
-  firingRatePlot_SingleCellFunc, 
+  firingRatePlot_SingleCellFunc_1_20, 
   # cellID = cellID - completed by pwalk
   df = KNDy_firingRate_long, 
-  zoom_x = TRUE,
-  xmin = 0,
-  xmax = 180,
-  zoom_y = TRUE,
-  ymin = 0,
-  ymax = 1,
   save = FALSE, #savePlots,
-  zoomInfo = "_1Hz",
   toPPT = toPPT,
   ppt = KNDy_PPT_1Hz,
   img_type = imgTypePlots,
   excludeLineType = FALSE,
   addFlag = TRUE,
   # flagText = flagText - completed by pwalk
-  )
-
-pwalk(
-  list(
-    cellID = juvConCellIDs$CellID,
-    flagText = juvConCellIDs$Flagged
-  ),
-  firingRatePlot_SingleCellFunc, 
-  # cellID = cellID - completed by pwalk
-  df = KNDy_firingRate_long, 
-  zoom_x = TRUE,
-  xmin = 0,
-  xmax = 180,
-  zoom_y = TRUE,
-  ymin = 0,
-  ymax = 20,
-  save = FALSE, #savePlots,
-  zoomInfo = "_20Hz",
-  toPPT = toPPT,
-  ppt = KNDy_PPT_20Hz,
-  img_type = imgTypePlots,
-  excludeLineType = FALSE,
-  addFlag = TRUE,
-  # flagText = flagText - completed by pwalk
+  # genTreatment - by pwalk
+  # ageGroup - by pwalk
   )
 ```
 
@@ -674,60 +751,500 @@ KNDy_PPT_20Hz <- ph_with(
 ```
 
 ```{r Juv-PNA-Individual}
+
+# pwalk(
+#   list(
+#     cellID = juvPNACellIDs$CellID,
+#     flagText = juvPNACellIDs$StatusComments
+#   ),
+#   firingRatePlot_SingleCellFunc, 
+#   # cellID = cellID - completed by pwalk
+#   df = KNDy_firingRate_long, 
+#   zoom_x = TRUE,
+#   xmin = 0,
+#   xmax = 180,
+#   zoom_y = TRUE,
+#   ymin = 0,
+#   ymax = 1,
+#   save = FALSE, #savePlots,
+#   zoomInfo = "_1Hz",
+#   toPPT = toPPT,
+#   ppt = KNDy_PPT_1Hz,
+#   img_type = imgTypePlots,
+#   excludeLineType = FALSE,
+#   addFlag = TRUE,
+#   # flagText = flagText - completed by pwalk
+#   )
+# 
+# pwalk(
+#   list(
+#     cellID = juvPNACellIDs$CellID,
+#     flagText = juvPNACellIDs$StatusComments
+#   ),
+#   firingRatePlot_SingleCellFunc, 
+#   # cellID = cellID - completed by pwalk
+#   df = KNDy_firingRate_long, 
+#   zoom_x = TRUE,
+#   xmin = 0,
+#   xmax = 180,
+#   zoom_y = TRUE,
+#   ymin = 0,
+#   ymax = 20,
+#   save = FALSE, #savePlots,
+#   zoomInfo = "_20Hz",
+#   toPPT = toPPT,
+#   ppt = KNDy_PPT_20Hz,
+#   img_type = imgTypePlots,
+#   excludeLineType = FALSE,
+#   addFlag = TRUE,
+#   # flagText = flagText - completed by pwalk
+#   )
+
 pwalk(
   list(
     cellID = juvPNACellIDs$CellID,
-    flagText = juvPNACellIDs$Flagged
+    flagText = juvPNACellIDs$StatusComments,
+    genTreatment = juvPNACellIDs$GenTreatment,
+    ageGroup = juvPNACellIDs$AgeGroup
   ),
-  firingRatePlot_SingleCellFunc, 
+  firingRatePlot_SingleCellFunc_1_20, 
   # cellID = cellID - completed by pwalk
   df = KNDy_firingRate_long, 
-  zoom_x = TRUE,
-  xmin = 0,
-  xmax = 180,
-  zoom_y = TRUE,
-  ymin = 0,
-  ymax = 1,
   save = FALSE, #savePlots,
-  zoomInfo = "_1Hz",
   toPPT = toPPT,
   ppt = KNDy_PPT_1Hz,
   img_type = imgTypePlots,
   excludeLineType = FALSE,
   addFlag = TRUE,
   # flagText = flagText - completed by pwalk
-  )
-
-pwalk(
-  list(
-    cellID = juvPNACellIDs$CellID,
-    flagText = juvPNACellIDs$Flagged
-  ),
-  firingRatePlot_SingleCellFunc, 
-  # cellID = cellID - completed by pwalk
-  df = KNDy_firingRate_long, 
-  zoom_x = TRUE,
-  xmin = 0,
-  xmax = 180,
-  zoom_y = TRUE,
-  ymin = 0,
-  ymax = 20,
-  save = FALSE, #savePlots,
-  zoomInfo = "_20Hz",
-  toPPT = toPPT,
-  ppt = KNDy_PPT_20Hz,
-  img_type = imgTypePlots,
-  excludeLineType = FALSE,
-  addFlag = TRUE,
-  # flagText = flagText - completed by pwalk
+  # genTreatment - by pwalk
+  # ageGroup - by pwalk
   )
 ```
 
 ```{r Save-Powerpoints}
 #save the powerpoints
-print(KNDy_PPT_1Hz, target = file.path(DataOutputFolder, "KNDy Firing Rate 1 Hz Graphs.pptx"))
-print(KNDy_PPT_20Hz, target = file.path(DataOutputFolder, "KNDy Firing Rate 20 Hz Graphs.pptx"))
+print(KNDy_PPT_1Hz, target = file.path(DataOutputFolder, "KNDyFiringByGroup - 17 Mar 2021.pptx"))
+# print(KNDy_PPT_20Hz, target = file.path(DataOutputFolder, "KNDy Firing Rate 20 Hz Graphs.pptx"))
 # print(byFiring_PPT, target = file.path(DataOutputFolder, "By Firing Rate.pptx"))
 # print(byRecStart_PPT, target = file.path(DataOutputFolder, "By Recording Start.pptx"))
 
 ```
+
+
+```{r ppt-setUp-2}
+#create a new powerpoint
+KNDy_PPT_firing = read_pptx()
+
+#add a new title slide
+KNDy_PPT_firing = add_slide(KNDy_PPT_firing, layout = "Title Slide", master = "Office Theme")
+
+#Write "KNDy - PNA DATA" in the title slot
+KNDy_PPT_firing = ph_with(KNDy_PPT_firing, value = "KNDy - PNA Firing Rate", location = ph_location_label(ph_label = "Title 1"))
+
+#view the possible layout properties 
+# layout_properties(x = KNDy_PPT, layout = "Title Slide")
+
+normal_font <- fp_text(font.size = 20)
+bold_font <- update(normal_font, font.size = 20)
+bold_red_font <- update(bold_font, color = "red")
+```
+
+```{r}
+toPPT = TRUE
+
+#Make a list of the excluded cell ids
+excludedCellIDs <- KNDyDATA %>%
+  filter(Status == "Excluded") %>%
+  select(CellID, StatusComments, GenTreatment, AgeGroup)
+  
+# Reorder by cellID
+excludedCellIDs <- excludedCellIDs[order(excludedCellIDs$CellID),]
+
+#Get the number of excluded cells
+numExcludedCells <- length(excludedCellIDs$CellID)
+
+#Make a list of the included (not truncated) cell ids
+includedCellIDs <- KNDyDATA %>%
+  filter(Status == "Included") %>%
+  select(CellID, StatusComments, GenTreatment, AgeGroup)
+includedCellIDs <- includedCellIDs[order(includedCellIDs$CellID),]
+
+#Get the number of included cells
+numIncludedCells <- length(includedCellIDs$CellID)
+
+#Make a list of the truncated cell ids
+truncatedCellIDs <- KNDyDATA %>%
+  filter(Status == "Truncated") %>%
+  select(CellID, StatusComments, GenTreatment, AgeGroup)
+truncatedCellIDs <- truncatedCellIDs[order(truncatedCellIDs$CellID),]
+
+#Get the number of truncated cells 
+numTruncatedCells <- length(truncatedCellIDs$CellID)
+
+#Make a list of the unresolved cell ids
+unresolvedCellIDs <- KNDyDATA %>%
+  filter(Status == "Unresolved") %>%
+  select(CellID, StatusComments, GenTreatment, AgeGroup)
+unresolvedCellIDs <- unresolvedCellIDs[order(unresolvedCellIDs$CellID),]
+
+#Get the number of unresolved cells (disregards marks for exclusion)
+numUnresolvedCells <- length(unresolvedCellIDs$CellID)
+
+```
+
+```{r Excluded-Individual-Slides}
+KNDy_PPT_firing <- add_slide(KNDy_PPT_firing, layout = "Section Header")
+KNDy_PPT_firing = ph_with(KNDy_PPT_firing, value = "Excluded Cells", location = ph_location_label(ph_label = "Title 1"))
+KNDy_PPT_firing <- add_slide(KNDy_PPT_firing, layout = "Title and Content")
+KNDy_PPT_firing <- ph_with(KNDy_PPT_firing, value = "Excluded Cells", location = ph_location_type(type = "title"))
+KNDy_PPT_firing <- ph_with(
+  KNDy_PPT_firing, 
+  value = block_list(
+    fpar(
+      ftext("There are ", prop = normal_font),
+      ftext(numExcludedCells, prop = normal_font),
+      ftext(" excluded cells", prop = normal_font)
+    )
+  ),
+  location = ph_location_type(type = "body")
+  ) 
+
+
+```
+
+```{r Excluded-Individual}
+pwalk(
+  list(
+    cellID = excludedCellIDs$CellID,
+    flagText = excludedCellIDs$StatusComments,
+    genTreatment = excludedCellIDs$GenTreatment,
+    ageGroup = excludedCellIDs$AgeGroup
+  ),
+  firingRatePlot_SingleCellFunc_1_20, 
+  # cellID = cellID - completed by pwalk
+  df = KNDy_firingRate_long, 
+  save = FALSE, #savePlots,
+  toPPT = toPPT,
+  ppt = KNDy_PPT_firing,
+  img_type = imgTypePlots,
+  excludeLineType = FALSE,
+  addFlag = TRUE,
+  # flagText = flagText - completed by pwalk
+  # genTreatment - by pwalk
+  # ageGroup - by pwalk
+  )
+```
+
+```{r Included-Individual-Slides}
+KNDy_PPT_firing <- add_slide(KNDy_PPT_firing, layout = "Section Header")
+KNDy_PPT_firing = ph_with(KNDy_PPT_firing, value = "Included as-is Cells", location = ph_location_label(ph_label = "Title 1"))
+KNDy_PPT_firing <- add_slide(KNDy_PPT_firing, layout = "Title and Content")
+KNDy_PPT_firing <- ph_with(KNDy_PPT_firing, value = "Included as-is Cells", location = ph_location_type(type = "title"))
+KNDy_PPT_firing <- ph_with(
+  KNDy_PPT_firing, 
+  value = block_list(
+    fpar(
+      ftext("There are ", prop = normal_font),
+      ftext(numIncludedCells, prop = normal_font),
+      ftext(" included as-is cells", prop = normal_font)
+      )
+  ),
+  location = ph_location_type(type = "body")
+  ) 
+
+```
+
+```{r Included-Individual}
+pwalk(
+  list(
+    cellID = includedCellIDs$CellID,
+    flagText = includedCellIDs$StatusComments,
+    genTreatment = includedCellIDs$GenTreatment,
+    ageGroup = includedCellIDs$AgeGroup
+  ),
+  firingRatePlot_SingleCellFunc_1_20, 
+  # cellID = cellID - completed by pwalk
+  df = KNDy_firingRate_long, 
+  save = FALSE, #savePlots,
+  toPPT = toPPT,
+  ppt = KNDy_PPT_firing,
+  img_type = imgTypePlots,
+  excludeLineType = FALSE,
+  addFlag = TRUE,
+  # flagText = flagText - completed by pwalk
+  # genTreatment - by pwalk
+  # ageGroup - by pwalk
+  )
+```
+
+```{r Truncated-Individual-Slides}
+KNDy_PPT_firing <- add_slide(KNDy_PPT_firing, layout = "Section Header")
+KNDy_PPT_firing = ph_with(KNDy_PPT_firing, value = "Truncated Cells", location = ph_location_label(ph_label = "Title 1"))
+KNDy_PPT_firing <- add_slide(KNDy_PPT_firing, layout = "Title and Content")
+KNDy_PPT_firing <- ph_with(KNDy_PPT_firing, value = "Truncated", location = ph_location_type(type = "title"))
+truncatedInfoText <- block_list(
+    fpar(
+      ftext("There are ", prop = normal_font),
+      ftext(numTruncatedCells, prop = normal_font),
+      ftext(" truncated cells", prop = normal_font)
+      )
+  )
+KNDy_PPT_firing <- ph_with(
+  KNDy_PPT_firing, 
+  value = truncatedInfoText,
+  location = ph_location_type(type = "body")
+  ) 
+
+```
+
+```{r Truncated-Individual}
+pwalk(
+  list(
+    cellID = truncatedCellIDs$CellID,
+    flagText = truncatedCellIDs$StatusComments,
+    genTreatment = truncatedCellIDs$GenTreatment,
+    ageGroup = truncatedCellIDs$AgeGroup
+  ),
+  firingRatePlot_SingleCellFunc_1_20, 
+  # cellID = cellID - completed by pwalk
+  df = KNDy_firingRate_long, 
+  save = FALSE, #savePlots,
+  toPPT = toPPT,
+  ppt = KNDy_PPT_firing,
+  img_type = imgTypePlots,
+  excludeLineType = FALSE,
+  addFlag = TRUE,
+  # flagText = flagText - completed by pwalk
+  # genTreatment - by pwalk
+  # ageGroup - by pwalk
+  )
+```
+
+```{r Unresolved-Individual-Slides}
+KNDy_PPT_firing <- add_slide(KNDy_PPT_firing, layout = "Section Header")
+KNDy_PPT_firing = ph_with(KNDy_PPT_firing, value = "Unresolved Cells", location = ph_location_label(ph_label = "Title 1"))
+KNDy_PPT_firing <- add_slide(KNDy_PPT_firing, layout = "Title and Content")
+KNDy_PPT_firing <- ph_with(KNDy_PPT_firing, value = "Unresolved Cells", location = ph_location_type(type = "title"))
+
+unresolvedInfoText <- block_list(
+    fpar(
+      ftext("There are ", prop = normal_font),
+      ftext(numUnresolvedCells, prop = normal_font),
+      ftext(" unresolved cells", prop = normal_font)
+      )
+  )
+
+KNDy_PPT_firing <- ph_with(
+  KNDy_PPT_firing, 
+  value = unresolvedInfoText,
+  location = ph_location_type(type = "body")
+  ) 
+
+```
+
+```{r Unresolved-Individual}
+pwalk(
+  list(
+    cellID = unresolvedCellIDs$CellID,
+    flagText = unresolvedCellIDs$StatusComments,
+    genTreatment = unresolvedCellIDs$GenTreatment,
+    ageGroup = unresolvedCellIDs$AgeGroup
+  ),
+  firingRatePlot_SingleCellFunc_1_20, 
+  # cellID = cellID - completed by pwalk
+  df = KNDy_firingRate_long, 
+  save = FALSE, #savePlots,
+  toPPT = toPPT,
+  ppt = KNDy_PPT_firing,
+  img_type = imgTypePlots,
+  excludeLineType = FALSE,
+  addFlag = TRUE,
+  # flagText = flagText - completed by pwalk
+  # genTreatment - by pwalk
+  # ageGroup - by pwalk
+  )
+```
+
+```{r Save-Powerpoints-2}
+#save the powerpoints
+print(KNDy_PPT_firing, target = file.path(DataOutputFolder, "KNDy Firing Rate Graphs - 17 Mar 2021.pptx"))
+
+```
+
+```{r uterine-mass}
+KNDy_mouse_demo %>%
+  filter(Age_in_days > 23) %>%
+  filter(!is.na(UterineMass)) %>%
+  my_KNDy_plot_fill(
+    var_to_plot = UterineMass,
+    dotsize = 1, 
+    binwidth = 5,
+    positionWidth = 1, #dodge position
+    usefill = TRUE, #separate by another variable in addition to treatment
+    fill = GenTreatment,
+    treatment = GenTreatment, #which treatment variable to use. Default to general treatment (PNA/Control)
+    ytitle = KNDy_VarNames$UterineMass, #y axis label
+    title = NULL, #title
+    expand_to_zero = TRUE, #expand axis to 0 
+    save = TRUE, #Save png
+    add_to_save_name = NULL, #append something additional to file name
+    dot_plot = TRUE, #use the dot_plot layer
+    violin_plot = TRUE, #add the violin plot layer
+    toPPT = FALSE, #add to a powerpoint
+    ppt = NULL, #powerpoint object to add to
+    zoom_y = FALSE,
+    ylimit = NULL,
+    img_type = ".png",
+    figWidth = 10,
+    figHeight = NA
+  )
+
+```
+```{r}
+
+firingCount <- KNDyDATA %>%
+  select(CellID, Who, WhoRecorded, GenTreatment, AgeGroup, FiringRate_0_20min) %>%
+  mutate(
+    first20Less0.2 = ifelse(FiringRate_0_20min < 0.2, TRUE, FALSE)
+  ) %>%
+  group_by(
+    AgeGroup, GenTreatment, WhoRecorded
+  ) %>%
+  summarise(
+    numCells = n(),
+    numLess0.2 = sum(first20Less0.2, na.rm = TRUE),
+    numGreater0.2 = sum(!first20Less0.2, na.rm = TRUE)
+  ) %>% mutate(
+    propLess = numLess0.2 / numCells
+  )
+
+firingCount
+```
+
+```{r}
+my_cumulative_freq_geoms <- function(
+  xtitle,
+  addTitle = TRUE,
+  title = NULL,
+  change_xmax = FALSE,
+  xmax = NA,
+  xmin = 0
+){
+  list(
+    stat_ecdf(size = 1),
+    labs(
+      x = xtitle,
+      y = "Cumulative Frequency",
+      title = if(addTitle){title}else{NULL}
+    ),
+    coord_cartesian(
+      xlim = c(
+        xmin,
+        if(change_xmax){xmax}else{NA}
+      )
+    ),
+    my_theme,
+    theme(legend.box = "vertical")
+  )
+}
+
+my_cumulative_freq_plot <- function(
+  df,
+  color_var = expr(WhoRecorded),
+  linetype_var = expr(GenTreatment),
+  var_to_plot, #as expr()
+  xtitle, #string
+  addTitle = TRUE,
+  title = NULL,
+  change_xmax = FALSE,
+  xmax = NA,
+  xmin = 0
+){
+  df %>%
+    filter(!is.na(!! var_to_plot)) %>%
+    ggplot(
+      aes(
+        !! var_to_plot,
+        color = !! color_var,
+        linetype = !! linetype_var
+      )
+    ) +
+    my_cumulative_freq_geoms(
+      xtitle = xtitle,
+      addTitle = addTitle,
+      title = title,
+      change_xmax = change_xmax,
+      xmax = xmax,
+      xmin = xmin
+    ) +
+    scale_linetype_manual(values = c("Control" = "solid", "PNA" = "dotted"))
+}
+
+my_cumulative_freq_plot(
+  KNDyDATA_juv %>% excludeFunc(),
+  var_to_plot = expr(FiringRate_0_20min),
+  xtitle = "Firing Rate for first 20 min (Hz)",
+  addTitle = FALSE,
+  change_xmax = TRUE,
+  xmax = 8,
+) + 
+  scale_color_manual(values = c("Amanda" = "red", "Jenn" = "blue")) 
+  
+  
+
+my_cumulative_freq_plot(
+  KNDyDATA_juv %>% excludeFunc(),
+  var_to_plot = expr(FiringRate_0_20min),
+  xtitle = "Firing Rate for first 20 min (Hz)",
+  addTitle = FALSE,
+  change_xmax = TRUE,
+  xmax = 1
+) + 
+  scale_color_manual(values = c("Amanda" = "red", "Jenn" = "blue")) 
+
+my_cumulative_freq_plot(
+  KNDyDATA %>% excludeFunc(),
+  var_to_plot = expr(FiringRate_0_20min),
+  xtitle = "Firing Rate for first 20 min (Hz)",
+  addTitle = FALSE,
+  change_xmax = TRUE,
+  xmax = 8,
+  color_var = expr(AgeGroup)
+) + 
+  scale_color_manual(values = c("Adult" = "black", "Juvenile" = "grey")) 
+
+my_cumulative_freq_plot(
+  KNDyDATA %>% excludeFunc(),
+  var_to_plot = expr(FiringRate_0_20min),
+  xtitle = "Firing Rate for first 20 min (Hz)",
+  addTitle = FALSE,
+  change_xmax = TRUE,
+  xmax = 1,
+  color_var = expr(AgeGroup)
+) + 
+  scale_color_manual(values = c("Adult" = "black", "Juvenile" = "grey")) 
+
+my_cumulative_freq_plot(
+  KNDyDATA %>% filter(WhoRecorded == "Amanda") %>% excludeFunc(),
+  var_to_plot = expr(FiringRate_0_20min),
+  xtitle = "Firing Rate for first 20 min (Hz)",
+  addTitle = TRUE,
+  change_xmax = TRUE,
+  xmax = 8,
+  color_var = expr(AgeGroup)
+) + 
+  scale_color_manual(values = c("Adult" = "black", "Juvenile" = "grey")) 
+
+my_cumulative_freq_plot(
+  KNDyDATA %>% filter(WhoRecorded == "Amanda") %>% excludeFunc(),
+  var_to_plot = expr(FiringRate_0_20min),
+  xtitle = "Firing Rate for first 20 min (Hz)",
+  addTitle = FALSE,
+  change_xmax = TRUE,
+  xmax = 1,
+  color_var = expr(AgeGroup)
+) + 
+  scale_color_manual(values = c("Adult" = "black", "Juvenile" = "grey")) 
+```
+
