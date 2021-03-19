@@ -547,8 +547,8 @@ makeTreatandWhoRecordedContrasts <- function(df){
   df_contrasts$GenTreatment = as.factor(df_contrasts$GenTreatment)
   #Use contr.Sum for contrast
   contrasts(df_contrasts$GenTreatment) <- contr.Sum
-  #Make AgeGroup a factor
-  df_contrasts$Who <- as.factor(df_contrasts$WhoRecorded)
+  #Make WhoRecorded a factor
+  df_contrasts$WhoRecorded <- as.factor(df_contrasts$WhoRecorded)
   #use contr.Sum for contrast
   contrasts(df_contrasts$AgeGroup) <- contr.Sum
   return(df_contrasts)
@@ -1002,7 +1002,7 @@ ppt_GraphFunc = function(ppt, viz){
   )
 }
 
-ppt_GraphFunc_flag = function(ppt, viz, flag){
+ppt_GraphFunc_flag = function(ppt, viz, flag, cellID, genTreatment, ageGroup){
   #add a new slide
   ppt = add_slide(
     ppt, 
@@ -1014,9 +1014,19 @@ ppt_GraphFunc_flag = function(ppt, viz, flag){
     value = viz, #add the visualization to the powerpoint
     location = ph_location_fullsize() #plot it on the entire slide
   )
+  
+  ageGroupText = if(ageGroup == "Adult"){" adult"} else if(ageGroup == "Juvenile"){" juvenile"}
+  
   ppt = ph_with(
     ppt, 
     value = block_list(
+      fpar(
+        ftext(cellID, prop = fp_text(font.size = 20))
+        ),
+      fpar(
+        ftext(genTreatment,  prop = fp_text(font.size = 20)),
+        ftext(ageGroupText,  prop = fp_text(font.size = 20))
+      ),
       fpar(
         ftext(flag, prop = fp_text(font.size = 20))
       )
@@ -1450,7 +1460,9 @@ firingRatePlotFunc <- function(
   figHeight = NA,
   cellID = "",
   addFlag = FALSE,
-  flagText = NULL
+  flagText = NULL,
+  genTreatment = NULL,
+  ageGroup = NULL
 ){
   viz <- ggplot(df, aes(x = Min_num, y = FiringRate_Hz, color = interaction(Who, WhoRecorded))) +
     geom_line(
@@ -1492,7 +1504,7 @@ firingRatePlotFunc <- function(
   }
   
   if(toPPT && addFlag){ #if toPPT is true
-    ppt_GraphFunc_flag(ppt, viz, flagText)
+    ppt_GraphFunc_flag(ppt, viz, flagText, cellID, genTreatment, ageGroup)
   }else if(toPPT){
     ppt_GraphFunc(ppt, viz)
   }
@@ -1519,11 +1531,16 @@ firingRatePlot_SingleCellFunc <- function(
   figWidth = 10,
   figHeight = NA,
   addFlag = FALSE,
-  flagText = NULL
+  flagText = NULL,
+  genTreatment = NULL,
+  ageGroup = NULL
 ){
   if(is.na(flagText)) {
-    addFlag = FALSE
+    flagText = ""
   }
+  # if(is.na(flagText)) {
+  #   addFlag = FALSE
+  # }
   df %>%
     filter(CellID == cellID) %>%
     firingRatePlotFunc(
@@ -1541,9 +1558,77 @@ firingRatePlot_SingleCellFunc <- function(
       img_type = img_type,
       cellID = cellID,
       addFlag = addFlag,
-      flagText = flagText
+      flagText = flagText,
+      genTreatment = genTreatment,
+      ageGroup = ageGroup
     )
 }
+
+# To plot a single cell
+firingRatePlot_SingleCellFunc_1_20 <- function(
+  cellID,
+  df,
+  excludeLineType = TRUE, # changes line-type based on whether or not cell is marked for exclusion
+  save = FALSE, #Save png
+  toPPT = FALSE, #add to a powerpoint
+  ppt = NULL, #powerpoint object to add to
+  img_type = ".png",
+  figWidth = 10,
+  figHeight = NA,
+  addFlag = FALSE,
+  flagText = NULL,
+  genTreatment = NULL,
+  ageGroup = NULL
+){
+  if(is.na(flagText)) {
+    flagText = ""
+  }
+  df %>%
+    filter(CellID == cellID) %>%
+    firingRatePlotFunc(
+      zoom_x = TRUE,
+      xmin = 0,
+      xmax = 180,
+      zoom_y = TRUE,
+      ymin = 0,
+      ymax = 1,
+      excludeLineType = excludeLineType,
+      save = save,
+      add_to_save = "_1Hz",
+      toPPT = toPPT,
+      ppt = ppt,
+      img_type = img_type,
+      cellID = cellID,
+      addFlag = addFlag,
+      flagText = flagText,
+      genTreatment = genTreatment,
+      ageGroup = ageGroup
+    )
+  
+  df %>%
+    filter(CellID == cellID) %>%
+    firingRatePlotFunc(
+      zoom_x = TRUE,
+      xmin = 0,
+      xmax = 180,
+      zoom_y = TRUE,
+      ymin = 0,
+      ymax = 20,
+      excludeLineType = excludeLineType,
+      save = save,
+      add_to_save = "_20Hz",
+      toPPT = toPPT,
+      ppt = ppt,
+      img_type = img_type,
+      cellID = cellID,
+      addFlag = addFlag,
+      flagText = flagText,
+      genTreatment = genTreatment,
+      ageGroup = ageGroup
+    )
+}
+
+
 
 ### Drafts - not using currently ---------------
 
