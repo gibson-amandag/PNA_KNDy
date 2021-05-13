@@ -40,6 +40,7 @@ scatterPlotsUI <- function(
               Record_start_hr,
               Record_end_hr,
               Sac_hr,
+              Time_sinceSlice,
               Recording_date,
               UterineMass,
               Age_in_days,
@@ -91,6 +92,17 @@ scatterPlotsUI <- function(
             "Non-quiescent"
           ),
           selected = "All"
+        ),
+        
+        radioButtons(
+          inputId = ns("whoRecordedSel"), 
+          label = "Select recording experimenter:",
+          choices = list(
+            "Both",
+            "Amanda",
+            "Jenn"
+          ),
+          selected = "Both"
         )
       ),
       mainPanel(
@@ -147,13 +159,23 @@ scatterPlotsServer <- function(
             filter(Exclude == FALSE | is.na(Exclude)) #only include cells marked FALSE or NA for Exclude
         }
         
+        if(input$whoRecordedSel == "Amanda"){
+          data2 <- data2 %>%
+            filter(WhoRecorded == "Amanda")
+        }
+        
+        if(input$whoRecordedSel == "Jenn"){
+          data2 <- data2 %>%
+            filter(WhoRecorded == "Jenn")
+        }
+        
         data2 <<- data2
         
         data2 %>%
           filter(!is.na(!! input$yaxis)) %>%
-          ggplot(aes(x = !! input$xaxis, y = !! input$yaxis, colour = !! input$treatment, shape = Who))+
+          ggplot(aes(x = !! input$xaxis, y = !! input$yaxis, colour = !! input$treatment, shape = WhoRecorded))+
           geom_point(size = 3)+
-          geom_smooth(method = lm, se = FALSE, formula = y ~ x, aes(linetype = Who))+
+          geom_smooth(method = lm, se = FALSE, formula = y ~ x, aes(linetype = WhoRecorded))+
           labs(
             x = KNDy_VarNames[, as.character(input$xaxis)], 
             y = KNDy_VarNames[, as.character(input$yaxis)], 

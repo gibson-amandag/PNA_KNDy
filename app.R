@@ -42,7 +42,7 @@ source(file.path(FunctionsFolder, GetDataReadyFileName))
 # - Readjusts the order of variables within the KNDyDATA data frame to be a little more helpful. 
 # If the order of the excel sheet changes, this has to change
 
-allDFs = GetDataReadyFunc(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firingRate, KNDy_burstData, KNDy_clusterData, rateForQuiet)
+allDFs = GetDataReadyFunc(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firingRate, KNDy_burstData, KNDy_clusterData, rateForQuiet, KNDy_TimingData)
 
 #<<- assigns at a higher environment level
 KNDyDATA <<- allDFs$KNDyDATA

@@ -34,12 +34,14 @@ PNA - Adult, PNA - Juvenile, Control - Adult, Control - Juvenile
 If the order of the excel sheet changes, this has to change
 
 ```{r Get Data Ready}
-allDFs <- GetDataReadyFunc(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firingRate, rateForQuiet)
+allDFs <- GetDataReadyFunc(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firingRate, KNDy_burstData, KNDy_clusterData, rateForQuiet)
 
 KNDyDATA <-  allDFs$KNDyDATA
 KNDy_mouse_demo <- allDFs$KNDy_mouse_demo
 KNDy_cells <- allDFs$KNDy_cells
 KNDy_firingRate <- allDFs$KNDy_firingRate
+VBW_BurstsPerHour <- allDFs$VBW_BurstsPerHour
+VBW_BurstsPerHour_hour1 <- allDFs$VBW_BurstsPerHour_hour1
 
 KNDyDATA
 

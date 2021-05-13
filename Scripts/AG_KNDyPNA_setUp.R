@@ -28,10 +28,11 @@ FiringRateSheetName = "FiringData"
 CyclesSheetName = "Cycles"
 BurstSheetName = "BurstData"
 ClusterSheetName = "ClusterData"
+TimingSheetName = "TimingData"
 
 file_prefix = Sys.getenv("FILE_PREFIX")
 
-rateForQuiet = 0.001
+rateForQuiet = 0.01
 
 #type of images to save for plots. .png or .svg, for example
 imgTypePlots = ".png"
@@ -77,5 +78,6 @@ KNDy_firingRate <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, FiringRateSheetNa
 KNDy_cycles <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, CyclesSheetName)
 KNDy_burstData <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, BurstSheetName)
 KNDy_clusterData <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, ClusterSheetName)
+KNDy_TimingData <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, TimingSheetName)
 
 dateToday = Sys.Date()

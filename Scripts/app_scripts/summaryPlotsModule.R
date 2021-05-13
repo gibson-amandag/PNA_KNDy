@@ -139,6 +139,22 @@ summaryPlotsUI <- function(
           ),
           selected = "All"
         )
+      ),
+      
+      fluidRow(
+        column(
+          3,
+          radioButtons(
+            inputId = ns("whoRecordedSel"), 
+            label = "Select recording experimenter:",
+            choices = list(
+              "Both",
+              "Amanda",
+              "Jenn"
+            ),
+            selected = "Both"
+          ),
+        )
       )
       
     ),
@@ -328,6 +344,16 @@ summaryPlotsServer <- function(
         if(input$exclude){
           data1 <- data1 %>%
             filter(Exclude == FALSE | is.na(Exclude)) #only include cells marked FALSE or NA for Exclude
+        }
+        
+        if(input$whoRecordedSel == "Amanda"){
+          data1 <- data1 %>%
+            filter(WhoRecorded == "Amanda")
+        }
+        
+        if(input$whoRecordedSel == "Jenn"){
+          data1 <- data1 %>%
+            filter(WhoRecorded == "Jenn")
         }
         
         data1 <<- data1

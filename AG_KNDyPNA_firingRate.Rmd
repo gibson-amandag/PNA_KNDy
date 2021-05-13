@@ -23,7 +23,7 @@ source("./Scripts/AG_KNDyPNA_setup.R")
 ```
 
 ```{r Get-Data-Ready}
-allDFs <- GetDataReadyFunc(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firingRate, KNDy_burstData, KNDy_clusterData, rateForQuiet)
+allDFs <- GetDataReadyFunc(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firingRate, KNDy_burstData, KNDy_clusterData, rateForQuiet, KNDy_TimingData)
 
 KNDyDATA <-  allDFs$KNDyDATA
 KNDy_mouse_demo <- allDFs$KNDy_mouse_demo
@@ -65,6 +65,36 @@ KNDy_VarNames <- KNDy_varNamesFunc(KNDyDATA)
 sepDFs <- sep_by_age(KNDyDATA)
 KNDyDATA_juv <- sepDFs$df_juv
 KNDyDATA_adult <- sepDFs$df_adult
+```
+
+```{r}
+outForIgor <- KNDyDATA %>%
+  select(
+    CellID,
+    TreatxAge,
+    StartTime_spont,
+    EndTime_spont,
+    Status,
+    Exclude
+  )
+
+outForIgor <- outForIgor %>%
+  mutate(
+    SCT_name = paste0(CellID, "_sct")
+  )
+
+outForIgor <- outForIgor %>%
+  select(
+    SCT_name,
+    CellID,
+    TreatxAge,
+    StartTime_spont,
+    EndTime_spont,
+    Status,
+    Exclude
+  )
+
+view(outForIgor)
 ```
 
 ```{r Count-Cells}

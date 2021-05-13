@@ -15,6 +15,7 @@ KNDy_varNamesFunc = function(dataframe) {
   KNDy_VarNames$Record_end = "End time of recording"
   KNDy_VarNames$Record_start_hr = "Recording Start (hr after lights on)"
   KNDy_VarNames$Record_end_hr = "Recording End (hr after lights on)"
+  KNDy_VarNames$Time_sinceSlice = "Recording Start (hrs after slicing)"
   
   KNDy_VarNames$SpontLength_min = "Spontaneous Recording Length (min)"
   KNDy_VarNames$Flagged = "Flagged?"

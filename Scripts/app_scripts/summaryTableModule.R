@@ -88,12 +88,31 @@ summaryTableUI <- function(
     ### ANOVAs ----
     h2("ANOVAs"),
     
-    varSelectInput(
-      ns("ANOVA_var"),
-      "Select variable for ANOVA:",
-      data = KNDyDATA %>%
-        select(SpontAvgFiring:MaxBurstWindow_senktide),
-      selected = "SpontAvgFiring"
+    fluidRow(
+      column(
+        3,
+        radioButtons(
+          inputId = ns("whoRecordedSel"), 
+          label = "Select recording experimenter:",
+          choices = list(
+            "Both",
+            "Amanda",
+            "Jenn"
+          ),
+          selected = "Both"
+        ),
+      ),
+      
+      column(
+        3,
+        varSelectInput(
+          ns("ANOVA_var"),
+          "Select variable for ANOVA:",
+          data = KNDyDATA %>%
+            select(SpontAvgFiring:MaxBurstWindow_senktide),
+          selected = "SpontAvgFiring"
+        )
+      )
     ),
     
     htmlOutput(ns("ANOVA_table")),
@@ -157,11 +176,23 @@ summaryTableServer <- function(
       })
       
       output$ANOVA_table <- renderText({
+        data <- KNDyDATA
+        
+        if(input$whoRecordedSel == "Amanda"){
+          data <- data %>%
+            filter(WhoRecorded == "Amanda")
+        }
+        
+        if(input$whoRecordedSel == "Jenn"){
+          data <- data %>%
+            filter(WhoRecorded == "Jenn")
+        }
+          
         # The makeTreatandAgeContrasts function excludes cells
-        KNDyDATA_contrasts <- makeTreatandAgeContrasts(KNDyDATA)
-        
+        KNDyDATA_contrasts <- makeTreatandAgeContrasts(data)
+
         Model <- lm_byTreatxAge(input$ANOVA_var, KNDyDATA_contrasts)
-        
+
         ANOVA_table <- makeANOVA_TreatAge(Model)
         ANOVA_table %>%
           kable_styling(

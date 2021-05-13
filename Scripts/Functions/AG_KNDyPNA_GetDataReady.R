@@ -16,7 +16,7 @@
 
 #Returns a list with the three data frames
 
-GetDataReadyFunc = function(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firingRate, KNDy_burstData, KNDy_clusterData, rateForQuiet){
+GetDataReadyFunc = function(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firingRate, KNDy_burstData, KNDy_clusterData, rateForQuiet, KNDy_timingData){
   #Reformat dates into year-month-day
   #I think not needed with reading of excel files
   # KNDy_mouse_demo$Date_of_birth = format_dates(KNDy_mouse_demo$Date_of_birth)
@@ -94,6 +94,7 @@ GetDataReadyFunc = function(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firi
   # Does not include the bursts per hour at each burst window
   KNDyDATA <- KNDyDATA %>%
     left_join(KNDy_burstData %>% select(CellID:ssDoubtsPerc_senktide_BW2), by = "CellID")
+  # Causing error 
   
   #TO-DO - add cluster data
   # KNDyDATA <- KNDyDATA %>%
@@ -124,6 +125,12 @@ GetDataReadyFunc = function(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firi
       )
     )
   
+  #Add a time since slicing variable
+  KNDyDATA <- KNDyDATA %>%
+    mutate(
+      Time_sinceSlice = Record_start_hr - Sac_hr
+    )
+  
   #Make AgeGroup a factor, and give it nice labels
   KNDyDATA$AgeGroup = factor(
     KNDyDATA$AgeGroup, 
@@ -134,6 +141,7 @@ GetDataReadyFunc = function(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firi
   #Get rid of white space in the names
   KNDyDATA$Who = gsub('\\s+', '', KNDyDATA$Who)
   KNDyDATA$WhoRecorded = gsub('\\s+', '', KNDyDATA$WhoRecorded)
+  KNDyDATA$CellID = gsub('\\s+', '', KNDyDATA$CellID)
   
   #Make "Who" sliced/recorded variable a factor
   KNDyDATA$Who = factor(KNDyDATA$Who, levels = c("Jenn", "Amanda"))
@@ -145,6 +153,10 @@ GetDataReadyFunc = function(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firi
     levels = c("CON_main", "CON", "VEH", "DHT"), 
     labels = c("Main Colony Control", "Control", "Vehicle", "DHT")
   )
+  
+  #Add the timing data
+  KNDyDATA <- KNDyDATA %>%
+    left_join(KNDy_timingData, by = "CellID")
   
   ##THIS IS IMPORTANT - IF COLUMNS CHANGE, NEED TO BE SURE THAT THAT CHANGE IS REFLECTED HERE##
   KNDyDATA = KNDyDATA %>%
@@ -158,11 +170,14 @@ GetDataReadyFunc = function(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firi
       Zygosity,
       Who,
       WhoRecorded,
+      Time_sinceSlice,
       Record_start:Flagged, 
       BodyMass_g:Sac_hr, 
       Sac_9plus, 
       Quiet, 
-      TreatxAge, 
+      TreatxAge,
+      StartTime_spont,
+      EndTime_spont,
       CycleStage, 
       SpontAvgFiring:FiringRate_100_120min,
       Mbd_spont:ssDoubtsPerc_senktide_BW2
