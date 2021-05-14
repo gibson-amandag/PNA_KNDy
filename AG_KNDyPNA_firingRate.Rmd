@@ -31,8 +31,6 @@ KNDy_cells <- allDFs$KNDy_cells
 KNDy_firingRate <- allDFs$KNDy_firingRate
 VBW_BurstsPerHour <- allDFs$VBW_BurstsPerHour
 VBW_BurstsPerHour_hour1 <- allDFs$VBW_BurstsPerHour_hour1
-
-KNDy_firingRate
 ```
 
 ```{r KNDy_VarNames}
@@ -135,12 +133,150 @@ numCells_Amanda_A_Con_Juv <- with(KNDy_count, numCells[Who == "Amanda" & WhoReco
 numCells_Amanda_J_Con_Juv <- with(KNDy_count, numCells[Who == "Jenn" & WhoRecorded == "Amanda" & GenTreatment == "Control" & AgeGroup == "Juvenile"])
 # Amanda slice and record - PNA juv
 numCells_Amanda_A_PNA_Juv <- with(KNDy_count, numCells[Who == "Amanda" & WhoRecorded == "Amanda" & GenTreatment == "PNA" & AgeGroup == "Juvenile"])
-# Jenn slice and Amanda record - PNA juv
+# Jenn slice and record - PNA juv
 numCells_Amanda_J_PNA_Juv <- with(KNDy_count, numCells[Who == "Jenn" & WhoRecorded == "Amanda" & GenTreatment == "PNA" & AgeGroup == "Juvenile"])
 
 #Amanda adults
 numCells_Amanda_Con_Adult <- with(KNDy_count, numCells[Who == "Amanda" & GenTreatment == "Control" & AgeGroup == "Adult"])
 numCells_Amanda_PNA_Adult <- with(KNDy_count, numCells[Who == "Amanda" & GenTreatment == "PNA" & AgeGroup == "Adult"])
+```
+
+# Count of Cells
+## Minus Excluded Cells
+```{r}
+
+df <- excludeFunc(KNDyDATA)
+
+df <- df %>%
+  select(
+    CellID,
+    MouseID,
+    Cage,
+    MouseNum,
+    CellNum,
+    Who,
+    WhoRecorded,
+    GenTreatment,
+    AgeGroup
+  ) 
+
+KNDy_count_minusExcluded <- df %>%
+  group_by(
+    WhoRecorded,
+    AgeGroup,
+    GenTreatment
+  ) %>%
+  summarise(
+    NumCells = n(),
+    .groups = 'drop'
+  )
+
+KNDy_count_minusExcluded
+```
+
+## Minus third cells from mouse
+```{r}
+KNDy_count_minus3rdCells <- df %>%
+  filter(
+    CellNum < 3
+  ) %>%
+  group_by(
+    WhoRecorded,
+    AgeGroup,
+    GenTreatment
+  ) %>%
+  summarise(
+    NumCells = n(),
+    .groups = 'drop'
+  )
+
+KNDy_count_minus3rdCells
+```
+
+## Minus second cells from mouse
+```{r}
+KNDy_count_minus2ndCells <- df %>%
+  filter(
+    CellNum == 1
+  ) %>%
+  group_by(
+    WhoRecorded,
+    AgeGroup,
+    GenTreatment
+  ) %>%
+  summarise(
+    NumCells = n(),
+    .groups = 'drop'
+  )
+
+KNDy_count_minus2ndCells
+```
+
+## Minus fourth animal from cage & third cells
+```{r}
+KNDy_count_minus4thanimal <- df %>%
+  filter(
+    MouseNum < 4,
+    CellNum < 3,
+  ) %>%
+  group_by(
+    WhoRecorded,
+    AgeGroup,
+    GenTreatment
+  ) %>%
+  summarise(
+    NumCells = n(),
+    .groups = 'drop'
+  )
+
+KNDy_count_minus4thanimal 
+```
+
+## Minus third animal from cage & third cells
+```{r}
+KNDy_count_minus4thanimal <- df %>%
+  filter(
+    MouseNum < 3,
+    CellNum < 3,
+  ) %>%
+  group_by(
+    WhoRecorded,
+    AgeGroup,
+    GenTreatment
+  ) %>%
+  summarise(
+    NumCells = n(),
+    .groups = 'drop'
+  )
+
+KNDy_count_minus4thanimal 
+```
+```{r}
+filteredKNDyData <- KNDyDATA %>%
+  filter(
+    Zygosity != "homoPlus",
+    Treatment != "Main Colony Control",
+    CellNum == 1
+  )
+
+filteredKNDyData
+
+sumDataSet <- filteredKNDyData %>%
+  summarize(
+    MinDur = min(SpontLength_min, na.rm = TRUE),
+    MaxDur = max(SpontLength_min, na.rm = TRUE),
+    MedDur = median(SpontLength_min, na.rm = TRUE),
+    MeanDur = mean(SpontLength_min, na.rm = TRUE)
+  )
+sumDataSet
+
+sumDataSet2 <- filteredKNDyData %>%
+  summarize(
+    MinDur = min(SpontAvgFiring, na.rm = TRUE),
+    MaxDur = max(SpontAvgFiring, na.rm = TRUE),
+    MedDur = median(SpontAvgFiring, na.rm = TRUE),
+    MeanDur = mean(SpontAvgFiring, na.rm = TRUE)
+  )
 ```
 
 ```{r}

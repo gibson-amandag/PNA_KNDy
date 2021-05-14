@@ -87,6 +87,8 @@ sourceModule("scatterPlotsModule.R")
 sourceModule("summaryTableModule.R")
 sourceModule("rawDataModule.R")
 sourceModule("maxBurstWindowModule.R")
+sourceModule("filterDFModule.R")
+sourceModule("cellCountModule.R")
 
 
 # Define UI for application
@@ -103,11 +105,16 @@ ui <- fluidPage(
     span("TRUE", style = "color:blue"), "to exclude."),
   
   tabsetPanel(
-    ###Summary Plots Panel ----
+    ### Summary Plots Panel ----
     tabPanel(
       "Summary Plots",
       summaryPlotsUI("summaryPlots", KNDyDATA),
     ),
+    ### Cell Numbers Panel ---
+    # tabPanel(
+    #   "Cell Numbers",
+    #   cellCountUI("cellCount", KNDyDATA),
+    # ),
     ### Scatter Plots ----
     tabPanel(
       "Scatter Plots",
@@ -173,6 +180,9 @@ server <- function(input, output) {
   
   ### SUMMARY PLOTS SERVER -------------------------------------
   summaryPlotsServer("summaryPlots", KNDyDATA, KNDyDATA_adult, KNDyDATA_juv, KNDy_VarNames)
+  
+  ### CELL NUMBERS SERVER --------------------------------------
+  # cellCountServer("cellCount", KNDyDATA)
 
   ### SCATTER PLOTS SERVER -------------------------------------
   scatterPlotsServer("scatterPlots", KNDyDATA, KNDyDATA_adult, KNDyDATA_juv, KNDy_VarNames)

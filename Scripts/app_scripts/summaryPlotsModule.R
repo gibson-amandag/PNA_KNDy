@@ -111,53 +111,55 @@ summaryPlotsUI <- function(
       column(
         3,
         #Exclude
-        checkboxInput(
-          inputId = ns("exclude"),
-          label = "Exclude marked cells",
-          value = TRUE
-        ),
-        
-        #which dataset?
-        radioButtons(
-          inputId = ns("dataset"), 
-          label = "Which ages?",
-          choices = list(
-            "All",
-            "Adults",
-            "Juveniles"
-          ),
-          selected = "All"
-        ),
-        #Which activity levels to include
-        radioButtons(
-          inputId = ns("firing"), 
-          label = "Select level of activity:",
-          choices = list(
-            "All",
-            "Quiescent",
-            "Non-quiescent"
-          ),
-          selected = "All"
-        )
+        # checkboxInput(
+        #   inputId = ns("exclude"),
+        #   label = "Exclude marked cells",
+        #   value = TRUE
+        # ),
+        # 
+        # #which dataset?
+        # radioButtons(
+        #   inputId = ns("dataset"), 
+        #   label = "Which ages?",
+        #   choices = list(
+        #     "All",
+        #     "Adults",
+        #     "Juveniles"
+        #   ),
+        #   selected = "All"
+        # ),
+        # #Which activity levels to include
+        # radioButtons(
+        #   inputId = ns("firing"), 
+        #   label = "Select level of activity:",
+        #   choices = list(
+        #     "All",
+        #     "Quiescent",
+        #     "Non-quiescent"
+        #   ),
+        #   selected = "All"
+        # )
       ),
       
-      fluidRow(
-        column(
-          3,
-          radioButtons(
-            inputId = ns("whoRecordedSel"), 
-            label = "Select recording experimenter:",
-            choices = list(
-              "Both",
-              "Amanda",
-              "Jenn"
-            ),
-            selected = "Both"
-          ),
-        )
-      )
+      # fluidRow(
+      #   column(
+      #     3,
+      #     radioButtons(
+      #       inputId = ns("whoRecordedSel"), 
+      #       label = "Select recording experimenter:",
+      #       choices = list(
+      #         "Both",
+      #         "Amanda",
+      #         "Jenn"
+      #       ),
+      #       selected = "Both"
+      #     ),
+      #   )
+      # )
       
     ),
+    
+    filterDFUI(ns("filterDF"), KNDyDATA),
     
     zoomAxisUI(ns("zoom_y"), "y"),
     
@@ -193,6 +195,8 @@ summaryPlotsServer <- function(
       instructionsSummaryServer("instructionsText")
       # instructionsSummary1Server("instructionsText")
       
+      filterOutput <- filterDFServer("filterDF", KNDyDATA)
+      
       zoom_y <- zoomAxisServer("zoom_y", "y", 0, 20)
       
       #ylimit UI to change with checking of zoom input
@@ -226,7 +230,7 @@ summaryPlotsServer <- function(
         # dataset and firing inputs. But, this would require changing later code, too
         
         #if juveniles and all firing
-        if(input$dataset == "Juveniles" & input$firing == "All"){
+        if(filterOutput$dataset() == "Juveniles" & filterOutput$firing() == "All"){
           varSelectInput(
             inputId = ns("grouping_var"),
             label = "Select grouping variable",
@@ -241,7 +245,7 @@ summaryPlotsServer <- function(
             selected = "WhoRecorded"
           )
           #if juveniles and not all firing
-        } else if (input$dataset == "Juveniles" & input$firing != "All"){
+        } else if (filterOutput$dataset() == "Juveniles" & filterOutput$firing() != "All"){
           varSelectInput(
             inputId = ns("grouping_var"),
             label = "Select grouping variable",
@@ -256,7 +260,7 @@ summaryPlotsServer <- function(
             selected = "WhoRecorded"
           )
           #if adults and all firing
-        } else if (input$dataset == "Adults" & input$firing == "All"){
+        } else if (filterOutput$dataset() == "Adults" & filterOutput$firing() == "All"){
           varSelectInput(
             inputId = ns("grouping_var"),
             label = "Select grouping variable",
@@ -270,7 +274,7 @@ summaryPlotsServer <- function(
             selected = "GenTreatment"
           )
           #if adults and not all firing
-        } else if (input$dataset == "Adults" & input$firing != "All"){
+        } else if (filterOutput$dataset() == "Adults" & filterOutput$firing() != "All"){
           varSelectInput(
             inputId = ns("grouping_var"),
             label = "Select grouping variable",
@@ -283,7 +287,7 @@ summaryPlotsServer <- function(
             selected = "GenTreatment"
           )
           #if all for both
-        }else if (input$dataset == "All" & input$firing == "All"){
+        }else if (filterOutput$dataset() == "All" & filterOutput$firing() == "All"){
           varSelectInput(
             inputId = ns("grouping_var"),
             label = "Select grouping variable",
@@ -299,7 +303,7 @@ summaryPlotsServer <- function(
             selected = "AgeGroup"
           )
           #if all for data set, not all for firing
-        }else if (input$dataset == "All" & input$firing != "All"){
+        }else if (filterOutput$dataset() == "All" & filterOutput$firing() != "All"){
           varSelectInput(
             inputId = ns("grouping_var"),
             label = "Select grouping variable",
@@ -323,40 +327,7 @@ summaryPlotsServer <- function(
       #              y_click <- input$plot_click$y)
       
       output$plot <- renderPlot({
-        data1 <- switch(
-          input$dataset,
-          "All" = KNDyDATA,
-          "Adults" = KNDyDATA_adult,
-          "Juveniles" = KNDyDATA_juv
-          
-        )
-        
-        if(input$firing == "Quiescent"){
-          data1 <- data1 %>%
-            filter(Quiet == TRUE)
-        }
-        
-        if(input$firing == "Non-quiescent"){
-          data1 <- data1 %>%
-            filter(Quiet == FALSE)
-        }
-        
-        if(input$exclude){
-          data1 <- data1 %>%
-            filter(Exclude == FALSE | is.na(Exclude)) #only include cells marked FALSE or NA for Exclude
-        }
-        
-        if(input$whoRecordedSel == "Amanda"){
-          data1 <- data1 %>%
-            filter(WhoRecorded == "Amanda")
-        }
-        
-        if(input$whoRecordedSel == "Jenn"){
-          data1 <- data1 %>%
-            filter(WhoRecorded == "Jenn")
-        }
-        
-        data1 <<- data1
+        data1 <<- filterOutput$filteredDF()
         
         # browser()
         # cat(file=stderr(), "The zoom value is", zoom_y$zoom(), "\n",

@@ -154,6 +154,10 @@ GetDataReadyFunc = function(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firi
     labels = c("Main Colony Control", "Control", "Vehicle", "DHT")
   )
   
+  #Make factor variables
+  KNDyDATA$CellNum <- as.factor(KNDyDATA$CellNum)
+  KNDyDATA$MouseNum <- as.factor(KNDyDATA$MouseNum)
+  
   #Add the timing data
   KNDyDATA <- KNDyDATA %>%
     left_join(KNDy_timingData, by = "CellID")
@@ -162,7 +166,9 @@ GetDataReadyFunc = function(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firi
   KNDyDATA = KNDyDATA %>%
     select(
       CellID:MouseID,
-      Cage:GenTreatment, 
+      Cage:GenTreatment,
+      MouseNum,
+      CellNum,
       Exclude,
       Status,
       StatusComments,
@@ -200,12 +206,15 @@ GetDataReadyFunc = function(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firi
       Who,
       WhoRecorded,
       Zygosity,
+      MouseNum,
+      CellNum,
       Exclude,
       Status,
       StatusComments,
       Sac_hr,
       Record_start_hr,
       Record_end_hr,
+      Time_sinceSlice,
       Sac_9plus,
       MaxBurstWindow_spont) %>%
     left_join(KNDy_burstData %>% select(CellID, BurstsPerHour_0.01:BurstsPerHour_1.00), by = "CellID")
@@ -221,12 +230,15 @@ GetDataReadyFunc = function(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firi
       Who,
       WhoRecorded,
       Zygosity,
+      MouseNum,
+      CellNum,
       Exclude,
       Status,
       StatusComments,
       Sac_hr,
       Record_start_hr,
       Record_end_hr,
+      Time_sinceSlice,
       Sac_9plus,
       MaxBurstWindow_hour1) %>%
     left_join(KNDy_burstData %>% select(CellID, BurstsHour1_0.01:BurstsHour1_1.00), by = "CellID")

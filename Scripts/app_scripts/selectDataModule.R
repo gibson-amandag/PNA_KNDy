@@ -1,4 +1,5 @@
-### Data Set Selection Module
+
+### Filter by mouse number and cell number
 
 
 # https://shiny.rstudio.com/articles/modules.html
@@ -59,6 +60,20 @@ selectDataUI <- function(id
             "Non-quiescent"
           ),
           selected = "All"
+        )
+      ),
+      column(
+        4,
+        #Who recorded
+        radioButtons(
+          inputId = ns("whoRecordedSel"), 
+          label = "Select recording experimenter:",
+          choices = list(
+            "Both",
+            "Amanda",
+            "Jenn"
+          ),
+          selected = "Both"
         )
       )
       
@@ -158,4 +173,3 @@ selectDataServer <- function(
     }
   )
 }
-

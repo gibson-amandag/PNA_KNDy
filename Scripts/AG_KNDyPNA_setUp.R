@@ -32,7 +32,7 @@ TimingSheetName = "TimingData"
 
 file_prefix = Sys.getenv("FILE_PREFIX")
 
-rateForQuiet = 0.01
+rateForQuiet = 0.005
 
 #type of images to save for plots. .png or .svg, for example
 imgTypePlots = ".png"

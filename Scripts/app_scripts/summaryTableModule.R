@@ -14,25 +14,27 @@ summaryTableUI <- function(
     # instructions ui
     instructionsSumTableUI(ns("instructions")),
     
+    filterDFUI(ns("filterDF"), KNDyDATA),
+    
     #Summary information
     fluidRow(
       #column 1
       column(
-        3,
+        6,
         #grouping variables
         varSelectInput(
           inputId = ns("group_vars"),
           label = "Select variables to group by",
           data = KNDyDATA %>%
             select(CellID:Who, Sac_9plus, Quiet),
-          selected = c("GenTreatment", "AgeGroup"),
+          selected = c("AgeGroup", "GenTreatment"),
           multiple = TRUE
         )
       ),
       
       #column 2
       column(
-        3,
+        6,
         #variable to summarize
         varSelectInput(
           inputId = ns("var_toSummarize"),
@@ -40,44 +42,6 @@ summaryTableUI <- function(
           data = KNDyDATA %>%
             select(SpontAvgFiring:MaxBurstWindow_senktide),
           selected = "SpontAvgFiring"
-        )
-      ),
-      
-      #column 3
-      column(
-        3,
-        #which dataset?
-        radioButtons(
-          inputId = ns("dataset3"), 
-          label = "Which ages?",
-          choices = list(
-            "All",
-            "Adults",
-            "Juveniles"
-          ),
-          selected = "All"
-        ),
-        #Exclude
-        checkboxInput(
-          inputId = ns("exclude3"),
-          label = "Exclude marked cells",
-          value = TRUE
-        )
-      ),
-      
-      #column 4
-      column(
-        3,
-        #Which activity levels to include
-        radioButtons(
-          inputId = ns("firing3"), 
-          label = "Select level of activity:",
-          choices = list(
-            "All",
-            "Quiescent",
-            "Non-quiescent"
-          ),
-          selected = "All"
         )
       )
     ),
@@ -89,20 +53,6 @@ summaryTableUI <- function(
     h2("ANOVAs"),
     
     fluidRow(
-      column(
-        3,
-        radioButtons(
-          inputId = ns("whoRecordedSel"), 
-          label = "Select recording experimenter:",
-          choices = list(
-            "Both",
-            "Amanda",
-            "Jenn"
-          ),
-          selected = "Both"
-        ),
-      ),
-      
       column(
         3,
         varSelectInput(
@@ -139,29 +89,10 @@ summaryTableServer <- function(
     function(input, output, session) {
       instructionsSumTableServer("instructions")
       
+      filterOutput <- filterDFServer("filterDF", KNDyDATA)
+      
       output$summarydf <- renderDataTable({
-        data <- switch(
-          input$dataset3,
-          "All" = KNDyDATA,
-          "Adults" = KNDyDATA_adult,
-          "Juveniles" = KNDyDATA_juv
-          
-        )
-        
-        if(input$firing3 == "Quiescent"){
-          data <- data %>%
-            filter(Quiet == TRUE)
-        }
-        
-        if(input$firing3 == "Non-quiescent"){
-          data <- data %>%
-            filter(Quiet == FALSE)
-        }
-        
-        if(input$exclude3){
-          data <- data %>%
-            filter(Exclude == FALSE | is.na(Exclude)) #only include cells marked FALSE or NA for Exclude
-        }
+        data <- filterOutput$filteredDF()
         
         data %>%
           filter(!is.na(!! input$var_toSummarize))%>%
@@ -176,17 +107,7 @@ summaryTableServer <- function(
       })
       
       output$ANOVA_table <- renderText({
-        data <- KNDyDATA
-        
-        if(input$whoRecordedSel == "Amanda"){
-          data <- data %>%
-            filter(WhoRecorded == "Amanda")
-        }
-        
-        if(input$whoRecordedSel == "Jenn"){
-          data <- data %>%
-            filter(WhoRecorded == "Jenn")
-        }
+        data <- filterOutput$filteredDF()
           
         # The makeTreatandAgeContrasts function excludes cells
         KNDyDATA_contrasts <- makeTreatandAgeContrasts(data)
@@ -202,14 +123,7 @@ summaryTableServer <- function(
       })
       
       output$ANOVA_table_whoRecorded <- renderText({
-        
-        data <- switch(
-          input$dataset3,
-          "All" = KNDyDATA,
-          "Adults" = KNDyDATA_adult,
-          "Juveniles" = KNDyDATA_juv
-          
-        )
+        data <- filterOutput$filteredDF()
         
         # The makeTreatandAgeContrasts function excludes cells
         KNDyDATA_contrasts <- makeTreatandWhoRecordedContrasts(data)
@@ -225,15 +139,7 @@ summaryTableServer <- function(
       })
       
       output$ANOVA_table_who <- renderText({
-        
-        
-        data <- switch(
-          input$dataset3,
-          "All" = KNDyDATA,
-          "Adults" = KNDyDATA_adult,
-          "Juveniles" = KNDyDATA_juv
-          
-        )
+        data <- filterOutput$filteredDF()
         
         # The makeTreatandAgeContrasts function excludes cells
         KNDyDATA_contrasts <- makeTreatandWhoContrasts(data)
