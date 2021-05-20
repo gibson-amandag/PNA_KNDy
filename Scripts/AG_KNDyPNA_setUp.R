@@ -1,4 +1,5 @@
 #### LOAD LIBRARIES ######################################
+library(DT)
 library(shiny)
 library(tidyverse)
 library(readr)
@@ -12,6 +13,7 @@ library(dplyr)
 library(openxlsx)
 library(car)
 library(kableExtra)
+library(tools)
 #https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_html.html#Overview
 
 #### SET UP ENVIRONMENT, FOLDER PATHS, SOURCE FUNCTIONS ###########################################################################
@@ -29,6 +31,9 @@ CyclesSheetName = "Cycles"
 BurstSheetName = "BurstData"
 ClusterSheetName = "ClusterData"
 TimingSheetName = "TimingData"
+
+# Burst Window Sheets
+BWSheetName_spont_230ms = "bw230ms"
 
 file_prefix = Sys.getenv("FILE_PREFIX")
 
@@ -62,6 +67,7 @@ VariableNamesFileName = "AG_KNDyPNA_VariableNames.R"
 FunctionsFileName = "AG_KNDyPNA_Functions.R"
 GraphFunctionsFileName = "AG_KNDyPNA_GraphFunctions.R"
 DateTrackingFileName = "AG_KNDyPNA_DateTracking.R"
+BurstParamsFileName = "AG_KNDyPNA_getBurstParamsDF.R"
 
 #Source the function files
 source(file.path(FunctionsFolder, GetDataReadyFileName))
@@ -69,6 +75,7 @@ source(file.path(FunctionsFolder, VariableNamesFileName))
 source(file.path(FunctionsFolder, FunctionsFileName))
 source(file.path(FunctionsFolder, GraphFunctionsFileName))
 source(file.path(FunctionsFolder, DateTrackingFileName))
+source(file.path(FunctionsFolder, BurstParamsFileName))
 
 #Load datasets
 KNDy_mouse_demo <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, MouseInfoSheetName)
@@ -79,5 +86,8 @@ KNDy_cycles <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, CyclesSheetName)
 KNDy_burstData <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, BurstSheetName)
 KNDy_clusterData <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, ClusterSheetName)
 KNDy_TimingData <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, TimingSheetName)
+
+#Burst datasets
+bursts_spont_230ms <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, BWSheetName_spont_230ms)
 
 dateToday = Sys.Date()

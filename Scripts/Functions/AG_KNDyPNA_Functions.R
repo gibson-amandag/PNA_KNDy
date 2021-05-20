@@ -17,6 +17,19 @@ myXLSX_func = function(folderPath, fileName, sheetName){
   )
 }
 
+myXLSX_funcFileSelect = function(selPath, sheetName){
+  read.xlsx(
+    selPath,
+    sheet = sheetName,
+    colNames = TRUE,
+    rowNames = FALSE,
+    detectDates = TRUE,
+    skipEmptyRows = TRUE,
+    skipEmptyCols = TRUE,
+    na.strings = "NA"
+  )
+}
+
 #### Get Data Ready-------------------------------------------------------------
 
 #Format dates function

@@ -52,6 +52,9 @@ KNDy_firingRate <<- allDFs$KNDy_firingRate
 VBW_BurstsPerHour <<- allDFs$VBW_BurstsPerHour
 VBW_BurstsPerHour_hour1 <<- allDFs$VBW_BurstsPerHour_hour1
 
+bParamsOut <- getBurstParamsDF(KNDyDATA, bursts_spont_230ms)
+bParams_spont_230ms <- bParamsOut$bParamsDF
+
 #create juvenile and adult dataframes
 sepDFs <- sep_by_age(KNDyDATA)
 KNDyDATA_juv <<- sepDFs$df_juv
@@ -90,6 +93,7 @@ sourceModule("maxBurstWindowModule.R")
 sourceModule("filterDFModule.R")
 sourceModule("cellCountModule.R")
 
+sourceModule("burstSummaryTableModule.R")
 
 # Define UI for application
 ui <- fluidPage(
@@ -155,6 +159,11 @@ ui <- fluidPage(
     tabPanel(
       "Firing Rate",
       firingRateUI("firingRate", KNDyDATA)
+    ),
+    #Burst summary ----
+    tabPanel(
+      "Burst Summary",
+      burstSummaryTableUI("burstSummary", bParams_spont_230ms)
     )
   ),
 )
@@ -190,6 +199,8 @@ server <- function(input, output) {
   ### SUMMARY TABLE SERVER -------------------------------------
   summaryTableServer("summaryTable", KNDyDATA, KNDyDATA_adult, KNDyDATA_juv, KNDy_VarNames)
   
+  ### BURST SUMMARY TABLE SERVER -------------------------------------
+  burstSummaryTableServer("burstSummary", KNDyDATA, KNDy_VarNames)
   
   ### RAW DATA SERVER -------------------------------------
   rawDataServer("rawData", KNDyDATA, KNDyDATA_adult, KNDyDATA_juv)
