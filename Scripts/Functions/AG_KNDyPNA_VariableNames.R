@@ -225,6 +225,21 @@ KNDy_varNamesFunc = function(dataframe) {
   KNDy_VarNames$Quiet = "Quiescent Cells"
   KNDy_VarNames$TreatxAge = "Treatment and Age"
   
+  KNDy_VarNames <- KNDy_VarNames %>%
+    mutate(
+      bn = "Burst Number",
+      mbd = "Mean Burst Duration (s)",
+      spb = "Spikes Per Burst",
+      bf = "Burst Freq (Hz)",
+      ssn = "Single Spike Number",
+      ssf = "Single Spike Freq (Hz)",
+      tf = "Total Freq (Hz)",
+      inter = "Mean Interevent Interval (s)",
+      intra = "Mean Intraburst Interval (s)",
+      bFlags = "# Bursts near Gaps",
+      ssFlags = "# Single Spikes Near Gaps"
+    )
+  
   return(KNDy_VarNames)
 }
 
