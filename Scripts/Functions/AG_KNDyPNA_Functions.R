@@ -68,9 +68,10 @@ excludeFunc = function(df){
 
 #### Summarize Variables 
 #Provide string name for columns for both var_toSummarize and group_vars. Can group on multiple variables
-KNDy_summary_byGroup = function(var_toSummarize, df, group_vars){
+KNDy_summary_byGroup = function(var_toSummarize, df, group_vars, addName = TRUE){
   var_name = KNDy_VarNames[, var_toSummarize] #get the long name
   df = df %>%
+    filter(! is.na(!!!syms(var_toSummarize))) %>%
     group_by(!!!syms(group_vars)) %>% #this evaluates the string name to the symbols here
     summarize(
       Mean = mean(!!!syms(var_toSummarize), na.rm = TRUE),
@@ -78,11 +79,39 @@ KNDy_summary_byGroup = function(var_toSummarize, df, group_vars){
       n = n(),
       SEM = SD/sqrt(n),
       .groups = 'drop'
-    ) %>%
-    mutate(
-      Variable = var_toSummarize, #add columns to indicate what is summarized in each row
-      VarName = var_name
     )
+  if(addName){
+    df <- df %>%
+      mutate(
+        Variable = var_toSummarize, #add columns to indicate what is summarized in each row
+        VarName = var_name
+      )
+  }
+  return(df)
+}
+#Provide string name for columns for both var_toSummarize and group_vars. Can group on multiple variables
+KNDy_quantileSummary <- function( varToSummarize, df, group_vars, addName = TRUE) {
+  var_name = KNDy_VarNames[, varToSummarize]
+  df <- df %>%
+    filter(! is.na(!!!syms(varToSummarize))) %>%
+    group_by(!!!syms(group_vars)) %>%
+    summarize(
+      min = min(!!!syms(varToSummarize), na.rm = TRUE),
+      q1 = quantile(!!!syms(varToSummarize), 0.25, na.rm = TRUE),
+      median = median(!!!syms(varToSummarize), na.rm=TRUE),
+      q3 = quantile(!!!syms(varToSummarize), 0.75, na.rm=TRUE),
+      max = max(!!!syms(varToSummarize), na.rm = TRUE),
+      .groups = 'drop'
+    )
+  
+  if(addName){
+    df <- df %>%
+      mutate(
+        Variable = varToSummarize,
+        VarName = var_name
+      )
+  }
+  
   return(df)
 }
 
@@ -509,6 +538,32 @@ makeANOVA_TreatAge <- function(
   options(knitr.kable.NA = '')
   kabled_ANOVA <- kable(ANOVA, digits = 3, escape = FALSE)
   return(kabled_ANOVA)
+}
+
+makeANOVAgetVals_TreatAge <- function(
+  lm
+){
+  ANOVA <- Anova(lm, type = "III")
+  #remove intercept and reorder - Interaction, Treatment, Age Group, Residuals
+  ANOVA <- ANOVA[c(4, 2, 3, 5),]
+  #Update column names and row names
+  colnames(ANOVA) <- c("SS", "df", "<i>F</i>", "<i>p</i>")
+  rownames(ANOVA) <- c("Interaction", "Treatment", "Age Group", "Residuals")
+  #hide missing values in table
+  options(knitr.kable.NA = '')
+  kabled_ANOVA <- kable(ANOVA, digits = 3, escape = FALSE)
+  
+  p_interaction <- ANOVA[1, 4]
+  p_treat <- ANOVA[2, 4]
+  p_age <- ANOVA[3, 4]
+  return(
+    list(
+      kabled_ANOVA = kabled_ANOVA,
+      p_interaction = p_interaction,
+      p_treat = p_treat,
+      p_age = p_age
+    )
+  )
 }
 
 # slicer by Treatment - use with juvenile only df

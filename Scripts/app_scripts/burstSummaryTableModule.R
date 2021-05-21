@@ -247,8 +247,16 @@ burstSummaryTableServer <- function(
         data %>%
           filter(!is.na(!! input$var_toSummarize))%>%
           group_by(!!! input$group_vars) %>% #group by the grouping variables
+          # summarize(
+          #   quibble(!! input$var_toSummarize),
+          #   .groups = 'drop'
+          # )
           summarize(
-            quibble(!! input$var_toSummarize),
+            min = min(!! input$var_toSummarize, na.rm = TRUE),
+            q1 = quantile(!! input$var_toSummarize, 0.25, na.rm = TRUE),
+            median = median(!! input$var_toSummarize, na.rm=TRUE),
+            q3 = quantile(!! input$var_toSummarize, 0.75, na.rm=TRUE),
+            max = max(!! input$var_toSummarize, na.rm = TRUE),
             .groups = 'drop'
           )
       })
