@@ -61,7 +61,7 @@ cutoff value is specified by rateForQuiet
 
 If the order of the excel sheet changes, this function has to change
 ```{r Get-Data-Ready}
-allDFs <- GetDataReadyFunc(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firingRate, KNDy_burstData, KNDy_clusterData, rateForQuiet)
+allDFs <- GetDataReadyFunc(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firingRate, KNDy_burstData, KNDy_clusterData, rateForQuiet, KNDy_TimingData)
 
 KNDyDATA <-  allDFs$KNDyDATA
 KNDy_mouse_demo <- allDFs$KNDy_mouse_demo
