@@ -1,9 +1,12 @@
 ---
 title: "Burst Analysis"
-output: 
-  html_document: 
+output:
+  word_document:
+    toc: yes
+  html_document:
     df_print: paged
     toc: yes
+  always_allow_html: true
 ---
 
 ```{r setup, include=FALSE}
@@ -116,64 +119,214 @@ writeToWorkbook("KNDyData", KNDyDATA, KNDyAnalysisWB)
 KNDy_VarNames <- KNDy_varNamesFunc(KNDyDATA)
 ```
 
-# Data
-
-## KNDy Data - the full dataset
-
-This includes all cells, regardless of exlusion status, recording order, etc
-
 ```{r}
-KNDyDATA
+#Change evaluation from false for the relevant chunk for the analysis that you want to run the report on 
 ```
 
-## Filtered Data
-
-From here out, we are only using the first viable cell from each mouse, excluding main colony control animals, and excluding homozygous animals.
-
-```{r filterData}
-KNDyDATA <- KNDyDATA %>%
-  filter(
-    CellNum == 1,
-    Treatment != "Main Colony Control",
-    Zygosity != "homoPlus"
-  ) %>%
-  excludeFunc()
-KNDyDATA
-
-writeToWorkbook("filteredData", KNDyDATA, KNDyAnalysisWB)
-
-timingData <- KNDyDATA %>%
-  select(
-    CellID,
-    TreatxAge,
-    StartTime_spont,
-    EndTime_spont
-  ) %>%
-  mutate(
-    SCTName = paste0(CellID, "_sct")
-  ) %>%
-  select(
-    SCTName,
-    CellID,
-    TreatxAge,
-    StartTime_spont,
-    EndTime_spont
-  )
-
-writeToWorkbook("timingData", timingData, KNDyAnalysisWB)
+```{r eval=FALSE, include=FALSE}
+# 230ms burst, full spontaneous
+selectionReason <- "BW for Charlotte's paper"
+selectedBW <- 230
+analysisName <- "Full Spontaneous"
+bParamsInit <- read.csv(file.path(DataFolder, "burstAnalysisOutputs", "spont0.23.txt"), sep = "\t")
 ```
 
-```{r}
-# Select the burst parameters to be used for this analysis
+```{r eval=FALSE, include=FALSE}
+# 210ms burst, full spontaneous
+selectionReason <- "max BW for adult control"
 selectedBW <- 210
+analysisName <- "Full Spontaneous"
 bParamsInit <- read.csv(file.path(DataFolder, "burstAnalysisOutputs", "spont0.21.txt"), sep = "\t")
-bParamsInit <- as.data.frame(bParamsInit)
 ```
 
+```{r eval=FALSE, include=FALSE}
+# 180ms burst, full spontaneous
+selectionReason <- "max BW for control juveniles"
+selectedBW <- 180
+analysisName <- "Full Spontaneous"
+bParamsInit <- read.csv(file.path(DataFolder, "burstAnalysisOutputs", "spont0.18.txt"), sep = "\t")
+```
+
+```{r eval=FALSE, include=FALSE}
+# 100ms burst, full spontaneous
+selectionReason <- "max BW for PNA adults"
+selectedBW <- 100
+analysisName <- "Full Spontaneous"
+bParamsInit <- read.csv(file.path(DataFolder, "burstAnalysisOutputs", "spont0.1.txt"), sep = "\t")
+```
+
+```{r eval=FALSE, include=FALSE}
+# 330ms burst, full spontaneous
+selectionReason <- "max BW for PNA juveniles"
+selectedBW <- 330
+analysisName <- "Full Spontaneous"
+bParamsInit <- read.csv(file.path(DataFolder, "burstAnalysisOutputs", "spont0.33.txt"), sep = "\t")
+```
+
+```{r eval=FALSE, include=FALSE}
+# 230ms burst, First 20 min Spontaneous
+selectionReason <- "BW for Charlotte's paper & max BW for adult control"
+selectedBW <- 230
+analysisName <- "First 20 min Spontaneous"
+bParamsInit <- read.csv(file.path(DataFolder, "burstAnalysisOutputs", "spont_bin20_00.23.txt"), sep = "\t")
+```
+
+```{r eval=FALSE, include=FALSE}
+# 170ms burst, First 20 min Spontaneous
+selectionReason <- "max BW for control juveniles"
+selectedBW <- 170
+analysisName <- "First 20 min Spontaneous"
+bParamsInit <- read.csv(file.path(DataFolder, "burstAnalysisOutputs", "spont_bin20_00.17.txt"), sep = "\t")
+```
+
+```{r eval=FALSE, include=FALSE}
+# 550ms burst, First 20 min Spontaneous
+selectionReason <- "max BW for PNA adults"
+selectedBW <- 550
+analysisName <- "First 20 min Spontaneous"
+bParamsInit <- read.csv(file.path(DataFolder, "burstAnalysisOutputs", "spont_bin20_00.55.txt"), sep = "\t")
+```
+
+```{r eval=FALSE, include=FALSE}
+# 310ms burst, First 20 min Spontaneous
+selectionReason <- "max BW for PNA juveniles"
+selectedBW <- 310
+analysisName <- "First 20 min Spontaneous"
+bParamsInit <- read.csv(file.path(DataFolder, "burstAnalysisOutputs", "spont_bin20_00.31.txt"), sep = "\t")
+```
+
+```{r eval=FALSE, include=FALSE}
+# 230ms burst, First 60 min
+selectionReason <- "BW for Charlotte's paper"
+selectedBW <- 230
+analysisName <- "First 60 min"
+bParamsInit <- read.csv(file.path(DataFolder, "burstAnalysisOutputs", "spont_bin60_00.23.txt"), sep = "\t")
+```
+
+```{r eval=FALSE, include=FALSE}
+# 210ms burst, First 60 min
+selectionReason <- "max BW for adult control"
+selectedBW <- 210
+analysisName <- "First 60 min"
+bParamsInit <- read.csv(file.path(DataFolder, "burstAnalysisOutputs", "spont_bin60_00.21.txt"), sep = "\t")
+```
+
+```{r eval=FALSE, include=FALSE}
+# 300ms burst, First 60 min
+selectionReason <- "max BW for control juveniles"
+selectedBW <- 300
+analysisName <- "First 60 min"
+bParamsInit <- read.csv(file.path(DataFolder, "burstAnalysisOutputs", "spont_bin60_00.3.txt"), sep = "\t")
+```
+
+```{r eval=FALSE, include=FALSE}
+# 90ms burst, First 60 min
+selectionReason <- "max BW for PNA adults"
+selectedBW <- 90
+analysisName <- "First 60 min"
+bParamsInit <- read.csv(file.path(DataFolder, "burstAnalysisOutputs", "spont_bin60_00.09.txt"), sep = "\t")
+```
+
+```{r eval=FALSE, include=FALSE}
+# 340ms burst, First 60 min
+selectionReason <- "max BW for PNA juveniles"
+selectedBW <- 340
+analysisName <- "First 60 min"
+bParamsInit <- read.csv(file.path(DataFolder, "burstAnalysisOutputs", "spont_bin60_00.34.txt"), sep = "\t")
+```
+
+```{r eval=FALSE, include=FALSE}
+# 230ms burst, Full Spontaneous - Max 90min
+selectionReason <- "BW for Charlotte's paper"
+selectedBW <- 230
+analysisName <- "Full Spontaneous - Max 90min"
+bParamsInit <- read.csv(file.path(DataFolder, "burstAnalysisOutputs", "spontMax90m0.23.txt"), sep = "\t")
+```
+
+```{r eval=FALSE, include=FALSE}
+# 210ms burst, Full Spontaneous - Max 90min
+selectionReason <- "max BW for adult control"
+selectedBW <- 210
+analysisName <- "Full Spontaneous - Max 90min"
+bParamsInit <- read.csv(file.path(DataFolder, "burstAnalysisOutputs", "spontMax90m0.21.txt"), sep = "\t")
+```
+
+```{r eval=FALSE, include=FALSE}
+# 180ms burst, Full Spontaneous - Max 90min
+selectionReason <- "max BW for control juveniles"
+selectedBW <- 180
+analysisName <- "Full Spontaneous - Max 90min"
+bParamsInit <- read.csv(file.path(DataFolder, "burstAnalysisOutputs", "spontMax90m0.18.txt"), sep = "\t")
+```
+
+```{r eval=FALSE, include=FALSE}
+# 120ms burst, Full Spontaneous - Max 90min
+selectionReason <- "max BW for PNA adults"
+selectedBW <- 120
+analysisName <- "Full Spontaneous - Max 90min"
+bParamsInit <- read.csv(file.path(DataFolder, "burstAnalysisOutputs", "spontMax90m0.12.txt"), sep = "\t")
+```
+
+```{r eval=FALSE, include=FALSE}
+# 340ms burst, Full Spontaneous - Max 90min
+selectionReason <- "max BW for PNA juveniles"
+selectedBW <- 340
+analysisName <- "Full Spontaneous - Max 90min"
+bParamsInit <- read.csv(file.path(DataFolder, "burstAnalysisOutputs", "spontMax90m0.34.txt"), sep = "\t")
+```
+
+```{r eval=FALSE, include=FALSE}
+# 230ms burst, Full Spontaneous - Max 60min
+selectionReason <- "BW for Charlotte's paper"
+selectedBW <- 230
+analysisName <- "Full Spontaneous - Max 60min"
+bParamsInit <- read.csv(file.path(DataFolder, "burstAnalysisOutputs", "spontMax60m0.23.txt"), sep = "\t")
+```
+
+```{r eval=FALSE, include=FALSE}
+# 210ms burst, Full Spontaneous - Max 60min
+selectionReason <- "max BW for adult control"
+selectedBW <- 210
+analysisName <- "Full Spontaneous - Max 60min"
+bParamsInit <- read.csv(file.path(DataFolder, "burstAnalysisOutputs", "spontMax60m0.21.txt"), sep = "\t")
+```
+
+```{r eval=FALSE, include=FALSE}
+# 180ms burst, Full Spontaneous - Max 60min
+selectionReason <- "max BW for control juveniles"
+selectedBW <- 180
+analysisName <- "Full Spontaneous - Max 60min"
+bParamsInit <- read.csv(file.path(DataFolder, "burstAnalysisOutputs", "spontMax60m0.18.txt"), sep = "\t")
+```
+
+```{r eval=FALSE, include=FALSE}
+# 90ms burst, Full Spontaneous - Max 60min
+selectionReason <- "max BW for PNA adults"
+selectedBW <- 90
+analysisName <- "Full Spontaneous - Max 60min"
+bParamsInit <- read.csv(file.path(DataFolder, "burstAnalysisOutputs", "spontMax60m0.09.txt"), sep = "\t")
+```
 
 ```{r}
+# 340ms burst, Full Spontaneous - Max 60min
+selectionReason <- "max BW for PNA juveniles"
+selectedBW <- 340
+analysisName <- "Full Spontaneous - Max 60min"
+bParamsInit <- read.csv(file.path(DataFolder, "burstAnalysisOutputs", "spontMax60m0.34.txt"), sep = "\t")
+```
+
+# `r analysisName` - BW `r selectedBW`ms
+
+This burst window was `r selectionReason`.
+
+# Dataset
+```{r}
+# Add the demographic info to the burst params dataframe
+bParamsInit <- as.data.frame(bParamsInit)
 bParamsOut <- getBurstParamsDF(KNDyDATA, bParamsInit)
 bParamsDF <- bParamsOut$bParamsDF
+
+#filter
 bParamsDF <- bParamsDF %>%
   filter(
     CellNum == 1,
@@ -181,6 +334,8 @@ bParamsDF <- bParamsDF %>%
     Zygosity != "homoPlus"
   ) %>%
   excludeFunc()
+
+bParamsDF
 
 writeToWorkbook(paste0("bw", selectedBW), bParamsDF, KNDyAnalysisWB)
 ```
