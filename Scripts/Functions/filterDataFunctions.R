@@ -36,3 +36,11 @@ filterData <- function (df) {
     ) %>%
     excludeFunc()
 }
+
+
+filterDataGreater60min <- function(df) {
+  filteredDF <- df %>%
+    filter(
+      SpontLength_min >= 60
+    )
+}

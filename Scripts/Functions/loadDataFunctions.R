@@ -25,7 +25,7 @@ myXLSX_funcFileSelect = function(selPath, sheetName){
   )
 }
 
-loadBurstParamsData <- function(analysis, BurstOutputsFolder, demoDF){
+loadBurstParamsData <- function(analysis, BurstOutputsFolder, demoDF, filterGreater60 = FALSE){
   fileName = paste0(analysis, ".txt")
   bParamsInit <- read.csv(file.path(BurstOutputsFolder, fileName), sep = "\t")
   
@@ -33,6 +33,10 @@ loadBurstParamsData <- function(analysis, BurstOutputsFolder, demoDF){
   bParamsOut <- getBurstParamsDF(demoDF, bParamsInit)
   bParamsDF <- bParamsOut$bParamsDF
   bParamsDF <- filterData(bParamsDF)
+  
+  if(filterGreater60){
+    bParamsDF <- filterDataGreater60min(bParamsDF)
+  }
   return(bParamsDF)
   
 }

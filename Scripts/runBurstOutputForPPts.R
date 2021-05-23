@@ -32,6 +32,9 @@ pna3wkAnalyses <- burstAnalysisKey %>%
 bw230Analyses <- burstAnalysisKey %>%
   filter(BWfromCharlotte == TRUE)
 
+first20Analyses <- burstAnalysisKey %>%
+  filter(analysisName == "First 20 min")
+
 burstParameters <- exprs(
   tf,
   bf,
@@ -215,4 +218,19 @@ generatePPT_byAnalysisType(
   groupingVars,
   rateForQuiet,
   pptNameForSave = "AG_KNDyPNA_burstParams_fullSpontConAd"
+)
+
+# 20 minute data, filtered by only cells that fired for at least 60 min
+generatePPT_byAnalysisType(
+  burstParameters,
+  niceNamesDF = KNDy_VarNames,
+  binWidths,
+  dotSizes,
+  analysisKeyDF = first20Analyses,
+  analysisReason = NA,
+  demoDF = KNDyDATA,
+  groupingVars,
+  rateForQuiet,
+  pptNameForSave = "AG_KNDyPNA_burstParams_first20Min-removedLess60minTotal",
+  filterGreater60min = TRUE
 )

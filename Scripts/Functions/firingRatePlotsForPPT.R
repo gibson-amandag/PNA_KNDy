@@ -136,7 +136,7 @@ firingRatePlot_SingleCellFunc <- function(
   figWidth = 10,
   figHeight = NA,
   addFlag = FALSE,
-  flagText = NULL,
+  flagText = NA,
   genTreatment = NULL,
   ageGroup = NULL
 ){
