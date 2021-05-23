@@ -1,0 +1,466 @@
+---
+title: "testingOutput"
+author: "Amanda Gibson"
+date: "5/22/2021"
+output:
+  word_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
+# options(digits=3)
+```
+
+```{r callSetUp, message=FALSE, warning=FALSE}
+# # Set-up
+# The `AG_KNDyPNA_setup.R` file reads the .REnviron to load the appropriate files for the local computer. It also calls the appropriate libraries and sources the other function files to be used for analysis.
+# 
+# This file also loads the `KNDy_mouse_demo`, `KNDy_cells`, `KNDy_exclude`, `KNDy_firingRate`, `KNDy_cycles`, and other dataframes by reading the `KNDyPNA_Data` excel file.
+#This runs the setup script that loads the appropriate libraries and files
+source("./Scripts/AG_KNDyPNA_setup.R")
+
+library(flextable)
+doc.type <- knitr::opts_knit$get('rmarkdown.pandoc.to')
+```
+
+```{r ppt-setUp}
+#create a new powerpoint
+KNDy_PPT = read_pptx()
+
+#add a new title slide
+KNDy_PPT = add_slide(KNDy_PPT, layout = "Title Slide", master = "Office Theme")
+
+#Write "KNDy - PNA DATA" in the title slot
+KNDy_PPT = ph_with(KNDy_PPT, value = "KNDy - PNA Data", location = ph_location_label(ph_label = "Title 1"))
+
+#view the possible layout properties 
+#layout_properties(x = KNDy_PPT, layout = "Title Slide")
+
+# Save plots
+save = FALSE
+toPPT = TRUE
+ppt = KNDy_PPT
+
+```
+
+
+```{r Get-Data-Ready}
+
+# ## Get Data Ready
+# 
+# The `GetDataReadyFunc` function takes the `KNDy_mouse_demo` and `KNDy_cells` data frame to produce a combined `KNDyDATA` data frame.
+# 
+# This does the following transformations
+# 
+# * reformats the columns with dates into date format
+# * Creates a new variable Sac_9plus that is TRUE when the time of sacrifice is more than 9hr after lights on
+# * Creates a new variable AgeGroup that is TRUE when the mouse is a juvenile
+# * Creates a new variable Quiet that is TRUE when the spontaneous average firing rate is less than a cutoff value
+# cutoff value is specified by rateForQuiet
+# * Creates a new variable TreatxAge to generate four groups 
+#   + PNA - Adult
+#   + PNA - Juvenile
+#   + Control - Adult
+#   + Control - Juvenile
+# * Makes AgeGroup a factor, and gives it nice labels, Juvenile or Adult
+# * Gets rid of white space in the "Who" variable
+# * Makes Treatment a factor variable with orders "Main Colony Control", "Control", "Vehicle", "DHT"
+# * Combines the KNDy_exclude information
+# *Readjusts the order of variables within the KNDyDATA data frame to be a little more helpful.  
+# 
+# If the order of the excel sheet changes, this function has to change
+
+allDFs <- GetDataReadyFunc(
+  KNDy_mouse_demo, 
+  KNDy_cells, 
+  KNDy_exclude, 
+  KNDy_firingRate, 
+  KNDy_burstData, 
+  KNDy_clusterData, 
+  rateForQuiet, 
+  KNDy_TimingData
+  )
+
+KNDyDATA <-  allDFs$KNDyDATA
+KNDy_mouse_demo <- allDFs$KNDy_mouse_demo
+KNDy_cells <- allDFs$KNDy_cells
+KNDy_firingRate <- allDFs$KNDy_firingRate
+VBW_BurstsPerHour <- allDFs$VBW_BurstsPerHour
+VBW_BurstsPerHour_hour1 <- allDFs$VBW_BurstsPerHour_hour1
+
+#Store the dataframes as excel sheets
+KNDyAnalysisWB = createWorkbook()
+
+writeToWorkbook("KNDyData", KNDyDATA, KNDyAnalysisWB)
+```
+
+```{r KNDy_VarNames}
+# Creates the KNDy_VarNames data frame with the nice names for each variable
+# Creates the following lists or expressions of variable groups. 
+# There is a _quo which is quoted for each variable, or the basename version which is the exprs (expressions) list
+# 
+# - timingVars
+# - demoVarsAll
+# - BurstVars_spont
+# - numPeaksVars
+# - numNadirsVars
+# - meanPeakDurVars
+# - meanNadirDurVars
+# - totalPeakDurVars
+# - totalNadirDurVars
+# - meanPeakFiringVars
+# - meanNadirFiringVars
+# - allClusterVars
+# - cluster2x2SD_Vars
+# - cluster3x3SD_Vars
+# - cluster 2x2SE_Vars
+# - cluster 3x3SE_Vars
+
+KNDy_VarNames <- KNDy_varNamesFunc(KNDyDATA)
+```
+
+```{r}
+df <- KNDyDATA %>%
+  select(CellID, MouseID, SpontAvgFiring)
+
+if(doc.type == "docx"){flextable(df)} else {df}
+```
+
+```{r}
+allParamsExpr <- exprs(
+  bn,
+  bf
+)
+
+getMeanOfNumericVariables(bParamsDF %>% group_by(AgeGroup))
+
+doMeanSummaryNumVars(bParamsDF %>% group_by(AgeGroup))
+doQuartileSummaryNumVars(bParamsDF %>% group_by(AgeGroup))
+
+
+bParamsDF %>%
+  group_by(AgeGroup) %>%
+  summarise(
+    across(
+      bn,
+      meanSummaryList,
+      .names = "{.fn}"
+    ),
+    .groups = 'drop'
+  )
+
+param = allParamsExpr[1]
+
+bParamsDFGrouped <- bParamsDF %>% group_by(AgeGroup, GenTreatment)
+
+map_dfr(allParamsExpr, doMeanSummaryForColumn, bParamsDFGrouped, includeVarInColName = FALSE, addVarCol = TRUE)
+
+meanSum <- addColNameToSummary(meanSum, param, KNDy_VarNames)
+meanSum
+
+doQuartileSummaryForColumn(bParamsDF %>% group_by(AgeGroup), expr(bn), includeVarInColName = TRUE)
+
+addColNameToSummary(meanSum, expr(bn), KNDy_VarNames)
+
+output <- createMultiVarSummary_byGroup(allParamsExpr, bParamsDF, exprs(AgeGroup, GenTreatment))
+
+output$meanSums
+output$quartileSums
+
+tf <- createMeanAndQuartileSummary_forColumn(expr(tf), bParamsDF, exprs(AgeGroup, GenTreatment))
+tf$meanSums
+tf$quartileSums
+```
+```{r}
+#create a new powerpoint
+KNDy_PPT = read_pptx()
+
+#add a new title slide
+addTitleSlide_ppt(KNDy_PPT, "test")
+
+KNDy_PPT <- add_slide(KNDy_PPT)
+
+summaryTable <- qflextable(
+  tf$meanSums
+) %>%
+  fontsize(part = "all", size = 26) %>%
+  theme_zebra() %>%
+  align(align = "center", part = "all") %>%
+  colformat_num(j = c("mean", "SD", "SEM"), digits = 3) %>%
+  autofit(add_w = 0.2)
+
+KNDy_PPT <- ph_with(KNDy_PPT, summaryTable, location = ph_location_type(), alignment = "c")
+
+
+bParamsDF_contrasts <- makeTreatandAgeContrasts(bParamsDF)
+        
+model <- lm_byTreatxAge(expr(bf), bParamsDF_contrasts)
+
+ANOVA <- Anova(model, type = "III")
+#remove intercept and reorder - Interaction, Treatment, Age Group, Residuals
+ANOVA <- ANOVA[c(4, 2, 3, 5),]
+#Update column names and row names
+colnames(ANOVA) <- c("SS", "df", "F", "p")
+rownames(ANOVA) <- c("Interaction", "Treatment", "Age Group", "Residuals")
+
+ANOVA_table <- ANOVA %>%
+  rownames_to_column(var = " ") %>%
+  qflextable() %>%
+  italic(j = c("F", "p"), part = "header") %>%
+  bold(~ p < 0.05) %>%
+  fontsize(part = "all", size = 28) %>%
+  colformat_num(j = c("SS", "F", "p"), digits = 3) %>%
+  autofit(add_w = 0.2)
+
+
+KNDy_PPT <- add_slide(KNDy_PPT)
+KNDy_PPT <- ph_with(KNDy_PPT, ANOVA_table, location = ph_location_type(), alignment = "c")
+
+# layout_properties(KNDy_PPT, layout = "Title and Content")
+
+print(KNDy_PPT, target = file.path(DataOutputFolder, "test.pptx"))
+```
+
+```{r}
+
+```
+
+```{r}
+newPPT <- read_pptx()
+
+addTitleSlide_ppt(newPPT, "Test 2")
+
+summaryTable <- formatMeanSummaryTableForPPT(tf$meanSums)
+addTableContent_ppt(newPPT, summaryTable, "Total Frequency Means")
+
+ANOVA_table <- formatANOVAforPPT(ANOVA)
+newPPT <- addTableContent_ppt(newPPT, ANOVA_table, "ANOVA for Total Frequency")
+
+newPPT <- ph_with(
+  newPPT,
+  value = "test",
+  location = ph_location(left = 1, top = 5, width = 8)
+)
+
+# newPPT <- ph_with(
+#   newPPT,
+#   value = block_list(
+#     fpar(
+#       ftext("test", prop = fp_text(font.size = 20))
+#     )
+#   ),
+#   location = ph_location(left = 1, width = 8)
+# )
+
+summaryTable <- formatQuartileSummaryTableForPPT(tf$quartileSums)
+addTableContent_ppt(newPPT, summaryTable, "Total Frequency Quartiles")
+
+newPPT <- addKNDyCellCountToPPT(bParamsDF, groupingVars = groupingVars, newPPT)
+
+print(newPPT, target = file.path(DataOutputFolder, "test2.pptx"))
+
+```
+
+```{r}
+burstParameters <- exprs(
+  tf,
+  bf,
+  mbd,
+  spb,
+  intra,
+  ssf,
+  inter
+)
+
+binWidths <- list(
+  tf = 0.04,
+  bf = 0.007,
+  mbd = NA,
+  spb = NA,
+  intra = NA,
+  ssf = 0.02,
+  inter = NA
+)
+
+dotSizes <- list(
+  tf = 3,
+  bf = 3,
+  mbd = 1,
+  spb = 1,
+  intra = 1,
+  ssf = 3,
+  inter = 1
+)
+
+groupingVars <- exprs(AgeGroup, GenTreatment)
+
+analysisName = "test"
+bParamsDF_contrasts <- makeTreatandAgeContrasts(bParamsDF)
+
+burstPPT <- read_pptx()
+addTitleSlide_ppt(burstPPT, "Burst Parameters")
+
+# burstPPT <- addCellCountToPPT(bParamsDF, groupingVars, burstPPT)
+# burstPPT <- addFiringCountToPPT(bParamsDF, groupingVars, rateForQuiet, burstPPT)
+burstPPT <- addCountLittersCellsFiringToPPT(bParamsDF, groupingVars, rateForQuiet, burstPPT)
+
+for(param in burstParameters){
+  paramName <- KNDy_VarNames[,as.character(param)]
+  binWidth <- as.numeric(binWidths[as.character(param)])
+  if(is.na(binWidth)){
+    binWidth = NULL
+  }
+  dotSize <- as.numeric(dotSizes[as.character(param)])
+  
+  addParamSlidesToPPT(
+    bParamsDF, 
+    bParamsDF_contrasts, 
+    param, 
+    paramName, 
+    binWidth, 
+    dotSize, 
+    groupingVars, 
+    burstPPT
+  )
+}
+pptTitle = paste0(analysisName, ".pptx")
+print(burstPPT, target = file.path(DataOutputFolder, pptTitle))
+```
+
+```{r}
+#This groups by analysis and then by parameter type
+filteredAnalyses <- burstAnalysisKey %>%
+  filter(ConAdBW == TRUE)
+
+burstPPT <- read_pptx()
+burstPPT <- addTitleSlide_ppt(burstPPT, "Burst Parameters")
+
+for(row in 1:nrow(filteredAnalyses)){
+  analysis <- filteredAnalyses[row, "specAnalysisName"]
+  bw <- filteredAnalyses[row, "bw"]
+  analysisName <- filteredAnalyses[row, "analysisName"]
+  analysisReason <- "Control Adult BW"
+  
+  fileName = paste0(analysis, ".txt")
+  bParamsInit <- read.csv(file.path(BurstOutputsFolder, fileName), sep = "\t")
+  
+  # Add the demographic info to the burst params dataframe
+  bParamsOut <- getBurstParamsDF(KNDyDATA, bParamsInit)
+  bParamsDF <- bParamsOut$bParamsDF
+  bParamsDF <- filterData(bParamsDF)
+  
+  bParamsDF_contrasts <- makeTreatandAgeContrasts(bParamsDF)
+  
+  titleText <- block_list(
+    fpar(
+      ftext(analysisName, prop = fp_text(font.size = 30))
+    ),
+    fpar(
+      ftext(paste("For Burst Window of", bw, "ms"), prop = fp_text(font.size = 30))
+    ),
+    fpar(
+      ftext(paste("This was the", analysisReason), prop = fp_text(font.size = 30))
+    )
+  )
+  
+  burstPPT <- addTitleSlide_ppt(burstPPT, titleText = titleText)
+  
+  burstPPT <- addCountLittersCellsFiringToPPT(bParamsDF, groupingVars, rateForQuiet, burstPPT)
+  
+  for(param in burstParameters){
+    paramName <- KNDy_VarNames[,as.character(param)]
+    binWidth <- as.numeric(binWidths[as.character(param)])
+    if(is.na(binWidth)){
+      binWidth = NULL
+    }
+    dotSize <- as.numeric(dotSizes[as.character(param)])
+    
+    addParamSlidesToPPT(
+      bParamsDF, 
+      bParamsDF_contrasts, 
+      param, 
+      paramName, 
+      binWidth, 
+      dotSize, 
+      groupingVars, 
+      burstPPT
+    )
+  }
+}
+pptTitle = paste0("conAdultBWs", ".pptx")
+print(burstPPT, target = file.path(DataOutputFolder, pptTitle))
+
+```
+
+```{r}
+filteredAnalyses <- burstAnalysisKey %>%
+  filter(ConAdBW == TRUE)
+
+burstPPT <- read_pptx()
+burstPPT <- addTitleSlide_ppt(burstPPT, "Burst Parameters")
+
+for(param in burstParameters){
+  paramName <- KNDy_VarNames[,as.character(param)]
+  binWidth <- as.numeric(binWidths[as.character(param)])
+  if(is.na(binWidth)){
+    binWidth = NULL
+  }
+  dotSize <- as.numeric(dotSizes[as.character(param)])
+  
+  
+  for(row in 1:nrow(filteredAnalyses)){
+    analysis <- filteredAnalyses[row, "specAnalysisName"]
+    bw <- filteredAnalyses[row, "bw"]
+    analysisName <- filteredAnalyses[row, "analysisName"]
+    analysisReason <- "Control Adult BW"
+    
+    fileName = paste0(analysis, ".txt")
+    bParamsInit <- read.csv(file.path(BurstOutputsFolder, fileName), sep = "\t")
+    
+    # Add the demographic info to the burst params dataframe
+    bParamsOut <- getBurstParamsDF(KNDyDATA, bParamsInit)
+    bParamsDF <- bParamsOut$bParamsDF
+    bParamsDF <- filterData(bParamsDF)
+
+    bParamsDF_contrasts <- makeTreatandAgeContrasts(bParamsDF)
+    
+    burstPPT <- addAnalysisTypeTitle_ppt(analysisName, bw, analysisReason, burstPPT)
+    
+    if(as.character(param) == "tf"){ #only add once
+      burstPPT <- addCountLittersCellsFiringToPPT(bParamsDF, groupingVars, rateForQuiet, burstPPT)
+    }
+    
+    addParamSlidesToPPT(
+      bParamsDF, 
+      bParamsDF_contrasts, 
+      param, 
+      paramName, 
+      binWidth, 
+      dotSize, 
+      groupingVars, 
+      burstPPT
+    )
+  }
+}
+pptTitle = paste0("conAdultBWsByParam", ".pptx")
+print(burstPPT, target = file.path(DataOutputFolder, pptTitle))
+```
+
+```{r}
+loadBurstParamsData("spont_bin20_00.23", BurstOutputsFolder = BurstOutputsFolder, KNDyDATA) %>% filter(SpontLength_min < 60)
+
+newPPT <- read_pptx()
+
+firingRatePlot_SingleCellFunc(
+  cellID = "20200918a",
+  df = KNDy_firingRate %>% left_join(KNDyDATA),
+  toPPT = TRUE,
+  ppt = newPPT
+)
+
+print(newPPT, target = file.path(DataOutputFolder, "20200918a plot.pptx"))
+```
+
+
