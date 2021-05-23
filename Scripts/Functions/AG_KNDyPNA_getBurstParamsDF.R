@@ -17,6 +17,8 @@
 #Returns a list with the three data frames
 
 getBurstParamsDF = function(KNDyDATA, bParamsDF){
+  bParamsDF <- as.data.frame(bParamsDF)
+  
   if("cellName" %in% colnames(bParamsDF)){
     bParamsDF <- bParamsDF %>% rename(CellID = cellName)
   }

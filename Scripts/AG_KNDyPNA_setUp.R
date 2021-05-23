@@ -53,6 +53,7 @@ FunctionsFolder <- file.path(ScriptsFolder, "Functions")
 
 #Where data files are saved - defined in .Renviron
 DataFolder <- Sys.getenv("DATA_FOLDER")
+BurstOutputsFolder <- file.path(DataFolder, "burstAnalysisOutputs")
 
 #Where output, like plots, should be saved
 #Output folder defined in .Renviron for local system
@@ -76,6 +77,17 @@ source(file.path(FunctionsFolder, FunctionsFileName))
 source(file.path(FunctionsFolder, GraphFunctionsFileName))
 source(file.path(FunctionsFolder, DateTrackingFileName))
 source(file.path(FunctionsFolder, BurstParamsFileName))
+source(file.path(FunctionsFolder, "loadDataFunctions.R"))
+source(file.path(FunctionsFolder, "formatDataFunctions.R"))
+source(file.path(FunctionsFolder, "filterDataFunctions.R"))
+source(file.path(FunctionsFolder, "summarizeDataFunctions.R"))
+source(file.path(FunctionsFolder, "writeToExcelFilesFunctions.R"))
+source(file.path(FunctionsFolder, "makeSpecificANOVAsFunctions.R"))
+source(file.path(FunctionsFolder, "makeLongFormFunctions.R"))
+source(file.path(FunctionsFolder, "firingRatePlotsForPPT.R"))
+source(file.path(FunctionsFolder, "savePlotsFunctions.R"))
+source(file.path(FunctionsFolder, "addToPPTfunctions.R"))
+source(file.path(FunctionsFolder, "generateBurstParamsPPTs.R"))
 
 #Load datasets
 KNDy_mouse_demo <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, MouseInfoSheetName)
@@ -86,6 +98,8 @@ KNDy_cycles <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, CyclesSheetName)
 KNDy_burstData <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, BurstSheetName)
 KNDy_clusterData <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, ClusterSheetName)
 KNDy_TimingData <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, TimingSheetName)
+
+burstAnalysisKey <- myXLSX_func(BurstOutputsFolder, "analysisTypesKey.xlsx", "Sheet1")
 
 #Burst datasets
 bursts_spont_230ms <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, BWSheetName_spont_230ms)
