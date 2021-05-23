@@ -234,3 +234,18 @@ generatePPT_byAnalysisType(
   pptNameForSave = "AG_KNDyPNA_burstParams_first20Min-removedLess60minTotal",
   filterGreater60min = TRUE
 )
+
+#20 minute data, including those <60 min total
+generatePPT_byAnalysisType(
+  burstParameters,
+  niceNamesDF = KNDy_VarNames,
+  binWidths,
+  dotSizes,
+  analysisKeyDF = first20Analyses,
+  analysisReason = NA,
+  demoDF = KNDyDATA,
+  groupingVars,
+  rateForQuiet,
+  pptNameForSave = "AG_KNDyPNA_burstParams_first20Min",
+  filterGreater60min = FALSE
+)
