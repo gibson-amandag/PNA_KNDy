@@ -23,6 +23,8 @@
 # install.packages("openxlsx")
 # install.packages("car")
 # install.packages("kableExtra")
+# install.packages("DT")
+# install.packages("car")
 
 source("./Scripts/AG_KNDyPNA_setup.R")
 

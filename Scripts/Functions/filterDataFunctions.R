@@ -25,6 +25,7 @@ sep_by_age = function(df){
 excludeFunc = function(df){
   df = df %>%
     filter(Exclude == FALSE | is.na(Exclude)) #remove excluded cells
+  return(df)
 }
 
 filterData <- function (df) {
@@ -35,6 +36,17 @@ filterData <- function (df) {
       Zygosity != "homoPlus"
     ) %>%
     excludeFunc()
+  return(filteredDF)
+}
+
+filterData_RemoveMainCol_Homozy_Excluded <- function(df) {
+  filteredDF <- df %>%
+    filter(
+      Treatment != "Main Colony Control",
+      Zygosity != "homoPlus"
+    ) %>%
+    excludeFunc()
+  return(filteredDF)
 }
 
 
@@ -43,4 +55,5 @@ filterDataGreater60min <- function(df) {
     filter(
       SpontLength_min >= 60
     )
+  return(filteredDF)
 }

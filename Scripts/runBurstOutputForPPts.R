@@ -249,3 +249,36 @@ generatePPT_byAnalysisType(
   pptNameForSave = "AG_KNDyPNA_burstParams_first20Min",
   filterGreater60min = FALSE
 )
+
+burstParameters_tfBf <- exprs(
+  tf,
+  bf
+)
+
+binWidths_tfBf <- list(
+  tf = 0.04,
+  bf = 0.007
+)
+
+dotSizes_tfBF <- list(
+  tf = 3,
+  bf = 3
+)
+
+bw230Analyses_inc2nd3rd <- burstAnalysisKey_inc2nd3rd %>%
+  filter(BWfromCharlotte == TRUE)
+
+generatePPT_byBurstParam(
+  burstParameters_tfBf,
+  niceNamesDF = KNDy_VarNames,
+  binWidths_tfBf,
+  dotSizes_tfBF,
+  analysisKeyDF = bw230Analyses_inc2nd3rd,
+  analysisReason = "BW in Charlotte's Paper",
+  demoDF = KNDyDATA,
+  groupingVars,
+  rateForQuiet,
+  pptNameForSave = "AG_KNDyPNA_230bw_spont_inc2nd3rdCells_tfBf",
+  percBursting = TRUE,
+  incSecondThird = TRUE
+)
