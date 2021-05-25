@@ -41,7 +41,12 @@ loadBurstParamsData <- function(
   # Add the demographic info to the burst params dataframe
   bParamsOut <- getBurstParamsDF(demoDF, bParamsInit)
   bParamsDF <- bParamsOut$bParamsDF
-  bParamsDF <- filterData(bParamsDF)
+  if(incSecondThird){
+    bParamsDF <- filterData_RemoveMainCol_Homozy_Excluded(bParamsDF)
+  } else {
+    #only first cells, not excluded, not main colony, not homozygous
+    bParamsDF <- filterData(bParamsDF)
+  }
   
   if(filterGreater60){
     bParamsDF <- filterDataGreater60min(bParamsDF)
