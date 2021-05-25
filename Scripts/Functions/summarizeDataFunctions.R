@@ -93,7 +93,7 @@ doMeanSummaryForColumn <- function(col, df, includeVarInColName = TRUE, addVarCo
   sumDF <- df %>%
     summarise(
       across(
-        !! col, #from !!!
+        !!! col, #from !!!
         meanSummaryList,
         .names = colNames
       ),
@@ -120,7 +120,7 @@ doQuartileSummaryForColumn <- function(col, df, includeVarInColName = TRUE, addV
   sumDF <- df %>%
     summarise(
       across(
-        !! col, #from !!!
+        !!! col, #from !!!
         quartilesSummaryList,
         .names = colNames
       ),
