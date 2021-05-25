@@ -100,6 +100,7 @@ KNDy_clusterData <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, ClusterSheetName
 KNDy_TimingData <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, TimingSheetName)
 
 burstAnalysisKey <- myXLSX_func(BurstOutputsFolder, "analysisTypesKey.xlsx", "Sheet1")
+burstAnalysisKey_inc2nd3rd <- myXLSX_func(BurstOutputsFolder, "analysisTypesKey.xlsx", "IncSecondThird")
 
 #Burst datasets
 bursts_spont_230ms <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, BWSheetName_spont_230ms)

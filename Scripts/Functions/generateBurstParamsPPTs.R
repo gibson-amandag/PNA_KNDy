@@ -9,7 +9,9 @@ generatePPT_byBurstParam <- function(
   groupingVars,
   rateForQuiet,
   pptNameForSave,
-  filterGreater60min = FALSE
+  filterGreater60min = FALSE,
+  percBursting = FALSE,
+  incSecondThird = FALSE
 ){
   burstPPT <- read_pptx()
   burstPPT <- addTitleSlide_ppt(burstPPT, "Burst Parameters")
@@ -31,13 +33,17 @@ generatePPT_byBurstParam <- function(
       if(is.na(analysisReason)){
         analysisReason = getAnalysisReason(analysisKeyDF, row)
       }
-      bParamsDF <- loadBurstParamsData(analysis, BurstOutputsFolder, demoDF, filterGreater60 = filterGreater60min)
+      bParamsDF <- loadBurstParamsData(analysis, BurstOutputsFolder, demoDF, filterGreater60 = filterGreater60min, incSecondThird = incSecondThird)
       bParamsDF_contrasts <- makeTreatandAgeContrasts(bParamsDF)
       
       burstPPT <- addAnalysisTypeTitle_ppt(analysisName, bw, analysisReason, burstPPT)
       
       if(as.character(param) == "tf"){ #only add once
-        burstPPT <- addCountLittersCellsFiringToPPT(bParamsDF, groupingVars, rateForQuiet, burstPPT)
+        if(percBursting){
+          burstPPT <- addPercFiringBurstsToPPT(bParamsDF, groupingVars, rateForQuiet, burstPPT)
+        } else {
+          burstPPT <- addCountLittersCellsFiringToPPT(bParamsDF, groupingVars, rateForQuiet, burstPPT)
+        }
       }
       
       addParamSlidesToPPT(
@@ -67,7 +73,9 @@ generatePPT_byAnalysisType <- function(
   groupingVars,
   rateForQuiet,
   pptNameForSave,
-  filterGreater60min = FALSE
+  filterGreater60min = FALSE,
+  percBursting = FALSE,
+  incSecondThird = FALSE
 ){
   burstPPT <- read_pptx()
   burstPPT <- addTitleSlide_ppt(burstPPT, "Burst Parameters")
@@ -81,12 +89,16 @@ generatePPT_byAnalysisType <- function(
       analysisReason <- getAnalysisReason(analysisKeyDF, row)
     }
     
-    bParamsDF <- loadBurstParamsData(analysis, BurstOutputsFolder, demoDF, filterGreater60 = filterGreater60min)
+    bParamsDF <- loadBurstParamsData(analysis, BurstOutputsFolder, demoDF, filterGreater60 = filterGreater60min, incSecondThird = incSecondThird)
     bParamsDF_contrasts <- makeTreatandAgeContrasts(bParamsDF)
   
     burstPPT <- addAnalysisTypeTitle_ppt(analysisName, bw, analysisReason, burstPPT)
     
-    burstPPT <- addCountLittersCellsFiringToPPT(bParamsDF, groupingVars, rateForQuiet, burstPPT)
+    if(percBursting){
+      burstPPT <- addPercFiringBurstsToPPT(bParamsDF, groupingVars, rateForQuiet, burstPPT)
+    } else {
+      burstPPT <- addCountLittersCellsFiringToPPT(bParamsDF, groupingVars, rateForQuiet, burstPPT)
+    }
     
     for(param in burstParameters){
       paramName <- niceNamesDF[,as.character(param)]

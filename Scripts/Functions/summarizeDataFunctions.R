@@ -93,7 +93,7 @@ doMeanSummaryForColumn <- function(col, df, includeVarInColName = TRUE, addVarCo
   sumDF <- df %>%
     summarise(
       across(
-        !!! col,
+        !! col, #from !!!
         meanSummaryList,
         .names = colNames
       ),
@@ -120,7 +120,7 @@ doQuartileSummaryForColumn <- function(col, df, includeVarInColName = TRUE, addV
   sumDF <- df %>%
     summarise(
       across(
-        !!! col,
+        !! col, #from !!!
         quartilesSummaryList,
         .names = colNames
       ),
@@ -199,6 +199,29 @@ countLittersCellsFiring <- function(df, groupingVars, rateForQuiet){
       .groups = "drop"
     )
   return(count)
+}
+
+countLittersCellsFiringBursting <- function(df, groupingVars, rateForQuiet){
+  count <- df %>%
+    filter(
+      !is.na(tf)
+    ) %>%
+    select(
+      !!! groupingVars,
+      Cage,
+      tf,
+      bf
+    ) %>%
+    group_by(!!! groupingVars) %>%
+    summarise(
+      numLitters = length(unique(Cage)),
+      numCells = n(),
+      numFiring = sum(tf > rateForQuiet),
+      "%Firing" = round((numFiring / numCells) * 100, 2),
+      numBursting = sum(bf > 0),
+      "%Bursting" = round((numBursting / numCells) * 100, 2),
+      .groups = "drop"
+    )
 }
 
 

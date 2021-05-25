@@ -25,8 +25,17 @@ myXLSX_funcFileSelect = function(selPath, sheetName){
   )
 }
 
-loadBurstParamsData <- function(analysis, BurstOutputsFolder, demoDF, filterGreater60 = FALSE){
+loadBurstParamsData <- function(
+  analysis, 
+  BurstOutputsFolder, 
+  demoDF, 
+  filterGreater60 = FALSE, 
+  incSecondThird = FALSE
+){
   fileName = paste0(analysis, ".txt")
+  if(incSecondThird){
+    BurstOutputsFolder <- file.path(BurstOutputsFolder, "include2nd3rdCells")
+  }
   bParamsInit <- read.csv(file.path(BurstOutputsFolder, fileName), sep = "\t")
   
   # Add the demographic info to the burst params dataframe

@@ -259,3 +259,11 @@ addCountLittersCellsFiringToPPT <- function(df, groupingVars, rateForQuiet, ppt)
   
   ppt <- addTableContent_ppt(ppt, countTable, titleText = paste0("Number of Cells (Firing is defined as >", rateForQuiet, "Hz)"))
 }
+
+addPercFiringBurstsToPPT <- function(df, groupingVars, rateForQuiet, ppt){
+  count <- countLittersCellsFiringBursting(df, groupingVars, rateForQuiet)
+  
+  countTable <- formatCountTableForPPT(count)
+  
+  ppt <- addTableContent_ppt(ppt, countTable, titleText = paste0("Number of Cells (Firing is defined as >", rateForQuiet, "Hz)"))
+}
