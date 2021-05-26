@@ -36,13 +36,14 @@ loadBurstParamsData <- function(
   if(incSecondThird){
     BurstOutputsFolder <- file.path(BurstOutputsFolder, "include2nd3rdCells")
   }
+  print(BurstOutputsFolder)
   bParamsInit <- read.csv(file.path(BurstOutputsFolder, fileName), sep = "\t")
   
   # Add the demographic info to the burst params dataframe
   bParamsOut <- getBurstParamsDF(demoDF, bParamsInit)
   bParamsDF <- bParamsOut$bParamsDF
   if(incSecondThird){
-    bParamsDF <- filterData_RemoveMainCol_Homozy_Excluded(bParamsDF)
+    bParamsDF <- filterData_RemoveMainCol_Homozy_Excluded(bParamsDF) %>% filter(CellNum != 3)
   } else {
     #only first cells, not excluded, not main colony, not homozygous
     bParamsDF <- filterData(bParamsDF)

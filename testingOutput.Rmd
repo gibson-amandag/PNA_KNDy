@@ -464,3 +464,127 @@ print(newPPT, target = file.path(DataOutputFolder, "20200918a plot.pptx"))
 ```
 
 
+```{r}
+secondCellsAdPNA = KNDyDATA %>%
+  filter(CellNum == 2,
+         Exclude != TRUE,
+         AgeGroup == "Adult",
+         GenTreatment == "PNA")
+
+secondCells = KNDyDATA %>%
+  filter(CellNum == 2,
+         Exclude != TRUE) %>%
+  group_by(GenTreatment, AgeGroup)
+
+doMeanSummaryForColumn(expr(SpontAvgFiring), secondCells)
+doMeanSummaryForColumn()
+
+KNDyDATA %>%
+  filter(CellNum == 3,
+         Exclude != TRUE,
+         AgeGroup == "Adult",
+         GenTreatment == "PNA")
+
+df <- KNDyDATA %>%
+  excludeFunc()
+
+df
+```
+
+```{r}
+bParamsDF <- loadBurstParamsData("spont0.23", BurstOutputsFolder = BurstOutputsFolder, KNDyDATA, incSecondThird = TRUE)
+
+bParamsDF_contrasts <- makeTreatandAgeContrasts(bParamsDF)
+
+newPPT <- read_pptx()
+param = params[1]
+paramName = as.character(KNDy_VarNames[, as.character(param)])
+
+groupingVars <- exprs(AgeGroup, GenTreatment)
+
+# newPPT <- addParamSlidesToPPT(
+#   bParamsDF, 
+#   bParamsDF_contrasts, 
+#   param, 
+#   paramName, 
+#   0.007, 
+#   3, 
+#   groupingVars, 
+#   newPPT
+# )
+
+params = exprs(tf, bf)
+binWidths = list(
+  tf = 0.04,
+  bf = 0.004
+)
+
+dotSizes <- list(
+  tf = 3,
+  bf = 3
+)
+
+generatePPT_byBurstParam(
+  params,
+  niceNamesDF = KNDy_VarNames,
+  binWidths,
+  dotSizes,
+  analysisKeyDF = burstAnalysisKey_inc2nd3rd,
+  analysisReason = NA,
+  demoDF = KNDyDATA,
+  groupingVars = groupingVars,
+  rateForQuiet,
+  pptNameForSave = "AG_KNDyPNA_230bw_spont_inc2nd3rdCells_tfBf",
+  percBursting = TRUE,
+  incSecondThird = TRUE
+)
+
+generatePPT_byBurstParam(
+  params,
+  niceNamesDF = KNDy_VarNames,
+  binWidths,
+  dotSizes,
+  analysisKeyDF = burstAnalysisKey %>% filter(specAnalysisName == "spont0.23"),
+  analysisReason = NA,
+  demoDF = KNDyDATA,
+  groupingVars = groupingVars,
+  rateForQuiet,
+  pptNameForSave = "AG_KNDyPNA_230bw_spont_firstCells_tfBf",
+  percBursting = TRUE,
+  incSecondThird = FALSE
+)
+
+generatePPT_byBurstParam(
+  params,
+  niceNamesDF = KNDy_VarNames,
+  binWidths,
+  dotSizes,
+  analysisKeyDF = burstAnalysisKey_inc2nd3rd %>% filter(specAnalysisName == "spont0.23"),
+  analysisReason = NA,
+  demoDF = KNDyDATA,
+  groupingVars = groupingVars,
+  rateForQuiet,
+  pptNameForSave = "AG_KNDyPNA_230bw_spont_firstSecondCells_tfBf",
+  percBursting = TRUE,
+  incSecondThird = TRUE
+)
+```
+
+```{r}
+KNDyDATA %>%
+  excludeFunc() %>%
+  filter(
+    Treatment != "Main Colony Control"
+  ) %>%
+  filter(
+    CellNum == 3
+  ) 
+# %>%
+#   group_by(
+#     AgeGroup, GenTreatment
+#   ) %>%
+#   summarise(
+#     n()
+#   )
+```
+

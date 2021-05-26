@@ -250,20 +250,7 @@ generatePPT_byAnalysisType(
   filterGreater60min = FALSE
 )
 
-burstParameters_tfBf <- exprs(
-  tf,
-  bf
-)
 
-binWidths_tfBf <- list(
-  tf = 0.04,
-  bf = 0.007
-)
-
-dotSizes_tfBF <- list(
-  tf = 3,
-  bf = 3
-)
 
 bw230Analyses_inc2nd3rd <- burstAnalysisKey_inc2nd3rd %>%
   filter(BWfromCharlotte == TRUE)
