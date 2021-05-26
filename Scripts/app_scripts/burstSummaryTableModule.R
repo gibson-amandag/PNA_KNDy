@@ -179,18 +179,18 @@ burstSummaryTableUI <- function(
       tabPanel(
         "%Firing",
         h2("Cell Counts"),
-        shiny::tableOutput(ns("countDF"))
+        shiny::dataTableOutput(ns("countDF"))
       ),
       tabPanel(
         "Mean Summaries",
         h2("Mean Summaries"),
         #create a space for the data table output
-        shiny::tableOutput(ns("summarydf"))
+        shiny::dataTableOutput(ns("summarydf"))
       ),
       tabPanel(
         "Quartile Summaries",
         h2("Quartile Summaries"),
-        shiny::tableOutput(ns("quartiledf"))
+        shiny::dataTableOutput(ns("quartiledf"))
       ),
       tabPanel(
         "ANOVA",
@@ -424,7 +424,7 @@ burstSummaryTableServer <- function(
         return(groupedDF)
       })
       
-      output$countDF <- shiny::renderTable({
+      output$countDF <- shiny::renderDataTable({
         data <- excludingSelectedDF()
         
         sum <- countLittersCellsFiringBursting(
@@ -433,12 +433,10 @@ burstSummaryTableServer <- function(
           input$rateForQuiet
         )
         return(sum)
-        },
-        digits = 2,
-        striped = TRUE
+        }
       )
       
-      output$summarydf <- shiny::renderTable(
+      output$summarydf <- shiny::renderDataTable(
         {data <- groupedDF() %>%
           filter(!is.na(!! input$var_toSummarize))
           
@@ -450,12 +448,10 @@ burstSummaryTableServer <- function(
           niceNamesDF = KNDy_VarNames
         )
         return(sum)
-        },
-        digits = 4,
-        striped = TRUE
+        }
       )
 
-      output$quartiledf <- shiny::renderTable(
+      output$quartiledf <- shiny::renderDataTable(
         {data <- groupedDF() %>%
           filter(!is.na(!! input$var_toSummarize))
         
@@ -467,9 +463,7 @@ burstSummaryTableServer <- function(
           niceNamesDF = KNDy_VarNames
         )
         return(sum)
-        },
-        digits = 4,
-        striped = TRUE
+        }
       )
       
       output$ANOVA_table <- renderText({
