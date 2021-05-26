@@ -32,6 +32,99 @@ burstSummaryTableUI <- function(
       )
     ),
     
+    fluidRow(
+      column(
+        4,
+        #which dataset?
+        radioButtons(
+          inputId = ns("dataset"), 
+          label = "Which ages?",
+          choices = list(
+            "All",
+            "Adults",
+            "Juveniles"
+          ),
+          selected = "All"
+        ),
+      ),
+      column(
+        4,
+        numericInput(
+          ns("rateForQuiet"),
+          label = "Enter cut-off for quiet:",
+          value = 0.005
+        ),
+        #Which activity levels to include
+        radioButtons(
+          inputId = ns("firing"), 
+          label = "Select level of activity:",
+          choices = list(
+            "All",
+            "Quiescent",
+            "Non-quiescent"
+          ),
+          selected = "All"
+        )
+      ),
+      column(
+        4,
+        #Who recorded
+        radioButtons(
+          inputId = ns("whoRecordedSel"), 
+          label = "Select recording experimenter:",
+          choices = list(
+            "Both",
+            "Amanda",
+            "Jenn"
+          ),
+          selected = "Both"
+        )
+      )
+    ),
+    fluidRow(
+      column(
+        4,
+        # Which mouse numbers
+        uiOutput(ns("mouseNumUI"))
+        # selectInput(
+        #   ns("mouseNum"),
+        #   "Which mice numbers (order sac'd)?",
+        #   choices = levels(data$MouseNum),
+        #   multiple = TRUE,
+        #   selected = levels(data$MouseNum)
+        # )
+      ),
+      column(
+        4,
+        #Which cell numbers
+        uiOutput(ns("cellNumUI"))
+        # selectInput(
+        #   ns("cellNum"),
+        #   "Which cell numbers (order recorded)?",
+        #   choices = levels(data$CellNum),
+        #   multiple = TRUE,
+        #   selected = "1"
+        # )
+      ),
+      column(
+        4,
+        # #Exclude - the cell numbers take care of exluded cells
+        # checkboxInput(inputId = ns("exclude"),
+        #               label = "Exclude marked cells",
+        #               value = TRUE),
+        checkboxInput(
+          inputId = ns("mainColCons"),
+          label = "Exclude main colony controls",
+          value = TRUE
+        ),
+        checkboxInput(
+          inputId = ns("zygosity"),
+          label = "Exclude homozygous mice",
+          value = TRUE
+        )
+      )
+    ),
+    
     #Summary information
     fluidRow(
       #column 1
@@ -64,22 +157,40 @@ burstSummaryTableUI <- function(
           inputId = ns("var_toSummarize"),
           label = "Select variable to summarize",
           data = bParamsDF %>%
-            select(bn:ssFlags),
-          selected = "bf"
+            select(
+              tf,
+              bf,
+              mbd,
+              spb,
+              intra,
+              ssf,
+              inter,
+              ssn,
+              bn,
+              bFlags,
+              ssFlags
+            ),
+          selected = "tf"
         )
       )
     ),
+    uiOutput(ns("varName")),
     tabsetPanel(
       tabPanel(
+        "%Firing",
+        h2("Cell Counts"),
+        shiny::tableOutput(ns("countDF"))
+      ),
+      tabPanel(
         "Mean Summaries",
-        h2("Summary data for variable"),
+        h2("Mean Summaries"),
         #create a space for the data table output
-        shiny::dataTableOutput(ns("summarydf"))
+        shiny::tableOutput(ns("summarydf"))
       ),
       tabPanel(
         "Quartile Summaries",
         h2("Quartile Summaries"),
-        shiny::dataTableOutput(ns("quartiledf"))
+        shiny::tableOutput(ns("quartiledf"))
       ),
       tabPanel(
         "ANOVA",
@@ -182,7 +293,8 @@ burstSummaryTableServer <- function(
   moduleServer(
     id,
     function(input, output, session) {
-      bParamsDF = reactive({
+      
+      bParamsDF_init = reactive({
         inFile <- input$bParamsFile
         
         if(is.null(inFile))
@@ -200,12 +312,97 @@ burstSummaryTableServer <- function(
         bParamsDFList <- getBurstParamsDF(KNDyDATA, bParamsDF)
         bParamsDF <- bParamsDFList$bParamsDF
         
-        bParamsDF
+        return(bParamsDF)
       })
-      # filterOutput <- filterDFServer("filterDF", bParamsDF())
       
-      output$summarydf <- shiny::renderDataTable({
-        # data <- filterOutput$filteredDF()
+      output$mouseNumUI <- renderUI({
+        ns <- session$ns
+        selectInput(
+          ns("mouseNum"),
+          "Which mice numbers (order sac'd)?",
+          choices = levels(bParamsDF_init()$MouseNum),
+          multiple = TRUE,
+          selected = levels(bParamsDF_init()$MouseNum)
+        )
+      })
+      
+      output$cellNumUI <- renderUI({
+        ns <- session$ns
+        selectInput(
+          ns("cellNum"),
+          "Which mice numbers (order sac'd)?",
+          choices = levels(bParamsDF_init()$CellNum),
+          multiple = TRUE,
+          selected = levels(bParamsDF_init()$CellNum)
+        )
+      })
+      
+      bParamsDF <- reactive({
+        df <- bParamsDF_init() 
+        
+        if(input$dataset == "Adults") {
+          df <- df %>%
+            filter(
+              AgeGroup == "Adult"
+            )
+        } else if (input$dataset == "Juveniles") {
+          df <- df %>%
+            filter(
+              AgeGroup == "Juvenile"
+            )
+        }
+        
+        if(input$mainColCons == TRUE) {
+          df <- df %>%
+            filter(
+              Treatment != "Main Colony Control"
+            )
+        }
+        
+        if(input$zygosity == TRUE) {
+          df <- df %>%
+            filter(
+              Zygosity != "homoPlus"
+            )
+        }
+        
+        if(input$firing == "Quiescent") {
+          df <- df %>%
+            filter(
+              tf < input$rateForQuiet
+            )
+        }else if(input$firing == "Non-quiescent"){
+          df <- df %>%
+            filter(
+              tf >= input$rateForQuiet
+            )
+        }
+        
+        if(input$whoRecordedSel == "Amanda"){
+          df <- df %>%
+            filter(WhoRecorded == "Amanda")
+        }else if(input$whoRecordedSel == "Jenn"){
+          df <- df %>%
+            filter(WhoRecorded == "Jenn")
+        }
+        
+        df <- df %>%
+          filter(
+            CellNum %in% as.character(input$cellNum)
+          )
+        
+        df <- df %>%
+          filter(
+            MouseNum %in% as.character(input$mouseNum)
+          )
+        return(df)
+      })
+      
+      output$varName <- renderUI({
+        h3(KNDy_VarNames[, as.character(input$var_toSummarize)])
+      })
+      
+      excludingSelectedDF <- reactive({
         data <- bParamsDF()
         
         #filter out selected rows from the data table
@@ -215,51 +412,65 @@ burstSummaryTableServer <- function(
               ! (row_number() %in% input$burstTable_rows_selected)
             )
         }
-        
-        data %>%
-          filter(!is.na(!! input$var_toSummarize))%>%
-          group_by(!!! input$group_vars) %>% #group by the grouping variables
-          summarize(
-            Mean = mean(!! input$var_toSummarize, na.rm = TRUE),
-            SD = sd(!! input$var_toSummarize, na.rm = TRUE),
-            n = n(),
-            SEM = SD/sqrt(n),
-            .groups = 'drop'
-          )
+        return(data)
       })
       
-      quibble <- function(x, q = c(0.25, 0.5, 0.75)) {
-        tibble(x = quantile(x, q), q = q)
-      }
-      
-      output$quartiledf <- shiny::renderDataTable({
-        # data <- filterOutput$filteredDF()
-        data <- bParamsDF()
+      groupedDF <- reactive({
+        data <- excludingSelectedDF()
         
-        #filter out selected rows from the data table
-        if(length(input$burstTable_rows_selected)){
-          data <- data %>%
-            filter(
-              ! (row_number() %in% input$burstTable_rows_selected)
-            )
-        }
+        groupedDF <- data %>%
+          group_by(!!! input$group_vars) #group by the grouping variables
         
-        data %>%
-          filter(!is.na(!! input$var_toSummarize))%>%
-          group_by(!!! input$group_vars) %>% #group by the grouping variables
-          # summarize(
-          #   quibble(!! input$var_toSummarize),
-          #   .groups = 'drop'
-          # )
-          summarize(
-            min = min(!! input$var_toSummarize, na.rm = TRUE),
-            q1 = quantile(!! input$var_toSummarize, 0.25, na.rm = TRUE),
-            median = median(!! input$var_toSummarize, na.rm=TRUE),
-            q3 = quantile(!! input$var_toSummarize, 0.75, na.rm=TRUE),
-            max = max(!! input$var_toSummarize, na.rm = TRUE),
-            .groups = 'drop'
-          )
+        return(groupedDF)
       })
+      
+      output$countDF <- shiny::renderTable({
+        data <- excludingSelectedDF()
+        
+        sum <- countLittersCellsFiringBursting(
+          data,
+          input$group_vars,
+          input$rateForQuiet
+        )
+        return(sum)
+        },
+        digits = 2,
+        striped = TRUE
+      )
+      
+      output$summarydf <- shiny::renderTable(
+        {data <- groupedDF() %>%
+          filter(!is.na(!! input$var_toSummarize))
+          
+        sum <- doMeanSummaryForColumn(
+          input$var_toSummarize, 
+          data, 
+          includeVarInColName = FALSE, 
+          addVarCol = FALSE, 
+          niceNamesDF = KNDy_VarNames
+        )
+        return(sum)
+        },
+        digits = 4,
+        striped = TRUE
+      )
+
+      output$quartiledf <- shiny::renderTable(
+        {data <- groupedDF() %>%
+          filter(!is.na(!! input$var_toSummarize))
+        
+        sum <- doQuartileSummaryForColumn(
+          input$var_toSummarize, 
+          data, 
+          includeVarInColName = FALSE, 
+          addVarCol = FALSE, 
+          niceNamesDF = KNDy_VarNames
+        )
+        return(sum)
+        },
+        digits = 4,
+        striped = TRUE
+      )
       
       output$ANOVA_table <- renderText({
         # data <- filterOutput$filteredDF()
@@ -396,7 +607,7 @@ burstSummaryTableServer <- function(
         return (binWidth)
       })
       
-      output$value_info <- renderText(
+      output$value_info <- renderText({
         if(is.null(input$plot_click$y)){
           paste("Click on graph")
         }else({
@@ -407,7 +618,7 @@ burstSummaryTableServer <- function(
             round(input$plot_click$y + thisBinWidth(), 3)
           )
         })
-      )
+      })
       
       
       output$plot_info <- shiny::renderDataTable(

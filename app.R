@@ -112,6 +112,11 @@ ui <- fluidPage(
   
   tabsetPanel(
     ### Summary Plots Panel ----
+    #Burst summary ----
+    tabPanel(
+      "Burst Summary",
+      burstSummaryTableUI("burstSummary", bParams_spont_230ms)
+    ),
     tabPanel(
       "Summary Plots",
       summaryPlotsUI("summaryPlots", KNDyDATA),
@@ -161,11 +166,6 @@ ui <- fluidPage(
     tabPanel(
       "Firing Rate",
       firingRateUI("firingRate", KNDyDATA)
-    ),
-    #Burst summary ----
-    tabPanel(
-      "Burst Summary",
-      burstSummaryTableUI("burstSummary", bParams_spont_230ms)
     )
   ),
 )
