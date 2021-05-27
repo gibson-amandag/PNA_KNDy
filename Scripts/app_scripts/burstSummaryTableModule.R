@@ -46,6 +46,16 @@ burstSummaryTableUI <- function(
           ),
           selected = "All"
         ),
+        checkboxInput(
+          ns("filterByDuration"),
+          label = "Filter by duration?",
+          value = FALSE
+        ),
+        numericInput(
+          ns("minDuration"),
+          label = "Minimum duration:",
+          value = 60
+        )
       ),
       column(
         4,
@@ -138,9 +148,9 @@ burstSummaryTableUI <- function(
             select(
               MouseNum,
               Treatment,
+              AgeGroup,
               GenTreatment,
               CellNum,
-              AgeGroup,
               Who,
               WhoRecorded
               ),
@@ -330,7 +340,7 @@ burstSummaryTableServer <- function(
         ns <- session$ns
         selectInput(
           ns("cellNum"),
-          "Which mice numbers (order sac'd)?",
+          "Which cell numbers?",
           choices = levels(bParamsDF_init()$CellNum),
           multiple = TRUE,
           selected = levels(bParamsDF_init()$CellNum)
@@ -384,6 +394,11 @@ burstSummaryTableServer <- function(
         }else if(input$whoRecordedSel == "Jenn"){
           df <- df %>%
             filter(WhoRecorded == "Jenn")
+        }
+        
+        if(input$filterByDuration){
+          df <- df %>%
+            filter(SpontLength_min >= input$minDuration)
         }
         
         df <- df %>%
