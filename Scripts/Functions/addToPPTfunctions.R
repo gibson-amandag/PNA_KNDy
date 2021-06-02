@@ -114,10 +114,10 @@ addSigFlag_ppt <- function(ppt, p_treat, p_age, p_interaction){
   return(ppt)
 }
 
-formatCountTableForPPT <- function(df) {
+formatCountTableForPPT <- function(df, fontSize = 18) {
   formatted_df <- df %>%
     qflextable() %>%
-    fontsize(part = "all", size = 18) %>%
+    fontsize(part = "all", size = fontSize) %>%
     theme_zebra() %>%
     align(align = "center", part = "all") %>%
     autofit(add_w = 0.2)
@@ -125,10 +125,10 @@ formatCountTableForPPT <- function(df) {
   return(formatted_df)
 }
 
-formatMeanSummaryTableForPPT <- function(df){
+formatMeanSummaryTableForPPT <- function(df, fontSize = 18){
   formatted_df <- df %>%
     qflextable() %>%
-    fontsize(part = "all", size = 18) %>%
+    fontsize(part = "all", size = fontSize) %>%
     theme_zebra() %>%
     align(align = "center", part = "all") %>%
     colformat_num(j = c("mean", "SD", "SEM"), digits = 3) %>%
@@ -137,10 +137,10 @@ formatMeanSummaryTableForPPT <- function(df){
   return(formatted_df)
 }
 
-formatQuartileSummaryTableForPPT <- function(df){
+formatQuartileSummaryTableForPPT <- function(df, fontSize = 18){
   formatted_df <- df %>%
     qflextable() %>%
-    fontsize(part = "all", size = 18) %>%
+    fontsize(part = "all", size = fontSize) %>%
     theme_zebra() %>%
     align(align = "center", part = "all") %>%
     colformat_num(j = c("min", "q1", "median", "q3", "max"), digits = 3) %>%
@@ -149,13 +149,13 @@ formatQuartileSummaryTableForPPT <- function(df){
   return(formatted_df)
 }
 
-formatANOVAforPPT <- function(ANOVA) {
+formatANOVAforPPT <- function(ANOVA, fontSize = 28) {
   ANOVA_table <- ANOVA %>%
     rownames_to_column(var = " ") %>%
     qflextable() %>%
     italic(j = c("F", "p"), part = "header") %>%
     bold(~ p < 0.05) %>%
-    fontsize(part = "all", size = 28) %>%
+    fontsize(part = "all", size = fontSize) %>%
     colformat_num(j = c("SS", "F", "p"), digits = 3) %>%
     autofit(add_w = 0.2)
   return(ANOVA_table)

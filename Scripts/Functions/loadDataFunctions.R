@@ -42,8 +42,10 @@ loadBurstParamsData <- function(
   # Add the demographic info to the burst params dataframe
   bParamsOut <- getBurstParamsDF(demoDF, bParamsInit)
   bParamsDF <- bParamsOut$bParamsDF
+  
   if(incSecondThird){
-    bParamsDF <- filterData_RemoveMainCol_Homozy_Excluded(bParamsDF) %>% filter(CellNum != 3)
+    # bParamsDF <- filterData_RemoveMainCol_Homozy_Excluded(bParamsDF) %>% filter(CellNum != 3)
+    bParamsDF <- excludeFunc(bParamsDF)
   } else {
     #only first cells, not excluded, not main colony, not homozygous
     bParamsDF <- filterData(bParamsDF)
@@ -54,4 +56,21 @@ loadBurstParamsData <- function(
   }
   return(bParamsDF)
   
+}
+
+
+loadBurstParamsData_noFilters <- function(
+  analysis, 
+  BurstOutputsFolder, 
+  demoDF
+){
+  fileName = paste0(analysis, ".txt")
+  
+  bParamsInit <- read.csv(file.path(BurstOutputsFolder, fileName), sep = "\t")
+  
+  # Add the demographic info to the burst params dataframe
+  bParamsOut <- getBurstParamsDF(demoDF, bParamsInit)
+  bParamsDF <- bParamsOut$bParamsDF
+  
+  return(bParamsDF)
 }

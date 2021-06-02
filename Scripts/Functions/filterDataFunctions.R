@@ -57,3 +57,69 @@ filterDataGreater60min <- function(df) {
     )
   return(filteredDF)
 }
+
+filterData_options <- function(
+  df,
+  excludeMarkedCells = TRUE,
+  minDuration = NA, # If NA -> no min duration
+  maxAgeInDays = NA, # If NA -> no max age
+  maxUterineMass = NA, # If NA -> no max mass
+  cellNums = c(1), # Array of numbers to include
+  mouseNums = c(1, 2, 3, 4), # Array of numbers to include
+  whoRecorded = c("Amanda", "Jenn"),
+  whoSliced = c("Amanda", "Jenn"),
+  includeMainCol = FALSE,
+  includeHomozygous = FALSE
+){
+  if(excludeMarkedCells){
+    df <- df %>%
+      excludeFunc()
+  }
+  
+  df <- df %>%
+    filter(
+      WhoRecorded %in% whoRecorded,
+      Who %in% whoSliced,
+      CellNum %in% as.character(cellNums),
+      MouseNum %in% as.character(mouseNums)
+    )
+  
+  if(!is.na(minDuration)){
+    df <- df %>%
+      filter(
+        SpontLength_min >= minDuration
+      )
+  }
+  
+  if(!is.na(maxAgeInDays)){
+    df <- df %>%
+      filter(
+        Age_in_days <= maxAgeInDays
+      )
+  }
+  
+  if(!is.na(maxUterineMass)){
+    df <- df %>%
+      filter(
+        UterineMass <= maxUterineMass
+      )
+  }
+  
+  if(! includeMainCol){
+    df <- df %>%
+      filter(
+        Treatment != "Main Colony Control"
+      )
+  }
+  
+  if(! includeHomozygous){
+    df <- df %>%
+      filter(
+        Zygosity != "homoPlus"
+      )
+  }
+  
+  
+  return(df)
+  
+}

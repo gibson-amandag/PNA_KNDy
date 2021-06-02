@@ -2,6 +2,7 @@
 library(DT)
 library(shiny)
 library(tidyverse)
+library(ggpubr)
 library(readr)
 library(rlang)
 library(purrr)
@@ -14,6 +15,7 @@ library(openxlsx)
 library(car)
 library(kableExtra)
 library(tools)
+library(rstatix)
 #https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_html.html#Overview
 
 #### SET UP ENVIRONMENT, FOLDER PATHS, SOURCE FUNCTIONS ###########################################################################

@@ -472,3 +472,56 @@ add_Min_col <- function(df){
     )
   return(df)
 }
+
+# 20 min bins
+make_20minBins_long <- function(df){
+  df %>%
+    gather(
+      key = "BinNum",
+      value = "Value",
+      c(bin0_20:bin40_60),
+      factor_key = TRUE
+    ) %>%
+    drop_na(Value)
+}
+
+add_Bin_col <- function(df){
+  df <- df %>%
+    mutate(
+      Time = 
+        case_when(
+          BinNum == "bin0_20" ~ 0,
+          BinNum == "bin20_40" ~ 20,
+          BinNum == "bin40_60" ~ 40
+        )
+    )
+  return(df)
+}
+
+make_20minBins_long_forBox <- function(df){
+  df %>%
+    filter(SpontLength_min >= 60) %>%
+    gather(
+      key = "BinNum",
+      value = "paramValue",
+      c(bin0_20:bin40_60),
+      factor_key = TRUE
+    ) 
+  # %>%
+    # drop_na(paramValue)
+}
+
+add_Bin_col_forBox <- function(df){
+  df <- df %>%
+    mutate(
+      Time = 
+        case_when(
+          BinNum == "bin0_20" ~ "0-20min",
+          BinNum == "bin20_40" ~ "20-40min",
+          BinNum == "bin40_60" ~ "40-60min"
+        )
+    )
+  df$Time <- as.factor(df$Time)
+  df$CellID <- as.factor(df$CellID)
+  return(df)
+}

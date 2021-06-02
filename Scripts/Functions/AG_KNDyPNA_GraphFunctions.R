@@ -13,3 +13,45 @@ my_theme = theme(
 ) 
 
 #scale_color_manual(values = c("Amanda" = "orange", "Jenn" = "blue"))
+
+plotBurstParamBox_overTime <- function(
+  param,
+  param_overTime, #df
+  niceName = KNDy_VarNames
+){
+  param_long <- make_20minBins_long_forBox(param_overTime)
+  param_long <- add_Bin_col_forBox(param_long)
+  viz <- ggboxplot(
+    param_long,
+    x = "GenTreatment",
+    y = "paramValue",
+    color = "Time",
+    palette = "jco",
+    facet.by = "AgeGroup",
+    short.panel.labs = TRUE,
+    add = c("jitter")
+  ) +
+    ylab(niceName[, as.character(param)]) + 
+    xlab("Treatment")
+  return(viz)
+}
+
+plotBurstParamBox <- function(
+  df,
+  param,
+  niceNames = KNDy_VarNames
+){
+  viz <- ggboxplot(
+    df,
+    x = "GenTreatment",
+    y = as.character(param),
+    facet.by = "AgeGroup",
+    add = c("jitter"),
+    color = "GenTreatment",
+    palette = "jco"
+  ) + ylab(niceNames[,as.character(param)]) +
+    xlab("Treatment")+
+    guides(color = guide_legend("Treatment"))
+  
+  return(viz)
+}

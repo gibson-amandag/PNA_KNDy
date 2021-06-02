@@ -91,6 +91,7 @@ filterDFUI <- function(id, data
         )
       )
     ),
+    # tableOutput(ns("test"))
   )
 }
 
@@ -161,8 +162,12 @@ filterDFServer <- function(
           filter(
             MouseNum %in% as.character(input$mouseNum)
           )
-        
+        return(df)
       })
+      
+      # output$test <- renderTable({
+      #   filteredDF()
+      # })
       
       #Return these values as a list to be able to use them in other modules
       # ...$treatment()
@@ -173,7 +178,11 @@ filterDFServer <- function(
           exclude = reactive({ input$exclude }),
           dataset = reactive({ input$dataset }),
           firing = reactive({ input$firing }),
-          whoRecordedSel = reactive({ input$whoRecordedSel })
+          whoRecordedSel = reactive({ input$whoRecordedSel }),
+          mainColCons = reactive({input$mainColCons}),
+          zygosity = reactive({input$zygosity}),
+          cellNum = reactive({input$cellNum}),
+          mouseNum = reactive(input$mouseNum)
         )
       )
     }

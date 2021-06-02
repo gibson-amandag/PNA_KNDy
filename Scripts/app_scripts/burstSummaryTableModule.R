@@ -88,6 +88,16 @@ burstSummaryTableUI <- function(
             "Jenn"
           ),
           selected = "Both"
+        ),
+        checkboxInput(
+          ns("filterByAge"),
+          label = "Filter by age?",
+          value = FALSE
+        ),
+        numericInput(
+          ns("maxAge"),
+          label = "Max age in days:",
+          value = 150
         )
       )
     ),
@@ -391,14 +401,23 @@ burstSummaryTableServer <- function(
         if(input$whoRecordedSel == "Amanda"){
           df <- df %>%
             filter(WhoRecorded == "Amanda")
+            # filter(Who == "Amanda",
+            #        WhoRecorded == "Amanda")
         }else if(input$whoRecordedSel == "Jenn"){
           df <- df %>%
             filter(WhoRecorded == "Jenn")
+            # filter(Who == "Jenn",
+            #        WhoRecorded == "Jenn")
         }
         
         if(input$filterByDuration){
           df <- df %>%
             filter(SpontLength_min >= input$minDuration)
+        }
+        
+        if(input$filterByAge){
+          df <- df %>%
+            filter(Age_in_days <= input$maxAge)
         }
         
         df <- df %>%

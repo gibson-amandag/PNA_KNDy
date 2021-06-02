@@ -492,7 +492,13 @@ df
 ```
 
 ```{r}
-bParamsDF <- loadBurstParamsData("spont0.23", BurstOutputsFolder = BurstOutputsFolder, KNDyDATA, incSecondThird = TRUE)
+
+bParamsDF <- loadBurstParamsData(
+  "spont0.23_mainCol", 
+  BurstOutputsFolder = BurstOutputsFolder, 
+  KNDyDATA,
+  incSecondThird = TRUE
+  )
 
 bParamsDF_contrasts <- makeTreatandAgeContrasts(bParamsDF)
 
@@ -586,5 +592,296 @@ KNDyDATA %>%
 #   summarise(
 #     n()
 #   )
+
+bParamsDF %>%
+  filter(
+    GenTreatment == "PNA",
+    AgeGroup == "Juvenile",
+    tf <= rateForQuiet
+  )
+rateForQuiet
+.005 * 60 * 60
+
+
+bParamsDF %>%
+  filter(
+    tf == 0
+  ) %>%
+  group_by(
+    AgeGroup, GenTreatment
+  ) %>%
+  summarize(
+    n()
+  )
+
+bParamsDF <- bParamsDF %>%
+  filter(
+    Zygosity != "homoPlus",
+    WhoRecorded != "Jenn"
+  )
+count <- countLittersCellsFiringBursting(bParamsDF, exprs(AgeGroup, Treatment), 0.005) 
+count
+
+KNDyDATA %>%
+  filter(
+    WhoRecorded == "Amanda",
+    AgeGroup == "Juvenile",
+    GenTreatment == "PNA"
+  ) %>%
+  arrange(SpontLength_min)
+
+bParamsDF%>%
+  filter(
+    WhoRecorded == "Amanda",
+    AgeGroup == "Juvenile",
+    GenTreatment == "PNA"
+  )%>%
+  arrange(SpontLength_min)
+
+
+```
+
+2021-06-01 - Add filter options when loading burst parameter data
+```{r}
+bParamsDF <- loadBurstParamsData_noFilters(
+  "spont_0.21",
+  file.path(BurstOutputsFolder, "allCells"),
+  KNDyDATA
+)
+
+filterParams = list(
+  excludeMarkedCells = TRUE,
+  minDuration = NA,
+  maxAgeInDays = 160,
+  maxUterineMass = 110,
+  cellNums = levels(KNDyDATA$CellNum),
+  mouseNums = levels(KNDyDATA$MouseNum),
+  whoRecorded = "Amanda",
+  whoSliced = levels(KNDyDATA$Who),
+  includeMainCol = FALSE,
+  includeHomozygous = FALSE
+)
+
+# use do.call to pass a list with parameters for a function
+# Have to wrap with c()
+do.call(filterData_options, c(
+  list(
+    df = bParamsDF
+  ),
+  filterParams
+))
+```
+
+```{r}
+bParams_spont_0_20_0.21 %>% 
+  select( # Rearrange
+    CellID,
+    MouseID:CycleStage,
+    bn:ssFlags
+  ) %>%
+  full_join(
+    bParams_spont_20_40_0.21 %>% 
+      select(
+        CellID:ssFlags
+      ),
+    by = "CellID",
+    suffix = c(".0-20", ".20-40")
+  )
+
+params = exprs(
+  tf,
+  bf,
+  mbd,
+  spb,
+  intra,
+  ssf,
+  inter
+)
+bParams_spont_0_20_0.21 %>% select(
+  CellID,
+  !!! params[1]
+) %>%
+  rename(
+    "0-20" = as.character(params[1])
+  ) %>%
+  left_join(
+    KNDyDATA
+  )
+
+tfOverTime <- combineBurstBinsForParam(
+  bParams_spont_0_20_0.21,
+  bParams_spont_20_40_0.21,
+  bParams_spont_40_60_0.21,
+  params[1]
+)
+
+tfOverTime
+writeToWorkbook("totalFreq", tfOverTime, KNDyAnalysisWB)
+tf_long <- make_20minBins_long(tfOverTime)
+
+tf_long <- add_Bin_col(tf_long)
+tf_long
+
+
+
+plotParam20minBins <- function(
+  param,
+  param_overTime,
+  niceNames = KNDy_VarNames,
+  individualLines = TRUE
+)
+{
+  param_long <- make_20minBins_long(param_overTime)
+  param_long <- add_Bin_col(param_long)
+  
+  ggplot(
+    param_long, 
+    aes(
+      Time, 
+      Value, 
+      color = GenTreatment,
+      shape = interaction(GenTreatment, AgeGroup),
+      group = interaction(GenTreatment, AgeGroup)
+    )
+  ) + 
+    my_KNDy_VBW_geoms(
+      useLinetype = TRUE,
+      linetype_var = expr(AgeGroup),
+      lineGroup_var = expr(CellID),
+      xtitle = "Time (min)",
+      ytitle = niceNames[,as.character(param)],
+      individualLines = individualLines,
+      mean_lines = FALSE,
+      zoom_x = FALSE,
+      xmin = 0,
+      xmax = 60,
+      zoom_y = FALSE,
+      ymin = NULL,
+      ymax = NULL
+    ) +
+    stat_summary(
+      fun.data = mean_se,
+      position = position_dodge(width = 6),
+      size = 1
+    ) +
+    theme(
+      legend.box = "vertical"
+    ) +
+    scale_x_continuous(
+      breaks = c(0, 20, 40),
+      labels = c("0" = "0-20", "20" = "20-40", "40" = "40-60")
+    )
+}
+
+param_overTime <- combineBurstBinsForParam(
+  bParams_spont_0_20_0.21,
+  bParams_spont_20_40_0.21,
+  bParams_spont_40_60_0.21,
+  params[2],
+  demoDF = KNDyDATA
+)
+
+plotParam20minBins(
+  params[2],
+  param_overTime,
+  KNDy_VarNames,
+  individualLines = TRUE
+)
+
+
+tf_long_box <- make_20minBins_long_forBox(tfOverTime)
+tf_long_box <- add_Bin_col_forBox(tf_long_box)
+tf_long_box
+ggboxplot(
+  tf_long_box,
+  x = "GenTreatment",
+  y = "paramValue",
+  color = "Time",
+  palette = "jco",
+  facet.by = "AgeGroup",
+  short.panel.labs = FALSE
+) +
+  ylab(KNDy_VarNames[, "tf"])
+
+
+
+plotParamBoxPlot(
+  params[2],
+  param_overTime = param_overTime,
+  niceName = KNDy_VarNames
+)
+
+# https://www.datanovia.com/en/lessons/repeated-measures-anova-in-r/ 
+
+# repMesANOVA <- anova_test(
+#   data = tf_long_box,
+#   dv = paramValue,
+#   wid = CellID,
+#   within = c(AgeGroup, GenTreatment, Time)
+# )
+
+repMesANOVA <- anova_test(
+  data = tf_long_box %>% select(CellID, AgeGroup, GenTreatment, Time, paramValue),
+  # dv = paramValue,
+  # within = c(AgeGroup, GenTreatment, Time)
+  paramValue ~ AgeGroup * GenTreatment * Time,
+  wid = CellID,
+  type = 3
+)
+
+get_anova_table(repMesANOVA)
+
+lm(paramValue~CellID+Time:AgeGroup,data=tf_long_box)
+
+tfOverTime
+doMeanSummaryForColumn(expr(bin0_20:bin40_60), 
+                       tfOverTime %>% group_by(AgeGroup, GenTreatment) %>%
+                         filter(SpontLength_min >=60)
+                       )
+
+new_tf_long <- make_20minBins_long_forBox(tfOverTime %>% filter(SpontLength_min >=60))
+
+new_tf_long <- add_Bin_col_forBox(new_tf_long)
+
+new_tf_long_sub <- new_tf_long %>%
+  select(
+    CellID,
+    paramValue,
+    GenTreatment,
+    AgeGroup,
+    Time
+  )
+
+new_tf_long_sub$GenTreatment <- as.factor(new_tf_long_sub$GenTreatment)
+
+new_tf_long_sub
+res.aov <- anova_test(
+  data = new_tf_long_sub, dv = paramValue, wid = CellID,
+  within = c(GenTreatment, AgeGroup, Time)
+  )
+get_anova_table(res.aov)
+```
+
+```{r}
+df
+param = params[2]
+ggboxplot(
+  df,
+  x = "GenTreatment",
+  y = as.character(param),
+  facet.by = "AgeGroup",
+  add = c("jitter"),
+  color = "GenTreatment",
+  palette = "jco"
+) + ylab(KNDy_VarNames[,as.character(param)]) +
+  xlab("Treatment")+
+  guides(color = guide_legend("Treatment"))
+
+
+
+plotBurstParamBox(
+  df,
+  param
+)
 ```
 
