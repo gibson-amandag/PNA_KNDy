@@ -831,6 +831,16 @@ repMesANOVA <- anova_test(
 
 get_anova_table(repMesANOVA)
 
+grouped_tfOverTime <- tfOverTime %>%
+  group_by(
+    AgeGroup, GenTreatment
+  )
+  doMeanSummaryForColumn(
+    expr(bin0_20:bin40_60),
+    grouped_tfOverTime
+  )
+
+
 lm(paramValue~CellID+Time:AgeGroup,data=tf_long_box)
 
 tfOverTime
@@ -883,5 +893,103 @@ plotBurstParamBox(
   df,
   param
 )
+```
+
+```{r}
+# ggplot(KNDyDATA, aes(x = SpontLength_min, fill = GenTreatment)) +
+#   geom_histogram(position = position_dodge(), binwidth = 10) +
+#   my_theme
+
+KNDyDATA %>%
+  filterData_options(
+    excludeMarkedCells = excludeMarkedCells,
+    minDuration = minDuration,
+    maxAgeInDays = maxAgeInDays,
+    maxUterineMass = maxUterineMass,
+    cellNums = cellNums,
+    mouseNums = mouseNums,
+    whoRecorded = whoRecorded,
+    whoSliced = whoSliced,
+    includeMainCol = includeMainCol,
+    includeHomozygous = includeHomozygous
+  )%>%
+  ggplot(aes(x = SpontLength_min, fill = GenTreatment)) +
+  geom_histogram(
+    position = "dodge", 
+    binwidth = 10,
+    boundary = 0,
+    closed = "left",
+    color = "black"
+    ) +
+  my_theme + 
+  scale_x_continuous(name="Spontaneous Length (min)", breaks = seq(0, 180, 10), limits = c(0, 180)) + 
+  ylab("Number of Cells")
+
+KNDyDATA %>%
+  filterData_options(
+    excludeMarkedCells = excludeMarkedCells,
+    minDuration = minDuration,
+    maxAgeInDays = maxAgeInDays,
+    maxUterineMass = maxUterineMass,
+    cellNums = cellNums,
+    mouseNums = mouseNums,
+    whoRecorded = whoRecorded,
+    whoSliced = whoSliced,
+    includeMainCol = includeMainCol,
+    includeHomozygous = includeHomozygous
+  )%>%
+  filter(
+    SpontLength_min > 60
+  ) %>%
+  group_by(
+    !!! groupingVars
+  ) %>%
+  summarise(
+    n(),
+    .groups = "drop"
+  )
+
+KNDyDATA %>%
+  filterData_options(
+    excludeMarkedCells = excludeMarkedCells,
+    minDuration = minDuration,
+    maxAgeInDays = maxAgeInDays,
+    maxUterineMass = maxUterineMass,
+    cellNums = cellNums,
+    mouseNums = mouseNums,
+    whoRecorded = whoRecorded,
+    whoSliced = whoSliced,
+    includeMainCol = includeMainCol,
+    includeHomozygous = includeHomozygous
+  )%>%
+  filter(
+    SpontLength_min >= 90
+  ) 
+# %>%
+#   group_by(
+#     !!! groupingVars
+#   ) %>%
+#   summarise(
+#     n(),
+#     .groups = "drop"
+#   )
+
+filterDF <- KNDyDATA %>%
+  filterData_options(
+    excludeMarkedCells = excludeMarkedCells,
+    minDuration = minDuration,
+    maxAgeInDays = maxAgeInDays,
+    maxUterineMass = maxUterineMass,
+    cellNums = cellNums,
+    mouseNums = mouseNums,
+    whoRecorded = whoRecorded,
+    whoSliced = whoSliced,
+    includeMainCol = includeMainCol,
+    includeHomozygous = includeHomozygous
+  ) %>%
+  filter(AgeGroup == "Adult")
+  doQuartileSummaryForColumn(col = expr(Age_in_days), filterDF)
+  
+  160/60
 ```
 

@@ -128,13 +128,17 @@ KNDy_VarNames <- KNDy_varNamesFunc(KNDyDATA)
 ```
 
 # Filtering Information
-For this report, cells were not filtered by recording duration. Mice that were up to 160 days of age were included. Uterine mass up to 110 mg was included. There was no filtering of the dataset by order of cell recorded or order of mice recorded from one litter. Only cells that Amanda recorded were included, but this includes cells that were from animals that Jenn sliced. This dataset does not include main colony control mice, which therefore also excludes homozygous mice. Cells that had other technical reasons for exclusion are not included in this dataset.
+For this report, cells were not filtered by recording duration, age, or uterine mass. There was no filtering of the dataset by order of cell recorded or order of mice recorded from one litter. Only cells that Amanda recorded were included, but this includes cells that were from animals that Jenn sliced. This dataset does not include main colony control mice, which therefore also excludes homozygous mice. Cells that had other technical reasons for exclusion are not included in this dataset.
 
 ```{r}
+# For this report, cells were not filtered by recording duration. Mice that were up to 160 days of age were included. Uterine mass up to 110 mg was included. There was no filtering of the dataset by order of cell recorded or order of mice recorded from one litter. Only cells that Amanda recorded were included, but this includes cells that were from animals that Jenn sliced. This dataset does not include main colony control mice, which therefore also excludes homozygous mice. Cells that had other technical reasons for exclusion are not included in this dataset.
+
 # Change this list to change how the dataset is filtered
 # This just needs to be changed here, and then it can be applied throughout
 minDuration = NA
+# maxAgeInDays = NA
 maxAgeInDays = 160
+# maxUterineMass = NA
 maxUterineMass = 110
 cellNums = levels(KNDyDATA$CellNum)
 mouseNums = levels(KNDyDATA$MouseNum)
@@ -215,6 +219,29 @@ bParams_spont_0.21_grouped <- bParams_spont_0.21 %>%
     !!! groupingVars
   )
 ```
+
+```{r}
+# Full Spontaneous - 210 burst window
+bParams_spontMax90_0.21 <- loadBurstParamsData_noFilters(
+  analysis = "spontMax90_0.21.txt",
+  BurstOutputsFolder = file.path(BurstOutputsFolder, "allCells"),
+  demoDF = KNDyDATA
+)
+
+bParams_spontMax90_0.21 <- do.call(
+  filterData_options,
+  c(
+    list(df = bParams_spontMax90_0.21),
+    filterParams
+  )
+)
+
+bParams_spontMax90_0.21_grouped <- bParams_spontMax90_0.21 %>%
+  group_by(
+    !!! groupingVars
+  )
+```
+
 
 ```{r}
 # 0-20 min Spontaneous - 210 burst window
