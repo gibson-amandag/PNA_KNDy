@@ -194,88 +194,88 @@ rateForQuiet <- 0.005
 
 
 ```{r}
-# Full Spontaneous - 230 burst window
-bParams_spont_0.23 <- loadBurstParamsData_noFilters(
-  analysis = "spont_0.23",
+# Full Spontaneous - 370 burst window
+bParams_spont_0.37 <- loadBurstParamsData_noFilters(
+  analysis = "spont_0.37",
   BurstOutputsFolder = file.path(BurstOutputsFolder, "allCells"),
   demoDF = KNDyDATA
 )
 
-bParams_spont_0.23 <- do.call(
+bParams_spont_0.37 <- do.call(
   filterData_options,
   c(
-    list(df = bParams_spont_0.23),
+    list(df = bParams_spont_0.37),
     filterParams
   )
 )
 
-bParams_spont_0.23_grouped <- bParams_spont_0.23 %>%
+bParams_spont_0.37_grouped <- bParams_spont_0.37 %>%
   group_by(
     !!! groupingVars
   )
 ```
 
 ```{r}
-# 0-20 min Spontaneous - 230 burst window
-bParams_spont_0_20_0.23 <- loadBurstParamsData_noFilters(
-  analysis = "spont_bin20_0_0.23",
+# 0-20 min Spontaneous - 370 burst window
+bParams_spont_0_20_0.37 <- loadBurstParamsData_noFilters(
+  analysis = "spont_bin20_0_0.37",
   BurstOutputsFolder = file.path(BurstOutputsFolder, "allCells"),
   demoDF = KNDyDATA
 )
 
-bParams_spont_0_20_0.23 <- do.call(
+bParams_spont_0_20_0.37 <- do.call(
   filterData_options,
   c(
-    list(df = bParams_spont_0_20_0.23),
+    list(df = bParams_spont_0_20_0.37),
     filterParams
   )
 )
 
-bParams_spont_0_20_0.23_grouped <- bParams_spont_0_20_0.23 %>%
+bParams_spont_0_20_0.37_grouped <- bParams_spont_0_20_0.37 %>%
   group_by(
     !!! groupingVars
   )
 ```
 
 ```{r}
-# 20-40 min Spontaneous - 230 burst window
-bParams_spont_20_40_0.23 <- loadBurstParamsData_noFilters(
-  analysis = "spont_bin20_1_0.23",
+# 20-40 min Spontaneous - 370 burst window
+bParams_spont_20_40_0.37 <- loadBurstParamsData_noFilters(
+  analysis = "spont_bin20_1_0.37",
   BurstOutputsFolder = file.path(BurstOutputsFolder, "allCells"),
   demoDF = KNDyDATA
 )
 
-bParams_spont_20_40_0.23 <- do.call(
+bParams_spont_20_40_0.37 <- do.call(
   filterData_options,
   c(
-    list(df = bParams_spont_20_40_0.23),
+    list(df = bParams_spont_20_40_0.37),
     filterParams
   )
 )
 
-bParams_spont_20_40_0.23_grouped <- bParams_spont_20_40_0.23 %>%
+bParams_spont_20_40_0.37_grouped <- bParams_spont_20_40_0.37 %>%
   group_by(
     !!! groupingVars
   )
 ```
 
 ```{r}
-# 40-60 min Spontaneous - 230 burst window
-bParams_spont_40_60_0.23 <- loadBurstParamsData_noFilters(
-  analysis = "spont_bin20_2_0.23",
+# 40-60 min Spontaneous - 370 burst window
+bParams_spont_40_60_0.37 <- loadBurstParamsData_noFilters(
+  analysis = "spont_bin20_2_0.37",
   BurstOutputsFolder = file.path(BurstOutputsFolder, "allCells"),
   demoDF = KNDyDATA
 )
 
-bParams_spont_40_60_0.23 <- do.call(
+bParams_spont_40_60_0.37 <- do.call(
   filterData_options,
   c(
-    list(df = bParams_spont_40_60_0.23),
+    list(df = bParams_spont_40_60_0.37),
     filterParams
   )
 )
 
-bParams_spont_40_60_0.23_grouped <- bParams_spont_40_60_0.23 %>%
+bParams_spont_40_60_0.37_grouped <- bParams_spont_40_60_0.37 %>%
   group_by(
     !!! groupingVars
   )
@@ -283,15 +283,15 @@ bParams_spont_40_60_0.23_grouped <- bParams_spont_40_60_0.23 %>%
 
 # Full Spontaneous Recordings 
 
-## Burst Window 230 ms - peak of control animals
+## Burst Window 370 ms - peak of PNA animals
 ```{r}
-df <- bParams_spont_0.23
-df_grouped <- bParams_spont_0.23_grouped
-df_contrasts <- makeTreatandAgeContrasts(bParams_spont_0.23)
+df <- bParams_spont_0.37
+df_grouped <- bParams_spont_0.37_grouped
+df_contrasts <- makeTreatandAgeContrasts(bParams_spont_0.37)
 
-df_0_20 <- bParams_spont_0_20_0.23
-df_20_40 <- bParams_spont_20_40_0.23
-df_40_60 <- bParams_spont_40_60_0.23
+df_0_20 <- bParams_spont_0_20_0.37
+df_20_40 <- bParams_spont_20_40_0.37
+df_40_60 <- bParams_spont_40_60_0.37
 ```
 
 ### Counts
@@ -315,10 +315,10 @@ if(doc.type == "docx"){
 
 ```{r eval=FALSE, include=FALSE}
 #overwhelming
-meanSum_spont_0.23 <- map_df(
+meanSum_spont_0.37 <- map_df(
   burstParameters,
   doMeanSummaryForColumn,
-  df = bParams_spont_0.23_grouped,
+  df = bParams_spont_0.37_grouped,
   includeVarInColName = FALSE,
   addVarCol = TRUE,
   niceNames = KNDy_VarNames
@@ -984,11 +984,11 @@ viz
 
 # First 20 Min of Spontaneous
 
-## Burst Window 230 ms - peak of control animals
+## Burst Window 370 ms - peak of PNA animals
 ```{r}
-df <- bParams_spont_0_20_0.23
-df_grouped <- bParams_spont_0_20_0.23_grouped
-df_contrasts <- makeTreatandAgeContrasts(bParams_spont_0_20_0.23)
+df <- bParams_spont_0_20_0.37
+df_grouped <- bParams_spont_0_20_0.37_grouped
+df_contrasts <- makeTreatandAgeContrasts(bParams_spont_0_20_0.37)
 ```
 
 ### Counts
@@ -1663,11 +1663,11 @@ viz
 
 # 20-40 min of Spontaneous
 
-## Burst Window 230 ms - peak of control animals
+## Burst Window 370 ms - peak of PNA animals
 ```{r}
-df <- bParams_spont_20_40_0.23
-df_grouped <- bParams_spont_20_40_0.23_grouped
-df_contrasts <- makeTreatandAgeContrasts(bParams_spont_20_40_0.23)
+df <- bParams_spont_20_40_0.37
+df_grouped <- bParams_spont_20_40_0.37_grouped
+df_contrasts <- makeTreatandAgeContrasts(bParams_spont_20_40_0.37)
 ```
 
 ### Counts
@@ -2342,11 +2342,11 @@ viz
 
 # 40-60 Min of Spontaneous
 
-## Burst Window 230 ms - peak of control animals
+## Burst Window 370 ms - peak of PNA animals
 ```{r}
-df <- bParams_spont_40_60_0.23
-df_grouped <- bParams_spont_40_60_0.23_grouped
-df_contrasts <- makeTreatandAgeContrasts(bParams_spont_40_60_0.23)
+df <- bParams_spont_40_60_0.37
+df_grouped <- bParams_spont_40_60_0.37_grouped
+df_contrasts <- makeTreatandAgeContrasts(bParams_spont_40_60_0.37)
 ```
 
 ### Counts

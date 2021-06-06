@@ -1,6 +1,7 @@
 ---
 title: "Effect of Prenatal Androgenization on Spontaneous Firing of Arcuate KNDy Neurons"
 author: "Amanda Gibson"
+date: '2021-06-05'
 output:
   word_document: 
     toc: yes
@@ -189,6 +190,7 @@ dotSizes <- list(
 
 groupingVars <- exprs(AgeGroup, GenTreatment)
 rateForQuiet <- 0.005
+AnovaFontSize <- 11
 ```
 
 
@@ -381,63 +383,213 @@ df_20_40 <- bParams_spont_20_40_0.23
 df_40_60 <- bParams_spont_40_60_0.23
 ```
 
-```{r}
-df_plot <- df %>%
-  AG_KNDyPNA_makeLowerCase()
-
-tf_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "tf")
-bf_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "bf")
-mbd_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "mbd")
-spb_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "spb")
-intra_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "intra")
-ssf_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "ssf")
-inter_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "inter")
-
-```
+### Counts
 
 ```{r}
-ggsave(
-  "AG_KNDyPNA_meanFrequency.pdf",
-  plot = tf_plot,
-  device = "pdf",
-  path = file.path(PlotOutputFolder, "manuscript"),
-  scale = 1,
-  width = 8,
-  height = 20/3,
-  units = c("cm")
+countSum <- countLittersCellsFiringBursting(
+  df_grouped,
+  groupingVars,
+  rateForQuiet
 )
+
+if(doc.type == "docx"){
+  formatCountTableForPPT(
+    countSum,
+    fontSize = 10
+  )
+} else {countSum}
 ```
 
 
-```{r}
-# Arrange the burst parameters into a 3x2 grid
-burstPlots3x2 <- ggarrange(
-  bf_plot,
-  mbd_plot,
-  spb_plot,
-  intra_plot,
-  ssf_plot,
-  inter_plot,
-  labels = c("A", "B", "C", "D", "E", "F"), #Label each panel
-  ncol = 2,
-  nrow = 3,
-  align = "v"
-)
 
-ggsave(
-  "AG_KNDyPNA_burstParameters_230ms.pdf",
-  plot = burstPlots3x2,
-  device = "pdf",
-  path = file.path(PlotOutputFolder, "manuscript"),
-  scale = 1,
-  width = 18,
-  height = 20,
-  units = c("cm")
+```{r eval=FALSE, include=FALSE}
+#overwhelming
+meanSum_spont_0.23 <- map_df(
+  burstParameters,
+  doMeanSummaryForColumn,
+  df = bParams_spont_0.23_grouped,
+  includeVarInColName = FALSE,
+  addVarCol = TRUE,
+  niceNames = KNDy_VarNames
 )
 ```
 
-## 370 ms Burst Window
+### Total Frequency
+```{r}
+param = expr(tf)
+```
 
+```{r}
+Model <- lm_byTreatxAge(param, df_contrasts)
+        
+
+if(doc.type == "docx"){
+  ANOVA_out <- makePlainANOVA_getVals_treatAge(Model)
+  formatANOVAforPPT(
+    ANOVA_out$ANOVA,
+    fontSize = AnovaFontSize
+  )
+} else {
+  ANOVA_table <- makeANOVA_TreatAge(Model)
+  ANOVA_table %>%
+    kable_styling(
+      font_size = 18,
+      bootstrap_options = c("striped"), full_width = TRUE
+    )
+}
+```
+
+### Burst Frequency
+```{r}
+param = expr(bf)
+```
+
+```{r}
+Model <- lm_byTreatxAge(param, df_contrasts)
+        
+
+if(doc.type == "docx"){
+  ANOVA_out <- makePlainANOVA_getVals_treatAge(Model)
+  formatANOVAforPPT(
+    ANOVA_out$ANOVA,
+    fontSize = AnovaFontSize
+  )
+} else {
+  ANOVA_table <- makeANOVA_TreatAge(Model)
+  ANOVA_table %>%
+    kable_styling(
+      font_size = 18,
+      bootstrap_options = c("striped"), full_width = TRUE
+    )
+}
+```
+
+### Mean Burst Duration
+```{r}
+param = expr(mbd)
+```
+
+```{r}
+Model <- lm_byTreatxAge(param, df_contrasts)
+        
+
+if(doc.type == "docx"){
+  ANOVA_out <- makePlainANOVA_getVals_treatAge(Model)
+  formatANOVAforPPT(
+    ANOVA_out$ANOVA,
+    fontSize = AnovaFontSize
+  )
+} else {
+  ANOVA_table <- makeANOVA_TreatAge(Model)
+  ANOVA_table %>%
+    kable_styling(
+      font_size = 18,
+      bootstrap_options = c("striped"), full_width = TRUE
+    )
+}
+```
+
+### Spikes Per Burst
+```{r}
+param = expr(spb)
+```
+
+```{r}
+Model <- lm_byTreatxAge(param, df_contrasts)
+        
+
+if(doc.type == "docx"){
+  ANOVA_out <- makePlainANOVA_getVals_treatAge(Model)
+  formatANOVAforPPT(
+    ANOVA_out$ANOVA,
+    fontSize = AnovaFontSize
+  )
+} else {
+  ANOVA_table <- makeANOVA_TreatAge(Model)
+  ANOVA_table %>%
+    kable_styling(
+      font_size = 18,
+      bootstrap_options = c("striped"), full_width = TRUE
+    )
+}
+```
+
+### Intra-burst Interval
+```{r}
+param = expr(intra)
+```
+
+```{r}
+Model <- lm_byTreatxAge(param, df_contrasts)
+        
+
+if(doc.type == "docx"){
+  ANOVA_out <- makePlainANOVA_getVals_treatAge(Model)
+  formatANOVAforPPT(
+    ANOVA_out$ANOVA,
+    fontSize = AnovaFontSize
+  )
+} else {
+  ANOVA_table <- makeANOVA_TreatAge(Model)
+  ANOVA_table %>%
+    kable_styling(
+      font_size = 18,
+      bootstrap_options = c("striped"), full_width = TRUE
+    )
+}
+```
+
+### Single Spike Frequency
+```{r}
+param = expr(ssf)
+```
+
+```{r}
+Model <- lm_byTreatxAge(param, df_contrasts)
+        
+
+if(doc.type == "docx"){
+  ANOVA_out <- makePlainANOVA_getVals_treatAge(Model)
+  formatANOVAforPPT(
+    ANOVA_out$ANOVA,
+    fontSize = AnovaFontSize
+  )
+} else {
+  ANOVA_table <- makeANOVA_TreatAge(Model)
+  ANOVA_table %>%
+    kable_styling(
+      font_size = 18,
+      bootstrap_options = c("striped"), full_width = TRUE
+    )
+}
+```
+
+### Inter-event Interval
+```{r}
+param = expr(inter)
+```
+
+```{r}
+Model <- lm_byTreatxAge(param, df_contrasts)
+        
+
+if(doc.type == "docx"){
+  ANOVA_out <- makePlainANOVA_getVals_treatAge(Model)
+  formatANOVAforPPT(
+    ANOVA_out$ANOVA,
+    fontSize = AnovaFontSize
+  )
+} else {
+  ANOVA_table <- makeANOVA_TreatAge(Model)
+  ANOVA_table %>%
+    kable_styling(
+      font_size = 18,
+      bootstrap_options = c("striped"), full_width = TRUE
+    )
+}
+```
+
+## Burst Window 370 ms - peak of PNA animals
 ```{r}
 df <- bParams_spont_0.37
 df_grouped <- bParams_spont_0.37_grouped
@@ -448,58 +600,208 @@ df_20_40 <- bParams_spont_20_40_0.37
 df_40_60 <- bParams_spont_40_60_0.37
 ```
 
-```{r}
-df_plot <- df %>%
-  AG_KNDyPNA_makeLowerCase()
-
-tf_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "tf")
-bf_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "bf")
-mbd_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "mbd")
-spb_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "spb")
-intra_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "intra")
-ssf_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "ssf")
-inter_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "inter")
-
-```
+### Counts
 
 ```{r}
-ggsave(
-  "AG_KNDyPNA_meanFrequency.pdf",
-  plot = tf_plot,
-  device = "pdf",
-  path = file.path(PlotOutputFolder, "manuscript"),
-  scale = 1,
-  width = 8,
-  height = 20/3,
-  units = c("cm")
+countSum <- countLittersCellsFiringBursting(
+  df_grouped,
+  groupingVars,
+  rateForQuiet
 )
+
+if(doc.type == "docx"){
+  formatCountTableForPPT(
+    countSum,
+    fontSize = 10
+  )
+} else {countSum}
 ```
 
 
-```{r}
-# Arrange the burst parameters into a 3x2 grid
-burstPlots3x2 <- ggarrange(
-  bf_plot,
-  mbd_plot,
-  spb_plot,
-  intra_plot,
-  ssf_plot,
-  inter_plot,
-  labels = c("A", "B", "C", "D", "E", "F"), #Label each panel
-  ncol = 2,
-  nrow = 3,
-  align = "v"
-)
 
-ggsave(
-  "AG_KNDyPNA_burstParameters_370ms.pdf",
-  plot = burstPlots3x2,
-  device = "pdf",
-  path = file.path(PlotOutputFolder, "manuscript"),
-  scale = 1,
-  width = 18,
-  height = 20,
-  units = c("cm")
+```{r eval=FALSE, include=FALSE}
+#overwhelming
+meanSum_spont_0.37 <- map_df(
+  burstParameters,
+  doMeanSummaryForColumn,
+  df = bParams_spont_0.37_grouped,
+  includeVarInColName = FALSE,
+  addVarCol = TRUE,
+  niceNames = KNDy_VarNames
 )
 ```
 
+### Total Frequency
+```{r}
+param = expr(tf)
+```
+
+```{r}
+Model <- lm_byTreatxAge(param, df_contrasts)
+        
+
+if(doc.type == "docx"){
+  ANOVA_out <- makePlainANOVA_getVals_treatAge(Model)
+  formatANOVAforPPT(
+    ANOVA_out$ANOVA,
+    fontSize = AnovaFontSize
+  )
+} else {
+  ANOVA_table <- makeANOVA_TreatAge(Model)
+  ANOVA_table %>%
+    kable_styling(
+      font_size = 18,
+      bootstrap_options = c("striped"), full_width = TRUE
+    )
+}
+```
+
+### Burst Frequency
+```{r}
+param = expr(bf)
+```
+
+```{r}
+Model <- lm_byTreatxAge(param, df_contrasts)
+        
+
+if(doc.type == "docx"){
+  ANOVA_out <- makePlainANOVA_getVals_treatAge(Model)
+  formatANOVAforPPT(
+    ANOVA_out$ANOVA,
+    fontSize = AnovaFontSize
+  )
+} else {
+  ANOVA_table <- makeANOVA_TreatAge(Model)
+  ANOVA_table %>%
+    kable_styling(
+      font_size = 18,
+      bootstrap_options = c("striped"), full_width = TRUE
+    )
+}
+```
+
+### Mean Burst Duration
+```{r}
+param = expr(mbd)
+```
+
+```{r}
+Model <- lm_byTreatxAge(param, df_contrasts)
+        
+
+if(doc.type == "docx"){
+  ANOVA_out <- makePlainANOVA_getVals_treatAge(Model)
+  formatANOVAforPPT(
+    ANOVA_out$ANOVA,
+    fontSize = AnovaFontSize
+  )
+} else {
+  ANOVA_table <- makeANOVA_TreatAge(Model)
+  ANOVA_table %>%
+    kable_styling(
+      font_size = 18,
+      bootstrap_options = c("striped"), full_width = TRUE
+    )
+}
+```
+
+### Spikes Per Burst
+```{r}
+param = expr(spb)
+```
+
+```{r}
+Model <- lm_byTreatxAge(param, df_contrasts)
+        
+
+if(doc.type == "docx"){
+  ANOVA_out <- makePlainANOVA_getVals_treatAge(Model)
+  formatANOVAforPPT(
+    ANOVA_out$ANOVA,
+    fontSize = AnovaFontSize
+  )
+} else {
+  ANOVA_table <- makeANOVA_TreatAge(Model)
+  ANOVA_table %>%
+    kable_styling(
+      font_size = 18,
+      bootstrap_options = c("striped"), full_width = TRUE
+    )
+}
+```
+
+### Intra-burst Interval
+```{r}
+param = expr(intra)
+```
+
+```{r}
+Model <- lm_byTreatxAge(param, df_contrasts)
+        
+
+if(doc.type == "docx"){
+  ANOVA_out <- makePlainANOVA_getVals_treatAge(Model)
+  formatANOVAforPPT(
+    ANOVA_out$ANOVA,
+    fontSize = AnovaFontSize
+  )
+} else {
+  ANOVA_table <- makeANOVA_TreatAge(Model)
+  ANOVA_table %>%
+    kable_styling(
+      font_size = 18,
+      bootstrap_options = c("striped"), full_width = TRUE
+    )
+}
+```
+
+### Single Spike Frequency
+```{r}
+param = expr(ssf)
+```
+
+```{r}
+Model <- lm_byTreatxAge(param, df_contrasts)
+        
+
+if(doc.type == "docx"){
+  ANOVA_out <- makePlainANOVA_getVals_treatAge(Model)
+  formatANOVAforPPT(
+    ANOVA_out$ANOVA,
+    fontSize = AnovaFontSize
+  )
+} else {
+  ANOVA_table <- makeANOVA_TreatAge(Model)
+  ANOVA_table %>%
+    kable_styling(
+      font_size = 18,
+      bootstrap_options = c("striped"), full_width = TRUE
+    )
+}
+```
+
+### Inter-event Interval
+```{r}
+param = expr(inter)
+```
+
+```{r}
+Model <- lm_byTreatxAge(param, df_contrasts)
+        
+
+if(doc.type == "docx"){
+  ANOVA_out <- makePlainANOVA_getVals_treatAge(Model)
+  formatANOVAforPPT(
+    ANOVA_out$ANOVA,
+    fontSize = AnovaFontSize
+  )
+} else {
+  ANOVA_table <- makeANOVA_TreatAge(Model)
+  ANOVA_table %>%
+    kable_styling(
+      font_size = 18,
+      bootstrap_options = c("striped"), full_width = TRUE
+    )
+}
+```

@@ -70,54 +70,72 @@ KNDy_VarNames <- KNDy_varNamesFunc(KNDyDATA)
 ```
 
 ```{r}
+minDuration = NA
+maxAgeInDays = 160
+maxUterineMass = 110
+cellNums = levels(KNDyDATA$CellNum)
+mouseNums = levels(KNDyDATA$MouseNum)
+whoRecorded = "Amanda"
+whoSliced = levels(KNDyDATA$Who)
+includeMainCol = FALSE
+includeHomozygous = FALSE
+excludeMarkedCells = TRUE
+```
+
+```{r}
 filteredDF <- KNDyDATA %>%
-  filterData_RemoveMainCol_Homozy_Excluded()
+  filterData_options(
+    excludeMarkedCells = excludeMarkedCells,
+    minDuration = minDuration,
+    maxAgeInDays = maxAgeInDays,
+    maxUterineMass = maxUterineMass,
+    cellNums = cellNums,
+    mouseNums = mouseNums,
+    whoRecorded = whoRecorded,
+    whoSliced = whoSliced,
+    includeMainCol = includeMainCol,
+    includeHomozygous = includeHomozygous
+  ) 
 
 timingDF <- filteredDF %>%
-  formatForIgor()
-
-laterCellsDF <- filteredDF %>%
-  filter(
-    CellNum == 2 | CellNum == 3
-  ) %>%
-  formatForIgor()
-
-laterCellsDF
-
-homozyAndMainCons <- KNDyDATA %>%
-  filter(
-    Zygosity == "homoPlus" | Treatment == "Main Colony Control"
-  ) %>%
-  excludeFunc()
-homozyAndMainCons <- homozyAndMainCons %>%
   formatForIgor()
 ```
 
 ```{r}
 # Replaces the treatxage column with blanks for cells that we don't want included in the group analysis
 # this allows for easy update of the group analysis in igor without having to save whole new versions of the experiment
+
+# Based on these filtering parameters
+# minDuration = NA
+# cellNums = levels(KNDyDATA$CellNum)
+# mouseNums = levels(KNDyDATA$MouseNum)
+# whoRecorded = "Amanda"
+# whoSliced = levels(KNDyDATA$Who)
+# includeMainCol = FALSE
+# includeHomozygous = FALSE
+# excludeMarkedCells = TRUE
+
 replaceTreatxAge <- KNDyDATA %>%
   excludeFunc() %>%
   mutate(
     TreatxAge = case_when(
       Treatment == "Main Colony Control" ~ "",
       WhoRecorded == "Jenn" ~ "",
+      Age_in_days > maxAgeInDays ~ "",
+      UterineMass > maxUterineMass ~ "",
       TRUE ~ TreatxAge
     )
   )
 
-groupsForAmandaOnlyNoMainCol <- replaceTreatxAge %>%
-  select(
-    CellID,
-    TreatxAge
-  )
+groupsForAmandaOnlyFiltered <- replaceTreatxAge %>%
+  formatForIgor()
+
+groupsForAmandaOnlyFiltered
 ```
 
 ```{r}
 writeToWorkbook("timingData", timingDF, KNDyAnalysisWB)
-writeToWorkbook("laterCells", laterCellsDF, KNDyAnalysisWB)
-writeToWorkbook("homozyAndMainCol", homozyAndMainCons, KNDyAnalysisWB)
-writeToWorkbook("amandaOnlyNoMainCol", groupsForAmandaOnlyNoMainCol, KNDyAnalysisWB)
+writeToWorkbook("amandaOnlyFiltered", groupsForAmandaOnlyFiltered, KNDyAnalysisWB)
 ```
 
 
