@@ -1,0 +1,349 @@
+---
+title: "Effect of Prenatal Androgenization on Spontaneous Firing of Arcuate KNDy Neurons"
+author: "Amanda Gibson"
+output:
+  word_document: 
+    toc: yes
+  html_notebook: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
+# options(digits=3)
+```
+
+```{r callSetUp, message=FALSE, warning=FALSE}
+# # Set-up
+# The `AG_KNDyPNA_setup.R` file reads the .REnviron to load the appropriate files for the local computer. It also calls the appropriate libraries and sources the other function files to be used for analysis.
+# 
+# This file also loads the `KNDy_mouse_demo`, `KNDy_cells`, `KNDy_exclude`, `KNDy_firingRate`, `KNDy_cycles`, and other dataframes by reading the `KNDyPNA_Data` excel file.
+#This runs the setup script that loads the appropriate libraries and files
+source("./Scripts/AG_KNDyPNA_setup.R")
+
+library(flextable)
+doc.type <- knitr::opts_knit$get('rmarkdown.pandoc.to')
+# doc.type = "docx"
+```
+
+```{r ppt-setUp}
+#create a new powerpoint
+KNDy_PPT = read_pptx()
+
+#add a new title slide
+KNDy_PPT = add_slide(KNDy_PPT, layout = "Title Slide", master = "Office Theme")
+
+#Write "KNDy - PNA DATA" in the title slot
+KNDy_PPT = ph_with(KNDy_PPT, value = "KNDy - PNA Data", location = ph_location_label(ph_label = "Title 1"))
+
+#view the possible layout properties 
+#layout_properties(x = KNDy_PPT, layout = "Title Slide")
+
+# Save plots
+save = FALSE
+toPPT = TRUE
+ppt = KNDy_PPT
+
+```
+
+
+```{r Get-Data-Ready}
+
+# ## Get Data Ready
+# 
+# The `GetDataReadyFunc` function takes the `KNDy_mouse_demo` and `KNDy_cells` data frame to produce a combined `KNDyDATA` data frame.
+# 
+# This does the following transformations
+# 
+# * reformats the columns with dates into date format
+# * Creates a new variable Sac_9plus that is TRUE when the time of sacrifice is more than 9hr after lights on
+# * Creates a new variable AgeGroup that is TRUE when the mouse is a juvenile
+# * Creates a new variable Quiet that is TRUE when the spontaneous average firing rate is less than a cutoff value
+# cutoff value is specified by rateForQuiet
+# * Creates a new variable TreatxAge to generate four groups 
+#   + PNA - Adult
+#   + PNA - Juvenile
+#   + Control - Adult
+#   + Control - Juvenile
+# * Makes AgeGroup a factor, and gives it nice labels, Juvenile or Adult
+# * Gets rid of white space in the "Who" variable
+# * Makes Treatment a factor variable with orders "Main Colony Control", "Control", "Vehicle", "DHT"
+# * Combines the KNDy_exclude information
+# *Readjusts the order of variables within the KNDyDATA data frame to be a little more helpful.  
+# 
+# If the order of the excel sheet changes, this function has to change
+
+allDFs <- GetDataReadyFunc(
+  KNDy_mouse_demo, 
+  KNDy_cells, 
+  KNDy_exclude, 
+  KNDy_firingRate, 
+  KNDy_burstData, 
+  KNDy_clusterData, 
+  rateForQuiet, 
+  KNDy_TimingData
+  )
+
+KNDyDATA <-  allDFs$KNDyDATA
+KNDy_mouse_demo <- allDFs$KNDy_mouse_demo
+KNDy_cells <- allDFs$KNDy_cells
+KNDy_firingRate <- allDFs$KNDy_firingRate
+VBW_BurstsPerHour <- allDFs$VBW_BurstsPerHour
+VBW_BurstsPerHour_hour1 <- allDFs$VBW_BurstsPerHour_hour1
+
+#Store the dataframes as excel sheets
+KNDyAnalysisWB = createWorkbook()
+```
+
+```{r KNDy_VarNames}
+# Creates the KNDy_VarNames data frame with the nice names for each variable
+# Creates the following lists or expressions of variable groups. 
+# There is a _quo which is quoted for each variable, or the basename version which is the exprs (expressions) list
+# 
+# - timingVars
+# - demoVarsAll
+# - BurstVars_spont
+# - numPeaksVars
+# - numNadirsVars
+# - meanPeakDurVars
+# - meanNadirDurVars
+# - totalPeakDurVars
+# - totalNadirDurVars
+# - meanPeakFiringVars
+# - meanNadirFiringVars
+# - allClusterVars
+# - cluster2x2SD_Vars
+# - cluster3x3SD_Vars
+# - cluster 2x2SE_Vars
+# - cluster 3x3SE_Vars
+
+KNDy_VarNames <- KNDy_varNamesFunc(KNDyDATA)
+```
+
+```{r}
+
+# if(doc.type == "docx"){flextable(df)} else {df}
+```
+
+# Filtering Information
+For this report, cells were not filtered by recording duration. Mice that were up to 160 days of age were included. Uterine mass up to 110 mg was included. There was no filtering of the dataset by order of cell recorded or order of mice recorded from one litter. Only cells that Amanda recorded were included, but this includes cells that were from animals that Jenn sliced. This dataset does not include main colony control mice, which therefore also excludes homozygous mice. Cells that had other technical reasons for exclusion are not included in this dataset.
+
+```{r}
+# Change this list to change how the dataset is filtered
+# This just needs to be changed here, and then it can be applied throughout
+minDuration = NA
+maxAgeInDays = 160
+maxUterineMass = 110
+cellNums = levels(KNDyDATA$CellNum)
+mouseNums = levels(KNDyDATA$MouseNum)
+whoRecorded = "Amanda"
+whoSliced = levels(KNDyDATA$Who)
+includeMainCol = FALSE
+includeHomozygous = FALSE
+excludeMarkedCells = TRUE
+
+
+filterParams = list(
+  excludeMarkedCells = excludeMarkedCells,
+  minDuration = minDuration,
+  maxAgeInDays = maxAgeInDays,
+  maxUterineMass = maxUterineMass,
+  cellNums = cellNums,
+  mouseNums = mouseNums,
+  whoRecorded = whoRecorded,
+  whoSliced = whoSliced,
+  includeMainCol = includeMainCol,
+  includeHomozygous = includeHomozygous
+)
+
+burstParameters <- exprs(
+  tf,
+  bf,
+  mbd,
+  spb,
+  intra,
+  ssf,
+  inter
+)
+
+binWidths <- list(
+  tf = 0.04,
+  bf = 0.007,
+  mbd = NA,
+  spb = NA,
+  intra = NA,
+  ssf = 0.02,
+  inter = NA
+)
+
+dotSizes <- list(
+  tf = 3,
+  bf = 3,
+  mbd = 1,
+  spb = 1,
+  intra = 1,
+  ssf = 3,
+  inter = 1
+)
+
+groupingVars <- exprs(AgeGroup, GenTreatment)
+rateForQuiet <- 0.005
+```
+
+
+```{r}
+# Full Spontaneous - 210 burst window
+bParams_spont_0.21 <- loadBurstParamsData_noFilters(
+  analysis = "spont_0.21",
+  BurstOutputsFolder = file.path(BurstOutputsFolder, "allCells"),
+  demoDF = KNDyDATA
+)
+
+bParams_spont_0.21 <- do.call(
+  filterData_options,
+  c(
+    list(df = bParams_spont_0.21),
+    filterParams
+  )
+)
+
+bParams_spont_0.21_grouped <- bParams_spont_0.21 %>%
+  group_by(
+    !!! groupingVars
+  )
+```
+
+```{r}
+# 0-20 min Spontaneous - 210 burst window
+bParams_spont_0_20_0.21 <- loadBurstParamsData_noFilters(
+  analysis = "spont_bin20_0_0.21",
+  BurstOutputsFolder = file.path(BurstOutputsFolder, "allCells"),
+  demoDF = KNDyDATA
+)
+
+bParams_spont_0_20_0.21 <- do.call(
+  filterData_options,
+  c(
+    list(df = bParams_spont_0_20_0.21),
+    filterParams
+  )
+)
+
+bParams_spont_0_20_0.21_grouped <- bParams_spont_0_20_0.21 %>%
+  group_by(
+    !!! groupingVars
+  )
+```
+
+```{r}
+# 20-40 min Spontaneous - 210 burst window
+bParams_spont_20_40_0.21 <- loadBurstParamsData_noFilters(
+  analysis = "spont_bin20_1_0.21",
+  BurstOutputsFolder = file.path(BurstOutputsFolder, "allCells"),
+  demoDF = KNDyDATA
+)
+
+bParams_spont_20_40_0.21 <- do.call(
+  filterData_options,
+  c(
+    list(df = bParams_spont_20_40_0.21),
+    filterParams
+  )
+)
+
+bParams_spont_20_40_0.21_grouped <- bParams_spont_20_40_0.21 %>%
+  group_by(
+    !!! groupingVars
+  )
+```
+
+```{r}
+# 40-60 min Spontaneous - 210 burst window
+bParams_spont_40_60_0.21 <- loadBurstParamsData_noFilters(
+  analysis = "spont_bin20_2_0.21",
+  BurstOutputsFolder = file.path(BurstOutputsFolder, "allCells"),
+  demoDF = KNDyDATA
+)
+
+bParams_spont_40_60_0.21 <- do.call(
+  filterData_options,
+  c(
+    list(df = bParams_spont_40_60_0.21),
+    filterParams
+  )
+)
+
+bParams_spont_40_60_0.21_grouped <- bParams_spont_40_60_0.21 %>%
+  group_by(
+    !!! groupingVars
+  )
+```
+
+# Full Spontaneous Recordings 
+
+## Burst Window 210 ms - peak of control animals
+```{r}
+df <- bParams_spont_0.21
+df_grouped <- bParams_spont_0.21_grouped
+df_contrasts <- makeTreatandAgeContrasts(bParams_spont_0.21)
+
+df_0_20 <- bParams_spont_0_20_0.21
+df_20_40 <- bParams_spont_20_40_0.21
+df_40_60 <- bParams_spont_40_60_0.21
+```
+
+```{r}
+df_plot <- df %>%
+  AG_KNDyPNA_makeLowerCase()
+
+tf_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "tf")
+bf_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "bf")
+mbd_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "mbd")
+spb_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "spb")
+intra_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "intra")
+ssf_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "ssf")
+inter_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "inter")
+
+```
+
+```{r}
+ggsave(
+  "AG_KNDyPNA_meanFrequency.pdf",
+  plot = tf_plot,
+  device = "pdf",
+  path = file.path(PlotOutputFolder, "manuscript"),
+  scale = 1,
+  width = 8,
+  height = 20/3,
+  units = c("cm")
+)
+```
+
+
+```{r}
+# Arrange the burst parameters into a 3x2 grid
+burstPlots3x2 <- ggarrange(
+  bf_plot,
+  mbd_plot,
+  spb_plot,
+  intra_plot,
+  ssf_plot,
+  inter_plot,
+  labels = c("A", "B", "C", "D", "E", "F"), #Label each panel
+  ncol = 2,
+  nrow = 3
+)
+
+ggsave(
+  "AG_KNDyPNA_burstParameters.pdf",
+  plot = burstPlots3x2,
+  device = "pdf",
+  path = file.path(PlotOutputFolder, "manuscript"),
+  scale = 1,
+  width = 18,
+  height = 20,
+  units = c("cm")
+)
+```
+

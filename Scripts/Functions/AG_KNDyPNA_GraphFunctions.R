@@ -55,3 +55,84 @@ plotBurstParamBox <- function(
   
   return(viz)
 }
+
+# param as character
+AG_KNDyPNA_manuscriptPlot <- function(df, param){
+  viz <- ggerrorplot(
+    df,
+    "GenTreatment",
+    param,
+    add = "jitter",
+    palette = c("white", "black"),
+    facet.by = "AgeGroup",
+    size = .4,
+    add.params = list(shape = 21, fill = "GenTreatment", size = 1, alpha = .8),
+    xlab = KNDy_VarNames[,"GenTreatment"],
+    ylab = KNDy_VarNames[, param],
+    error.plot = "linerange",
+    font.x = c(size = 11, style = "bold"),
+    font.y = c(size = 11, style = "bold"),
+    font.family = "Arial",
+    font.tickslab = c(size = 11 ),
+    font.label = c(size = 11),
+    panel.labs.font = list(size = 11, face = "bold")
+  ) +
+    stat_summary(
+      geom = "errorbar", 
+      fun.min = mean, 
+      fun = mean, 
+      fun.max = mean, 
+      width = .3,
+      size = .4
+    ) +
+    stat_summary(
+      geom = "errorbar", 
+      fun.min = median, 
+      fun = median, 
+      fun.max = median, 
+      width = .3,
+      size = .4,
+      color = "red",
+      alpha = .7
+    ) +
+    rremove(
+      "legend"
+    ) +
+    theme(
+      element_blank()
+    )
+  
+  return(viz)
+}
+
+AG_KNDyPNA_makeLowerCase <- function(df){
+  df <- df %>%
+    mutate(
+      AgeGroup = case_when(
+        AgeGroup == "Adult" ~ "adult",
+        AgeGroup == "Juvenile" ~ "juvenile"
+      ),
+      GenTreatment = case_when(
+        GenTreatment == "Control" ~ "control",
+        TRUE ~ as.character(GenTreatment)
+      )
+    )
+  
+  KNDyDATA$AgeGroup = factor(
+    KNDyDATA$AgeGroup, 
+    levels = c(TRUE, FALSE), 
+    labels = c("Juvenile", "Adult")
+  )
+  
+  df$AgeGroup <- factor(
+    df$AgeGroup,
+    levels = c("juvenile", "adult")
+  )
+  
+  df$GenTreatment <- factor(
+    df$GenTreatment,
+    levels = c("control", "PNA")
+  )
+  
+  return(df)
+}

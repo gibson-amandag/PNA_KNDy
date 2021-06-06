@@ -277,6 +277,17 @@ sumDataSet2 <- filteredKNDyData %>%
     MedDur = median(SpontAvgFiring, na.rm = TRUE),
     MeanDur = mean(SpontAvgFiring, na.rm = TRUE)
   )
+sumDataSet2
+
+sumDataSet3 <- filteredKNDyData %>%
+  summarize(
+    Total = n(),
+    PropLess0.001 = sum(SpontAvgFiring < 0.001, na.rm = TRUE) / n(),
+    PropLess0.005 = sum(SpontAvgFiring < 0.005, na.rm = TRUE) / n(),
+    PropLess0.01 = sum(SpontAvgFiring < 0.01, na.rm = TRUE) / n()
+  )
+
+sumDataSet3
 ```
 
 ```{r}

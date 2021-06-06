@@ -200,8 +200,8 @@ KNDy_varNamesFunc = function(dataframe) {
   KNDy_VarNames$meanNadirFiring_2x2SE = "Mean Nadir Firing Rate (Hz) - 2x2SE"
   KNDy_VarNames$meanNadirFiring_3x3SE = "Mean Nadir Firing Rate (Hz) - 3x3SE"
   
-  KNDy_VarNames$Treatment = "Treatment"
-  KNDy_VarNames$GenTreatment = "Treatment"
+  KNDy_VarNames$Treatment = "treatment"
+  KNDy_VarNames$GenTreatment = "treatment"
   
   KNDy_VarNames$CycleStage = "Cycle Stage"
   KNDy_VarNames$BodyMass_g = "Body Mass (g)"
@@ -218,7 +218,7 @@ KNDy_varNamesFunc = function(dataframe) {
   KNDy_VarNames$Time_sac = "Time of Sacrifice"
   KNDy_VarNames$Sac_hr = "Time of Sacrifice (hr after lights on)"
   KNDy_VarNames$Sac_9plus = "Was sacrifice 9 hrs+ after lights on?"
-  KNDy_VarNames$AgeGroup = "Age Group"
+  KNDy_VarNames$AgeGroup = "age group"
   KNDy_VarNames$Who = "Sliced By"
   KNDy_VarNames$Zygosity = "Zygosity"
   
@@ -227,17 +227,17 @@ KNDy_varNamesFunc = function(dataframe) {
   
   KNDy_VarNames <- KNDy_VarNames %>%
     mutate(
-      bn = "Burst Number",
-      mbd = "Mean Burst Duration (s)",
-      spb = "Spikes Per Burst",
-      bf = "Burst Freq (Hz)",
-      ssn = "Single Spike Number",
-      ssf = "Single Spike Freq (Hz)",
-      tf = "Total Freq (Hz)",
-      inter = "Mean Interevent Interval (s)",
-      intra = "Mean Intraburst Interval (s)",
-      bFlags = "# Bursts near Gaps",
-      ssFlags = "# Single Spikes Near Gaps"
+      bn = "burst number",
+      mbd = "mean burst duration (s)",
+      spb = "spikes per burst",
+      bf = "burst frequency (Hz)",
+      ssn = "single spike number",
+      ssf = "single spike frequency (Hz)",
+      tf = "mean firing frequency (Hz)",
+      inter = "mean interevent interval (s)",
+      intra = "mean intraburst interval (s)",
+      bFlags = "# bursts near gaps",
+      ssFlags = "# single spikes near gaps"
     )
   
   return(KNDy_VarNames)
