@@ -20,6 +20,33 @@ formatForIgor <- function(df) {
   return(formatedDF)
 }
 
+formatSenktideForIgor <- function(
+  df, 
+  timeRelBath, #How long after senktide hits bath should the analysis period start?
+  analysisDur,
+  saveToClipboard = FALSE
+){
+  formatedDF <- df %>%
+    mutate(
+      sctName = paste0(CellID, "_sct"),
+      baselineStart = Senktide_bath - 1 - analysisDur,
+      baselineEnd = Senktide_bath - 1,
+      senktideStart = Senktide_bath + timeRelBath,
+      senktideEnd = Senktide_bath + timeRelBath + analysisDur
+    ) %>%
+    select(
+      sctName,
+      CellID,
+      TreatxAge,
+      baselineStart,
+      baselineEnd,
+      senktideStart,
+      senktideEnd,
+      Senktide_bath
+    )
+  return(formatedDF)
+}
+
 # param should be in form exprs(parameter), can be params[1] form from params being an exprs list
 combineBurstBinsForParam <- function(
   df_0_20,

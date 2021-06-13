@@ -82,7 +82,8 @@ allDFs <- GetDataReadyFunc(
   KNDy_burstData, 
   KNDy_clusterData, 
   rateForQuiet, 
-  KNDy_TimingData
+  KNDy_TimingData,
+  KNDy_Senktide
   )
 
 KNDyDATA <-  allDFs$KNDyDATA
@@ -91,6 +92,7 @@ KNDy_cells <- allDFs$KNDy_cells
 KNDy_firingRate <- allDFs$KNDy_firingRate
 VBW_BurstsPerHour <- allDFs$VBW_BurstsPerHour
 VBW_BurstsPerHour_hour1 <- allDFs$VBW_BurstsPerHour_hour1
+KNDy_Senktide <- allDFs$KNDy_Senktide
 
 #Store the dataframes as excel sheets
 KNDyAnalysisWB = createWorkbook()
