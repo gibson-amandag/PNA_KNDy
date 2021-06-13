@@ -157,6 +157,8 @@ GetDataReadyFunc = function(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firi
   #Make factor variables
   KNDyDATA$CellNum <- as.factor(KNDyDATA$CellNum)
   KNDyDATA$MouseNum <- as.factor(KNDyDATA$MouseNum)
+  KNDyDATA$Generation <- as.factor(KNDyDATA$Generation)
+  KNDyDATA$DamID <- as.factor(KNDyDATA$DamID)
   
   #Add the timing data
   KNDyDATA <- KNDyDATA %>%
@@ -184,6 +186,7 @@ GetDataReadyFunc = function(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firi
       TreatxAge,
       StartTime_spont,
       EndTime_spont,
+      StartTime_senktide,
       CycleStage, 
       SpontAvgFiring:FiringRate_100_120min,
       Mbd_spont:ssDoubtsPerc_senktide_BW2
