@@ -93,7 +93,7 @@ doMeanSummaryForColumn <- function(col, df, includeVarInColName = TRUE, addVarCo
   sumDF <- df %>%
     summarise(
       across(
-        !! col, #from !!!
+        {{col}}, #from !!!, then !!
         meanSummaryList,
         .names = colNames
       ),
@@ -110,6 +110,7 @@ doMeanSummaryForColumn <- function(col, df, includeVarInColName = TRUE, addVarCo
 doQuartileSummaryForColumn <- function(col, df, includeVarInColName = TRUE, addVarCol = FALSE, niceNamesDF = KNDy_VarNames) {
   #provide col as expression
   # examples - expr(bn), expr(bn:bf), expr(c(bn, bf))
+  # now that using {{ }} can be more flexible with entry
   
   if(includeVarInColName ){
     colNames <- "{col}.{.fn}"
@@ -120,7 +121,7 @@ doQuartileSummaryForColumn <- function(col, df, includeVarInColName = TRUE, addV
   sumDF <- df %>%
     summarise(
       across(
-        !! col, #from !!!
+        {{col}}, #from !!!, then !!
         quartilesSummaryList,
         .names = colNames
       ),
