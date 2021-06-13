@@ -13,7 +13,9 @@ formatForIgor <- function(df) {
       CellID,
       TreatxAge,
       StartTime_spont,
-      EndTime_spont
+      EndTime_spont,
+      StartTime_senktide,
+      Status,
     )
   return(formatedDF)
 }
