@@ -16,7 +16,7 @@
 
 #Returns a list with the three data frames
 
-GetDataReadyFunc = function(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firingRate, KNDy_burstData, KNDy_clusterData, rateForQuiet, KNDy_timingData){
+GetDataReadyFunc = function(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firingRate, KNDy_burstData, KNDy_clusterData, rateForQuiet, KNDy_timingData, KNDy_Senktide){
   #Reformat dates into year-month-day
   #I think not needed with reading of excel files
   # KNDy_mouse_demo$Date_of_birth = format_dates(KNDy_mouse_demo$Date_of_birth)
@@ -246,13 +246,20 @@ GetDataReadyFunc = function(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firi
       MaxBurstWindow_hour1) %>%
     left_join(KNDy_burstData %>% select(CellID, BurstsHour1_0.01:BurstsHour1_1.00), by = "CellID")
   
+  KNDy_Senktide <- KNDy_Senktide %>%
+    left_join(
+      KNDyDATA,
+      by = "CellID"
+    )
+  
   my_list = list(
     "KNDyDATA" = KNDyDATA, 
     "KNDy_mouse_demo" = KNDy_mouse_demo, 
     "KNDy_cells" = KNDy_cells,
     "KNDy_firingRate" = KNDy_firingRate,
     "VBW_BurstsPerHour" = VBW_BurstsPerHour,
-    "VBW_BurstsPerHour_hour1" = VBW_BurstsPerHour_hour1
+    "VBW_BurstsPerHour_hour1" = VBW_BurstsPerHour_hour1,
+    "KNDy_Senktide" = KNDy_Senktide
   )
   
   return(my_list)
