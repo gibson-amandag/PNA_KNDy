@@ -33,6 +33,7 @@ CyclesSheetName = "Cycles"
 BurstSheetName = "BurstData"
 ClusterSheetName = "ClusterData"
 TimingSheetName = "TimingData"
+SenktideSheetName = "Senktide"
 
 # Burst Window Sheets
 BWSheetName_spont_230ms = "bw230ms"
@@ -100,6 +101,7 @@ KNDy_cycles <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, CyclesSheetName)
 KNDy_burstData <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, BurstSheetName)
 KNDy_clusterData <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, ClusterSheetName)
 KNDy_TimingData <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, TimingSheetName)
+KNDy_Senktide <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, SenktideSheetName)
 
 burstAnalysisKey <- myXLSX_func(BurstOutputsFolder, "analysisTypesKey.xlsx", "Sheet1")
 burstAnalysisKey_inc2nd3rd <- myXLSX_func(BurstOutputsFolder, "analysisTypesKey.xlsx", "IncSecondThird")

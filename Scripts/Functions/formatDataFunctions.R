@@ -13,7 +13,36 @@ formatForIgor <- function(df) {
       CellID,
       TreatxAge,
       StartTime_spont,
-      EndTime_spont
+      EndTime_spont,
+      StartTime_senktide,
+      Status,
+    )
+  return(formatedDF)
+}
+
+formatSenktideForIgor <- function(
+  df, 
+  timeRelBath, #How long after senktide hits bath should the analysis period start?
+  analysisDur,
+  saveToClipboard = FALSE
+){
+  formatedDF <- df %>%
+    mutate(
+      sctName = paste0(CellID, "_sct"),
+      baselineStart = Senktide_bath - 1 - analysisDur,
+      baselineEnd = Senktide_bath - 1,
+      senktideStart = Senktide_bath + timeRelBath,
+      senktideEnd = Senktide_bath + timeRelBath + analysisDur
+    ) %>%
+    select(
+      sctName,
+      CellID,
+      TreatxAge,
+      baselineStart,
+      baselineEnd,
+      senktideStart,
+      senktideEnd,
+      Senktide_bath
     )
   return(formatedDF)
 }

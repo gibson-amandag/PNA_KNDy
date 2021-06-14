@@ -25,27 +25,6 @@ library(flextable)
 doc.type <- knitr::opts_knit$get('rmarkdown.pandoc.to')
 ```
 
-```{r ppt-setUp}
-#create a new powerpoint
-KNDy_PPT = read_pptx()
-
-#add a new title slide
-KNDy_PPT = add_slide(KNDy_PPT, layout = "Title Slide", master = "Office Theme")
-
-#Write "KNDy - PNA DATA" in the title slot
-KNDy_PPT = ph_with(KNDy_PPT, value = "KNDy - PNA Data", location = ph_location_label(ph_label = "Title 1"))
-
-#view the possible layout properties 
-#layout_properties(x = KNDy_PPT, layout = "Title Slide")
-
-# Save plots
-save = FALSE
-toPPT = TRUE
-ppt = KNDy_PPT
-
-```
-
-
 ```{r Get-Data-Ready}
 
 # ## Get Data Ready
@@ -80,7 +59,8 @@ allDFs <- GetDataReadyFunc(
   KNDy_burstData, 
   KNDy_clusterData, 
   rateForQuiet, 
-  KNDy_TimingData
+  KNDy_TimingData,
+  KNDy_Senktide
   )
 
 KNDyDATA <-  allDFs$KNDyDATA
@@ -89,11 +69,10 @@ KNDy_cells <- allDFs$KNDy_cells
 KNDy_firingRate <- allDFs$KNDy_firingRate
 VBW_BurstsPerHour <- allDFs$VBW_BurstsPerHour
 VBW_BurstsPerHour_hour1 <- allDFs$VBW_BurstsPerHour_hour1
+KNDy_Senktide <- allDFs$KNDy_Senktide
 
 #Store the dataframes as excel sheets
 KNDyAnalysisWB = createWorkbook()
-
-writeToWorkbook("KNDyData", KNDyDATA, KNDyAnalysisWB)
 ```
 
 ```{r KNDy_VarNames}
@@ -120,6 +99,72 @@ writeToWorkbook("KNDyData", KNDyDATA, KNDyAnalysisWB)
 
 KNDy_VarNames <- KNDy_varNamesFunc(KNDyDATA)
 ```
+
+# Filtering Information
+For this report, cells were not filtered by recording duration. Mice that were up to 160 days of age were included. Uterine mass up to 110 mg was included. There was no filtering of the dataset by order of cell recorded or order of mice recorded from one litter. Only cells that Amanda recorded were included, but this includes cells that were from animals that Jenn sliced. This dataset does not include main colony control mice, which therefore also excludes homozygous mice. Cells that had other technical reasons for exclusion are not included in this dataset.
+
+```{r}
+# Change this list to change how the dataset is filtered
+# This just needs to be changed here, and then it can be applied throughout
+minDuration = NA
+maxAgeInDays = 160
+maxUterineMass = 110
+cellNums = levels(KNDyDATA$CellNum)
+mouseNums = levels(KNDyDATA$MouseNum)
+whoRecorded = "Amanda"
+whoSliced = levels(KNDyDATA$Who)
+includeMainCol = FALSE
+includeHomozygous = FALSE
+excludeMarkedCells = TRUE
+
+
+filterParams = list(
+  excludeMarkedCells = excludeMarkedCells,
+  minDuration = minDuration,
+  maxAgeInDays = maxAgeInDays,
+  maxUterineMass = maxUterineMass,
+  cellNums = cellNums,
+  mouseNums = mouseNums,
+  whoRecorded = whoRecorded,
+  whoSliced = whoSliced,
+  includeMainCol = includeMainCol,
+  includeHomozygous = includeHomozygous
+)
+
+burstParameters <- exprs(
+  tf,
+  bf,
+  mbd,
+  spb,
+  intra,
+  ssf,
+  inter
+)
+
+binWidths <- list(
+  tf = 0.04,
+  bf = 0.007,
+  mbd = NA,
+  spb = NA,
+  intra = NA,
+  ssf = 0.02,
+  inter = NA
+)
+
+dotSizes <- list(
+  tf = 3,
+  bf = 3,
+  mbd = 1,
+  spb = 1,
+  intra = 1,
+  ssf = 3,
+  inter = 1
+)
+
+groupingVars <- exprs(AgeGroup, GenTreatment)
+rateForQuiet <- 0.005
+```
+
 
 ```{r}
 df <- KNDyDATA %>%
@@ -173,6 +218,7 @@ tf <- createMeanAndQuartileSummary_forColumn(expr(tf), bParamsDF, exprs(AgeGroup
 tf$meanSums
 tf$quartileSums
 ```
+
 ```{r}
 #create a new powerpoint
 KNDy_PPT = read_pptx()
@@ -1624,6 +1670,7 @@ ggsave(
 )
 ```
 
+
 ```{r}
 library(dabestr)
 bParams_spont_0.23$TreatxAge
@@ -1643,7 +1690,9 @@ multi.two.group.unpaired.meandiff <- mean_diff(multi.two.group.unpaired)
 # Create a multi-two group plot.
 multi.two.group.unpaired.meandiff %>% 
   plot()
+
 ```
+
 ```{r}
 multi.two.group.unpaired <- 
   bParams_spont_0.23 %>%
@@ -1652,7 +1701,11 @@ multi.two.group.unpaired <-
                     c("PNA-Adult", "PNA-Juvenile")),
          paired = FALSE)
 
+```
 
+# Burst analysis
+
+```{r}
 # Compute the mean difference.
 multi.two.group.unpaired.meandiff <- mean_diff(multi.two.group.unpaired)
 
@@ -1661,7 +1714,6 @@ multi.two.group.unpaired.meandiff <- mean_diff(multi.two.group.unpaired)
 multi.two.group.unpaired.meandiff %>% 
   plot()
 ```
-
 
 ```{r}
 two.group.unpaired <- 
@@ -1692,7 +1744,70 @@ two.group.unpaired.mediandiff
 plot(two.group.unpaired.mediandiff, color.column = GenTreatment)
 ```
 
+
+# 2021-06-12
+
+Senktide analysis processing
+
+5 min prior to senktide addition to intake beaker
+1 min to travel to chamber
+start 2 min after reaching chamber -> 5 min of senktide exposure
+
 ```{r}
+KNDy_Senktide %>%
+  group_by(
+    AgeGroup,
+    GenTreatment
+  ) %>%
+  ggplot(
+    aes(x = First.event, fill = interaction(AgeGroup, GenTreatment))
+  ) +
+  geom_bar(
+    position = position_dodge2(preserve = "single"),
+    # binwidth = 1,
+    width = 0.9,
+    color = "white"
+  ) +
+  labs(
+    x = "Time of first event after senktide hit bath (min)"
+  )+
+  my_theme
+
+```
+
+```{r}
+KNDy_Senktide %>%
+  group_by(
+    AgeGroup,
+    GenTreatment
+  ) %>%
+  ggplot(
+    aes(x = Peak, fill = interaction(AgeGroup, GenTreatment))
+  ) +
+  geom_bar(
+    position = position_dodge2(preserve = "single"),
+    # binwidth = 1,
+    width = 0.9,
+    color = "white"
+  ) +
+  labs(
+    x = "Time of peak after senktide hit bath (min)"
+  )+
+  my_theme
+
+doMeanSummaryForColumn(
+  First.event, KNDy_Senktide %>% group_by(AgeGroup, GenTreatment), TRUE, FALSE
+)
+doMeanSummaryForColumn(
+  Peak, KNDy_Senktide %>% group_by(AgeGroup, GenTreatment), TRUE, FALSE
+)
+
+doQuartileSummaryForColumn(
+  First.event, KNDy_Senktide %>% group_by(AgeGroup, GenTreatment), TRUE, FALSE
+)
+doQuartileSummaryForColumn(
+  Peak, KNDy_Senktide %>% group_by(AgeGroup, GenTreatment), TRUE, FALSE
+)
 
 ```
 
@@ -1701,4 +1816,262 @@ doQuartileSummaryForColumn(expr(SpontLength_min), bParams_spont_0.23)
 
 ```
 
+```{r}
+baseline_5min_0.23 <- loadBurstParamsData_noFilters(
+  analysis = "baseline5min_0.23",
+  BurstOutputsFolder = file.path(BurstOutputsFolder, "senktide"),
+  demoDF = KNDyDATA
+)
+
+senktide_2_7min_0.23 <- loadBurstParamsData_noFilters(
+  analysis = "senktide2-7min_0.23",
+  BurstOutputsFolder = file.path(BurstOutputsFolder, "senktide"),
+  demoDF = KNDyDATA
+)
+
+senktideRespDF <- baseline_5min_0.23 %>%
+  left_join(
+    senktide_2_7min_0.23 %>%
+      select(
+        CellID:ssFlags
+      ),
+    suffix = c("base", "senk"),
+    by = "CellID"
+  )
+
+senktideRespDF
+
+#Focus on just the total frequency for now
+senktideTF <- senktideRespDF %>%
+  select(
+    CellID,
+    AgeGroup,
+    GenTreatment,
+    tfbase,
+    tfsenk,
+    Quiet
+  ) %>%
+  mutate(
+    foldChange = ifelse(tfbase > 0, (tfsenk - tfbase) / tfbase, NA)
+  )
+senktideTF %>%
+  filter(!is.na(foldChange))
+```
+First look at graph - messy, but it's a start
+```{r}
+ggpaired(
+  senktideTF,
+  "tfbase",
+  "tfsenk",
+  id = "CellID",
+  facet.by = "AgeGroup",
+  color = "GenTreatment",
+  line.color = "GenTreatment"
+)
+```
+
+```{r}
+senktideTF %>%
+ggerrorplot(
+  x = "GenTreatment",
+  y = "foldChange",
+  facet.by = "AgeGroup"
+  # add = "jitter"
+)
+```
+
+```{r}
+senktide_long <- senktideTF %>%
+  gather(
+    key = "key",
+    value = "firingRate",
+    c(tfbase, tfsenk),
+    factor_key = TRUE
+  ) %>%
+  mutate(
+    time = ifelse(key == "tfbase", "baseline", "senktide")
+  )
+```
+
+```{r}
+senktide_long %>%
+  anova_test(
+    dv = firingRate,
+    wid = CellID,
+    within = time,
+    between = c(AgeGroup, GenTreatment),
+    type = 3
+  ) %>% get_anova_table() %>%
+  flextable()
+```
+```{r}
+senktide_long %>%
+  filter(
+    Quiet == TRUE
+  ) %>%
+  anova_test(
+    dv = firingRate,
+    wid = CellID,
+    within = time,
+    between = c(AgeGroup, GenTreatment),
+    type = 3
+  ) %>% get_anova_table() %>%
+  flextable()
+```
+
+```{r}
+ggerrorplot(
+  senktide_long,
+  x = "GenTreatment",
+  y = "firingRate",
+  color = "time",
+  facet.by = "AgeGroup",
+  add = "jitter",
+  short.panel.labs = TRUE,
+  palette = "jco",
+  panel.labs = list(AgeGroup = c("3wk", "adult")),
+  xlab = "treatment",
+  ylab = "firing rate (Hz)"
+)
+```
+
+```{r}
+two.way <- senktide_long %>%
+  group_by(
+    AgeGroup
+  ) %>%
+  anova_test(
+    dv = firingRate,
+    wid = CellID,
+    between = GenTreatment,
+    within = time,
+    type = 3
+  ) 
+# Doing two simple two-way interactions, so accept at 0.025 level
+# This adjusts to 6 comparisons, but actually not what we want
+# %>%
+#   adjust_pvalue(
+#     method = "bonferroni"
+#   ) %>%
+#   add_significance(
+#     "p.adj"
+#   )
+
+
+two.way %>%
+  flextable()
+```
+
+```{r}
+KNDy_Senktide %>%
+  group_by(
+    AgeGroup, GenTreatment, Quiet
+  ) %>%
+  summarize(
+    n()
+  )
+
+bParams_spont_0.23 <- do.call(
+  filterData_options,
+  c(
+    list(df = bParams_spont_0.23),
+    filterParams
+  )
+)
+count <- bParams_spont_0.23 %>%
+  countLittersCellsFiringBursting(groupingVars = groupingVars, 0.005)
+count
+```
+
+```{r}
+KNDy_Senktide %>%
+  group_by(
+    AgeGroup, GenTreatment
+  ) %>%
+  ggplot(
+    aes(x = Senktide_bath, fill = interaction(AgeGroup, GenTreatment))
+  )+
+  geom_histogram(
+    position = position_dodge2(preserve = "single"),
+    binwidth = 5
+  ) + my_theme
+```
+
+```{r}
+senktide_long %>%
+  anova_test(
+    dv = firingRate,
+    wid = CellID,
+    within = time,
+    between = c(AgeGroup),
+    type = 3
+  ) %>% get_anova_table() %>%
+  flextable()
+
+senktide_long %>%
+  anova_test(
+    dv = firingRate,
+    wid = CellID,
+    within = time,
+    between = c(GenTreatment),
+    type = 3
+  ) %>% get_anova_table() %>%
+  flextable()
+```
+
+```{r}
+treatment.effect <- senktide_long %>%
+  group_by(AgeGroup, time) %>%
+  anova_test(dv = firingRate, wid = CellID, between = GenTreatment) %>%
+  get_anova_table()
+treatment.effect %>% as_tibble() %>% filter(AgeGroup == "Juvenile") %>% flextable()
+
+pwc <- senktide_long %>%
+  group_by(AgeGroup, time) %>%
+  pairwise_t_test(firingRate ~ GenTreatment, p.adjust.method = "bonferroni") 
+# %>%
+#   select(-p, -p.signif) # Remove details
+# Focus on the results of juveniles at senktide time point
+#no bonferroni because it's only correcting within each group... sigh
+pwc %>% filter(time == "senktide", AgeGroup == "Juvenile")
+
+?anova_test
+?pairwise_t_test
+```
+```{r}
+senktideForPrism <- senktideTF %>%
+  arrange(
+    AgeGroup,
+    GenTreatment
+  )
+
+senktideWB <- createWorkbook()
+
+writeToWorkbook("senktide", senktideForPrism, senktideWB)
+saveWorkbook(
+  senktideWB, 
+  file = file.path(DataOutputFolder, paste0("KNDy_senktide_data_", dateToday, ".xlsx")), 
+  overwrite = TRUE)
+```
+
+```{r}
+pwc2 <- senktide_long %>%
+  group_by(AgeGroup, GenTreatment) %>%
+  pairwise_t_test(
+    firingRate ~ time,
+    paired = TRUE,
+    p.adjust.method = "bonferroni"
+  )
+pwc2
+
+senktide_long %>%
+  pairwise_t_test(
+    firingRate ~ time,
+    paired = TRUE
+    # ,
+    # comparisons = list(c("Juveniles", "Adults"))
+  )
+senktide_long
+.4149 / 12
+```
 
