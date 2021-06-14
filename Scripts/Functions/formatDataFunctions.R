@@ -67,3 +67,31 @@ combineBurstBinsForParam <- function(
   
   return(mergedDF$bParamsDF)
 }
+
+AG_KNDyPNA_makeLowerCase <- function(df){
+  df <- df %>%
+    mutate(
+      AgeGroup = case_when(
+        AgeGroup == "Adult" ~ "adult",
+        AgeGroup == "Juvenile" ~ "juvenile"
+        # AgeGroup == "Juvenile" ~ "3wk"
+      ),
+      GenTreatment = case_when(
+        GenTreatment == "Control" ~ "control",
+        TRUE ~ as.character(GenTreatment)
+      )
+    )
+  
+  df$AgeGroup <- factor(
+    df$AgeGroup,
+    levels = c("juvenile", "adult")
+    # levels = c("3wk", "adult")
+  )
+  
+  df$GenTreatment <- factor(
+    df$GenTreatment,
+    levels = c("control", "PNA")
+  )
+  
+  return(df)
+}

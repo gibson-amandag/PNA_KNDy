@@ -104,35 +104,3 @@ AG_KNDyPNA_manuscriptPlot <- function(df, param){
   
   return(viz)
 }
-
-AG_KNDyPNA_makeLowerCase <- function(df){
-  df <- df %>%
-    mutate(
-      AgeGroup = case_when(
-        AgeGroup == "Adult" ~ "adult",
-        AgeGroup == "Juvenile" ~ "juvenile"
-      ),
-      GenTreatment = case_when(
-        GenTreatment == "Control" ~ "control",
-        TRUE ~ as.character(GenTreatment)
-      )
-    )
-  
-  KNDyDATA$AgeGroup = factor(
-    KNDyDATA$AgeGroup, 
-    levels = c(TRUE, FALSE), 
-    labels = c("Juvenile", "Adult")
-  )
-  
-  df$AgeGroup <- factor(
-    df$AgeGroup,
-    levels = c("juvenile", "adult")
-  )
-  
-  df$GenTreatment <- factor(
-    df$GenTreatment,
-    levels = c("control", "PNA")
-  )
-  
-  return(df)
-}
