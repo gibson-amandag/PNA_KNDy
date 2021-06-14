@@ -228,14 +228,14 @@ KNDy_varNamesFunc = function(dataframe) {
   KNDy_VarNames <- KNDy_VarNames %>%
     mutate(
       bn = "burst number",
-      mbd = "mean burst duration (s)",
+      mbd = "burst duration (s)",
       spb = "spikes per burst",
       bf = "burst frequency (Hz)",
       ssn = "single spike number",
       ssf = "single spike frequency (Hz)",
       tf = "mean firing frequency (Hz)",
-      inter = "mean interevent interval (s)",
-      intra = "mean intraburst interval (s)",
+      inter = "interevent interval (s)",
+      intra = "intraburst interval (s)",
       bFlags = "# bursts near gaps",
       ssFlags = "# single spikes near gaps"
     )
