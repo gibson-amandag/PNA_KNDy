@@ -1918,3 +1918,81 @@ KNDy_Senktide %>%
   ) + my_theme
 ```
 
+```{r}
+senktide_long %>%
+  anova_test(
+    dv = firingRate,
+    wid = CellID,
+    within = time,
+    between = c(AgeGroup),
+    type = 3
+  ) %>% get_anova_table() %>%
+  flextable()
+
+senktide_long %>%
+  anova_test(
+    dv = firingRate,
+    wid = CellID,
+    within = time,
+    between = c(GenTreatment),
+    type = 3
+  ) %>% get_anova_table() %>%
+  flextable()
+```
+
+```{r}
+treatment.effect <- senktide_long %>%
+  group_by(AgeGroup, time) %>%
+  anova_test(dv = firingRate, wid = CellID, between = GenTreatment) %>%
+  get_anova_table()
+treatment.effect %>% as_tibble() %>% filter(AgeGroup == "Juvenile") %>% flextable()
+
+pwc <- senktide_long %>%
+  group_by(AgeGroup, time) %>%
+  pairwise_t_test(firingRate ~ GenTreatment, p.adjust.method = "bonferroni") 
+# %>%
+#   select(-p, -p.signif) # Remove details
+# Focus on the results of juveniles at senktide time point
+#no bonferroni because it's only correcting within each group... sigh
+pwc %>% filter(time == "senktide", AgeGroup == "Juvenile")
+
+?anova_test
+?pairwise_t_test
+```
+```{r}
+senktideForPrism <- senktideTF %>%
+  arrange(
+    AgeGroup,
+    GenTreatment
+  )
+
+senktideWB <- createWorkbook()
+
+writeToWorkbook("senktide", senktideForPrism, senktideWB)
+saveWorkbook(
+  senktideWB, 
+  file = file.path(DataOutputFolder, paste0("KNDy_senktide_data_", dateToday, ".xlsx")), 
+  overwrite = TRUE)
+```
+
+```{r}
+pwc2 <- senktide_long %>%
+  group_by(AgeGroup, GenTreatment) %>%
+  pairwise_t_test(
+    firingRate ~ time,
+    paired = TRUE,
+    p.adjust.method = "bonferroni"
+  )
+pwc2
+
+senktide_long %>%
+  pairwise_t_test(
+    firingRate ~ time,
+    paired = TRUE
+    # ,
+    # comparisons = list(c("Juveniles", "Adults"))
+  )
+senktide_long
+.4149 / 12
+```
+
