@@ -1625,6 +1625,80 @@ ggsave(
 ```
 
 ```{r}
+library(dabestr)
+bParams_spont_0.23$TreatxAge
+
+multi.two.group.unpaired <- 
+  bParams_spont_0.23 %>%
+  dabest(TreatxAge, tf, 
+         idx = list(c("Con-Adult", "PNA-Adult"), 
+                    c("Con-Juvenile", "PNA-Juvenile")),
+         paired = FALSE)
+
+
+# Compute the mean difference.
+multi.two.group.unpaired.meandiff <- mean_diff(multi.two.group.unpaired)
+
+
+# Create a multi-two group plot.
+multi.two.group.unpaired.meandiff %>% 
+  plot()
+```
+```{r}
+multi.two.group.unpaired <- 
+  bParams_spont_0.23 %>%
+  dabest(TreatxAge, tf, 
+         idx = list(c("Con-Adult", "Con-Juvenile"), 
+                    c("PNA-Adult", "PNA-Juvenile")),
+         paired = FALSE)
+
+
+# Compute the mean difference.
+multi.two.group.unpaired.meandiff <- mean_diff(multi.two.group.unpaired)
+
+
+# Create a multi-two group plot.
+multi.two.group.unpaired.meandiff %>% 
+  plot()
+```
+
+
+```{r}
+two.group.unpaired <- 
+  bParams_spont_0.23 %>%
+  filter(!is.na(mbd))%>%
+  dabest(AgeGroup, mbd, 
+         # The idx below passes "Control" as the control group, 
+         # and "Group1" as the test group. The mean difference
+         # will be computed as mean(Group1) - mean(Control1).
+         idx = c("Adult", "Juvenile"), 
+         paired = FALSE)
+
+# Calling the object automatically prints out a summary.
+two.group.unpaired 
+
+two.group.unpaired.meandiff <- mean_diff(two.group.unpaired)
+
+# Calling the above object produces a textual summary of the computed effect size.
+two.group.unpaired.meandiff
+
+plot(two.group.unpaired.meandiff, color.column = GenTreatment)
+
+two.group.unpaired.mediandiff <- median_diff(two.group.unpaired)
+
+# Calling the above object produces a textual summary of the computed effect size.
+two.group.unpaired.mediandiff
+
+plot(two.group.unpaired.mediandiff, color.column = GenTreatment)
+```
+
+```{r}
 
 ```
+
+```{r}
+doQuartileSummaryForColumn(expr(SpontLength_min), bParams_spont_0.23)
+
+```
+
 
