@@ -140,7 +140,7 @@ addColNameToSummary <- function(sumDF, col, niceNamesDF){
   varName = niceNamesDF[, as.character(col)]
   newDF <- sumDF %>%
     mutate(
-      Variable = varName
+      Variable = as.character(varName)
     )
   return(newDF)
 }
