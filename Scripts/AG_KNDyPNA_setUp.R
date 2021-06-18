@@ -15,7 +15,14 @@ library(openxlsx)
 library(car)
 library(kableExtra)
 library(tools)
+library(cowplot)
 library(rstatix)
+library(extrafont)
+# font_import()
+# fonts()
+# have to add fonts to be able to load them into pdfs
+# https://fromthebottomoftheheap.net/2013/09/09/preparing-figures-for-plos-one-with-r/
+loadfonts(dev="pdf")
 #https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_html.html#Overview
 
 #### SET UP ENVIRONMENT, FOLDER PATHS, SOURCE FUNCTIONS ###########################################################################
@@ -34,6 +41,8 @@ BurstSheetName = "BurstData"
 ClusterSheetName = "ClusterData"
 TimingSheetName = "TimingData"
 SenktideSheetName = "Senktide"
+AGDSheetName = "AGD"
+VOSheetName = "VO"
 
 # Burst Window Sheets
 BWSheetName_spont_230ms = "bw230ms"
@@ -102,6 +111,8 @@ KNDy_burstData <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, BurstSheetName)
 KNDy_clusterData <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, ClusterSheetName)
 KNDy_TimingData <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, TimingSheetName)
 KNDy_Senktide <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, SenktideSheetName)
+KNDy_VO <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, VOSheetName)
+KNDy_AGD <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, AGDSheetName)
 
 burstAnalysisKey <- myXLSX_func(BurstOutputsFolder, "analysisTypesKey.xlsx", "Sheet1")
 burstAnalysisKey_inc2nd3rd <- myXLSX_func(BurstOutputsFolder, "analysisTypesKey.xlsx", "IncSecondThird")

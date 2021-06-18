@@ -16,7 +16,20 @@
 
 #Returns a list with the three data frames
 
-GetDataReadyFunc = function(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firingRate, KNDy_burstData, KNDy_clusterData, rateForQuiet, KNDy_timingData, KNDy_Senktide){
+GetDataReadyFunc = function(
+  KNDy_mouse_demo, 
+  KNDy_cells, 
+  KNDy_exclude, 
+  KNDy_firingRate, 
+  KNDy_burstData, 
+  KNDy_clusterData, 
+  rateForQuiet, 
+  KNDy_timingData, 
+  KNDy_Senktide,
+  KNDy_cycles,
+  KNDy_VO,
+  KNDy_AGD
+){
   #Reformat dates into year-month-day
   #I think not needed with reading of excel files
   # KNDy_mouse_demo$Date_of_birth = format_dates(KNDy_mouse_demo$Date_of_birth)
@@ -31,6 +44,63 @@ GetDataReadyFunc = function(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firi
   #Create a new variable that is TRUE when the mouse is a juvenile
   KNDy_mouse_demo = KNDy_mouse_demo %>%
     mutate(AgeGroup = ifelse(Age_in_days <=22, TRUE, FALSE))
+  
+  #Create a Variable to generate four groups - PNA - Adult, PNA - Juvenile, Control - Adult, Control - Juvenile
+  KNDy_mouse_demo = KNDy_mouse_demo %>%
+    mutate(
+      TreatxAge = ifelse(
+        GenTreatment == "Control" & AgeGroup == FALSE,
+        "Con-Adult",
+        ifelse(
+          GenTreatment == "Control" & AgeGroup == TRUE,
+          "Con-Juvenile",
+          ifelse(
+            GenTreatment == "PNA" & AgeGroup == FALSE,
+            "PNA-Adult",
+            ifelse(
+              GenTreatment == "PNA" & AgeGroup == TRUE,
+              "PNA-Juvenile", NA
+            )
+          )
+        )
+      )
+    )
+  
+  #Get rid of white space in the names
+  KNDy_mouse_demo$Who = gsub('\\s+', '', KNDy_mouse_demo$Who)
+  KNDy_mouse_demo$MouseID = gsub('\\s+', '', KNDy_mouse_demo$MouseID)
+  KNDy_cells$CellID = gsub('\\s+', '', KNDy_cells$CellID)
+  KNDy_cells$MouseID = gsub('\\s+', '', KNDy_cells$MouseID)
+  KNDy_exclude$CellID = gsub('\\s+', '', KNDy_exclude$CellID)
+  KNDy_firingRate$CellID = gsub('\\s+', '', KNDy_firingRate$CellID)
+  KNDy_burstData$CellID = gsub('\\s+', '', KNDy_burstData$CellID)
+  KNDy_clusterData$CellID = gsub('\\s+', '', KNDy_clusterData$CellID)
+  KNDy_timingData$CellID = gsub('\\s+', '', KNDy_timingData$CellID)
+  KNDy_Senktide$CellID = gsub('\\s+', '', KNDy_Senktide$CellID)
+  KNDy_cycles$MouseID = gsub('\\s+', '', KNDy_cycles$MouseID)
+  KNDy_VO$MouseID = gsub('\\s+', '', KNDy_VO$MouseID)
+  KNDy_AGD$MouseID = gsub('\\s+', '', KNDy_AGD$MouseID)
+  
+
+  #Make AgeGroup a factor, and give it nice labels
+  KNDy_mouse_demo$AgeGroup = factor(
+    KNDy_mouse_demo$AgeGroup, 
+    levels = c(TRUE, FALSE), 
+    labels = c("Juvenile", "Adult")
+  )
+  
+  #Make Treatment a factor variable with orders
+  KNDy_mouse_demo$Treatment = factor(
+    KNDy_mouse_demo$Treatment, 
+    levels = c("CON_main", "CON", "VEH", "DHT"), 
+    labels = c("Main Colony Control", "Control", "Vehicle", "DHT")
+  )
+  
+  #Make factor variables
+  KNDy_mouse_demo$MouseNum <- as.factor(KNDy_mouse_demo$MouseNum)
+  KNDy_mouse_demo$Generation <- as.factor(KNDy_mouse_demo$Generation)
+  KNDy_mouse_demo$Cage <- as.factor(KNDy_mouse_demo$Cage)
+  KNDy_mouse_demo$DamID <- as.factor(KNDy_mouse_demo$DamID)
   
   #Merge the KNDy_exclude DF to the KNDy_cells DF create an "Exclude" variable
   KNDy_cells = KNDy_cells %>%
@@ -104,61 +174,21 @@ GetDataReadyFunc = function(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firi
   KNDyDATA = KNDyDATA %>%
     mutate(Quiet = ifelse(SpontAvgFiring <= rateForQuiet, TRUE, FALSE))
   
-  #Create a Variable to generate four groups - PNA - Adult, PNA - Juvenile, Control - Adult, Control - Juvenile
-  KNDyDATA = KNDyDATA %>%
-    mutate(
-      TreatxAge = ifelse(
-        GenTreatment == "Control" & AgeGroup == FALSE,
-        "Con-Adult",
-        ifelse(
-          GenTreatment == "Control" & AgeGroup == TRUE,
-          "Con-Juvenile",
-          ifelse(
-            GenTreatment == "PNA" & AgeGroup == FALSE,
-            "PNA-Adult",
-            ifelse(
-              GenTreatment == "PNA" & AgeGroup == TRUE,
-              "PNA-Juvenile", NA
-            )
-          )
-        )
-      )
-    )
-  
   #Add a time since slicing variable
   KNDyDATA <- KNDyDATA %>%
     mutate(
       Time_sinceSlice = Record_start_hr - Sac_hr
     )
   
-  #Make AgeGroup a factor, and give it nice labels
-  KNDyDATA$AgeGroup = factor(
-    KNDyDATA$AgeGroup, 
-    levels = c(TRUE, FALSE), 
-    labels = c("Juvenile", "Adult")
-  )
-  
   #Get rid of white space in the names
-  KNDyDATA$Who = gsub('\\s+', '', KNDyDATA$Who)
   KNDyDATA$WhoRecorded = gsub('\\s+', '', KNDyDATA$WhoRecorded)
-  KNDyDATA$CellID = gsub('\\s+', '', KNDyDATA$CellID)
   
   #Make "Who" sliced/recorded variable a factor
   KNDyDATA$Who = factor(KNDyDATA$Who, levels = c("Jenn", "Amanda"))
   KNDyDATA$WhoRecorded = factor(KNDyDATA$WhoRecorded, levels = c("Jenn", "Amanda"))
   
-  #Make Treatment a factor variable with orders
-  KNDyDATA$Treatment = factor(
-    KNDyDATA$Treatment, 
-    levels = c("CON_main", "CON", "VEH", "DHT"), 
-    labels = c("Main Colony Control", "Control", "Vehicle", "DHT")
-  )
-  
   #Make factor variables
   KNDyDATA$CellNum <- as.factor(KNDyDATA$CellNum)
-  KNDyDATA$MouseNum <- as.factor(KNDyDATA$MouseNum)
-  KNDyDATA$Generation <- as.factor(KNDyDATA$Generation)
-  KNDyDATA$DamID <- as.factor(KNDyDATA$DamID)
   
   #Add the timing data
   KNDyDATA <- KNDyDATA %>%
@@ -252,6 +282,42 @@ GetDataReadyFunc = function(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firi
       by = "CellID"
     )
   
+  KNDy_cycles <- KNDy_cycles %>%
+    left_join(
+      KNDy_mouse_demo %>%
+        select(
+          -MouseNum,
+          -(CycleStage:Uterine_mg_per_g),
+          -(Saved_pit:Sac_hr),
+          -Sac_9plus
+        ),
+      by = "MouseID"
+    )
+  
+  KNDy_VO <- KNDy_VO %>%
+    left_join(
+      KNDy_mouse_demo %>%
+        select(
+          -MouseNum,
+          -(CycleStage:Uterine_mg_per_g),
+          -(Saved_pit:Sac_hr),
+          -Sac_9plus
+        ),
+      by = "MouseID"
+    )
+  
+  KNDy_AGD <- KNDy_AGD %>%
+    left_join(
+      KNDy_mouse_demo %>%
+        select(
+          -MouseNum,
+          -(CycleStage:Uterine_mg_per_g),
+          -(Saved_pit:Sac_hr),
+          -Sac_9plus
+        ),
+      by = "MouseID"
+    )
+  
   my_list = list(
     "KNDyDATA" = KNDyDATA, 
     "KNDy_mouse_demo" = KNDy_mouse_demo, 
@@ -259,7 +325,10 @@ GetDataReadyFunc = function(KNDy_mouse_demo, KNDy_cells, KNDy_exclude, KNDy_firi
     "KNDy_firingRate" = KNDy_firingRate,
     "VBW_BurstsPerHour" = VBW_BurstsPerHour,
     "VBW_BurstsPerHour_hour1" = VBW_BurstsPerHour_hour1,
-    "KNDy_Senktide" = KNDy_Senktide
+    "KNDy_Senktide" = KNDy_Senktide,
+    "KNDy_AGD" = KNDy_AGD,
+    "KNDy_VO"= KNDy_VO,
+    "KNDy_cycles" = KNDy_cycles
   )
   
   return(my_list)

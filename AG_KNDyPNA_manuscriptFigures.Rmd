@@ -83,7 +83,10 @@ allDFs <- GetDataReadyFunc(
   KNDy_clusterData, 
   rateForQuiet, 
   KNDy_TimingData,
-  KNDy_Senktide
+  KNDy_Senktide,
+  KNDy_cycles,
+  KNDy_VO,
+  KNDy_AGD
   )
 
 KNDyDATA <-  allDFs$KNDyDATA
@@ -93,6 +96,9 @@ KNDy_firingRate <- allDFs$KNDy_firingRate
 VBW_BurstsPerHour <- allDFs$VBW_BurstsPerHour
 VBW_BurstsPerHour_hour1 <- allDFs$VBW_BurstsPerHour_hour1
 KNDy_Senktide <- allDFs$KNDy_Senktide
+KNDy_cycles <- allDFs$KNDy_cycles
+KNDy_VO <- allDFs$KNDy_VO
+KNDy_AGD <- allDFs$KNDy_AGD
 
 #Store the dataframes as excel sheets
 KNDyAnalysisWB = createWorkbook()
@@ -408,6 +414,16 @@ ggsave(
   height = 20/3,
   units = c("cm")
 )
+ggsave(
+  "AG_KNDyPNA_meanFrequency.pdf",
+  plot = tf_plot,
+  device = "pdf",
+  path = file.path(PlotOutputFolder, "poster"),
+  scale = 1,
+  width = 20/3,
+  height = 10/2,
+  units = c("cm")
+)
 ```
 
 
@@ -562,6 +578,310 @@ shapiro.test(
 
 shapiro.test(
   df_plot$inter
+)
+```
+
+# AGD
+
+```{r}
+KNDy_AGD_avg <- getAGD_avgs(KNDy_AGD)
+
+dataset_generations <- unique(bParams_spont_0.23$Generation)
+
+KNDy_AGD_dataset <- KNDy_AGD_avg %>%
+  filter(
+    Generation %in% dataset_generations
+  )
+```
+
+```{r}
+KNDy_AGD_dataset_lowercase  <-  KNDy_AGD_dataset %>% AG_KNDyPNA_makeLowerCase()
+
+AGD_plot <- AG_KNDyPNA_manuscriptPlot_AGD(
+  KNDy_AGD_dataset_lowercase,
+  "AGD_avg",
+  "AG distance (mm)",
+  addSig = TRUE,
+  yAdd = .2
+)
+
+AGD_Mass_plot <- AG_KNDyPNA_manuscriptPlot_AGD(
+  KNDy_AGD_dataset_lowercase,
+  "mass_avg",
+  "body mass (g)",
+  addSig = TRUE,
+  yAdd = 3
+)
+AGD_Mass_plot
+
+normAGD_plot <- AG_KNDyPNA_manuscriptPlot_AGD(
+  KNDy_AGD_dataset_lowercase,
+  "AGD_byMass",
+  "normalized AGD (AGD (mm) / body mass (g))",
+  addSig = TRUE,
+  yAdd = 0.01
+)
+```
+```{r}
+# Arrange the phenotype parameters into a grid
+pnaPhenotype <- ggarrange(
+  AGD_plot,
+  AGD_Mass_plot,
+  labels = c("A", "B"), #Label each panel
+  ncol = 2,
+  nrow = 1,
+  align = "v"
+)
+
+ggsave(
+  "AG_KNDyPNA_PNA_phenotype.pdf",
+  plot = pnaPhenotype,
+  device = "pdf",
+  path = file.path(PlotOutputFolder, "manuscript"),
+  scale = 1,
+  width = 8,
+  height = 20 / 3,
+  units = c("cm")
+)
+```
+
+```{r}
+ggsave(
+  "AG_KNDyPNA_AGD.pdf",
+  plot = AGD_plot,
+  device = "pdf",
+  path = file.path(PlotOutputFolder, "manuscript"),
+  scale = 1,
+  width = 3.8,
+  height = 20/3,
+  units = c("cm")
+)
+ggsave(
+  "AG_KNDyPNA_AGD.pdf",
+  plot = AGD_plot,
+  device = "pdf",
+  path = file.path(PlotOutputFolder, "poster"),
+  scale = 1,
+  width = 20/3/2,
+  height = 10/2,
+  units = c("cm")
+)
+pnaPhenotypePoster <- ggarrange(
+  AGD_plot,
+  AGD_Mass_plot,
+  ncol = 2,
+  nrow = 1
+)
+ggsave(
+  "AG_KNDyPNA_pnaPhenotype.pdf",
+  plot = pnaPhenotypePoster,
+  device = "pdf",
+  path = file.path(PlotOutputFolder, "poster"),
+  scale = 1,
+  width = 7,
+  height = 10/2,
+  units = c("cm")
+)
+```
+
+# Senktide
+
+```{r}
+baseline_5min_0.23 <- loadBurstParamsData_noFilters(
+  analysis = "baseline5min_0.23",
+  BurstOutputsFolder = file.path(BurstOutputsFolder, "senktide"),
+  demoDF = KNDyDATA
+)
+
+senktide_2_7min_0.23 <- loadBurstParamsData_noFilters(
+  analysis = "senktide2-7min_0.23",
+  BurstOutputsFolder = file.path(BurstOutputsFolder, "senktide"),
+  demoDF = KNDyDATA
+)
+
+senktideRespDF <- baseline_5min_0.23 %>%
+  left_join(
+    senktide_2_7min_0.23 %>%
+      select(
+        CellID:ssFlags
+      ),
+    suffix = c("base", "senk"),
+    by = "CellID"
+  )
+
+#Focus on just the total frequency for now
+senktideTF <- senktideRespDF %>%
+  select(
+    CellID,
+    AgeGroup,
+    GenTreatment,
+    tfbase,
+    tfsenk,
+    Quiet,
+    TreatxAge
+  ) %>%
+  mutate(
+    foldChange = ifelse(tfbase > 0, (tfsenk - tfbase) / tfbase, NA)
+  )
+
+senktide_long <- makeSenktideLong(senktideTF)
+```
+
+```{r}
+# This is un-faceted, just a paired plot
+senkPlot <- AG_KNDyPNA_baseSenkPlot(
+  senktide_long %>%
+    AG_KNDyPNA_makeLowerCase()
+  )
+```
+
+```{r}
+# senkPlot_grid <- AG_KNDyPNA_gridSenktidePlot(senkPlot)
+senkPlot_long <- AG_KNDyPNA_longSenktidePlot(senkPlot) + expand_limits(y = 7)
+senkPlot_long
+```
+
+```{r}
+# ggsave(
+#   "AG_KNDyPNA_senktideGrid.pdf",
+#   plot = senkPlot_grid,
+#   device = "pdf",
+#   path = file.path(PlotOutputFolder, "poster"),
+#   scale = 1,
+#   width = 20/3,
+#   height = 20/3,
+#   units = c("cm")
+# )
+# ggsave(
+#   "AG_KNDyPNA_senktideLong.pdf",
+#   plot = senkPlot_long,
+#   device = "pdf",
+#   path = file.path(PlotOutputFolder, "poster"),
+#   scale = 1,
+#   width = 20/3,
+#   height = 10/2,
+#   units = c("cm")
+# )
+```
+
+```{r}
+# plot_grid has to be used rather than ggarrange as far I can tell because need to be able to specify which axes to align when the plots have different facetting
+posterPlots <- plot_grid(
+  tf_plot,
+  bf_plot,
+  mbd_plot,
+  spb_plot,
+  senkPlot_long,
+  # + theme(strip.text = element_blank()),
+  intra_plot,
+  ssf_plot,
+  inter_plot,
+  # labels = c("A", "B", "C", "D", "E", "F"), #Label each panel
+  ncol = 1,
+  nrow = 8,
+  align = "hv",
+  axis = "btlr"
+)
+
+ggsave(
+  "AG_KNDyPNA_posterPlots.pdf",
+  plot = posterPlots,
+  device = "pdf",
+  path = file.path(PlotOutputFolder, "poster"),
+  scale = 1,
+  width = 27/4,
+  height = 10*4,
+  units = c("cm")
+)
+```
+
+# Cycles
+```{r}
+KNDy_cycles_dataset <- KNDy_cycles %>%
+  filter(
+    Generation %in% dataset_generations
+  )
+
+KNDy_cycles_perc_long <- makeCyclesPercLong(KNDy_cycles_dataset)
+KNDy_cycles_perc_long <- KNDy_cycles_perc_long %>%
+  AG_KNDyPNA_makeLowerCase()
+```
+
+## Distribution plot
+```{r}
+cyclesDistPlot <- KNDy_cycles_perc_long %>%
+  AG_KNDyPNA_plotCyclesPercent()
+cyclesDistPlot
+```
+
+```{r}
+KNDy_cycles_days_long <- KNDy_cycles_dataset %>%
+  filter(
+    !is.na(PercD) # quick way to see if meets criterion for num days rather than counting here
+  ) %>%
+  makeCyclesDayLong(
+    Day1:Day21
+  )
+```
+
+## Chi-square test
+```{r}
+KNDy_cycles_contTable <- table(
+  KNDy_cycles_days_long$GenTreatment,
+  KNDy_cycles_days_long$stageName
+)
+
+cycles.Chi.Sq.res <- chisq_test(KNDy_cycles_contTable)
+cycles.Chi.Sq.res %>% flextable()
+
+chisq_descriptives(
+  cycles.Chi.Sq.res
+) %>% flextable() %>%
+  colformat_num(digits = 2)
+```
+
+```{r}
+KNDy_cycles_allMice <- KNDy_cycles_days_long %>%
+  AG_KNDyPNA_makeLowerCase() %>%
+  AG_KNDyPNA_plotCycleTraces()
+
+KNDy_cycles_allMice
+```
+
+```{r}
+exampleMice <- c("1_2019", "5b", "8_2020", "1a")
+cyclesPlot_exampleMice <- KNDy_cycles_days_long %>%
+  AG_KNDyPNA_makeLowerCase() %>%
+  filter(
+    MouseID %in% exampleMice
+  ) %>%
+  AG_KNDyPNA_plotCycleTraces(
+    lineColorVar = GenTreatment,
+    removeFacets = TRUE,
+    colorKey = c("CON" = "grey50", "PNA" = "black")
+    )
+cyclesPlot_exampleMice
+```
+
+```{r}
+pnaPhenotypePoster2 <- plot_grid(
+  AGD_plot,
+  AGD_Mass_plot,
+  cyclesDistPlot,
+  align = "hv",
+  ncol = 3,
+  axis = "tb",
+  rel_widths = c(1, 1.1, 2.5)
+)
+ggsave(
+  "AG_KNDyPNA_pnaPhenotype.pdf",
+  plot = pnaPhenotypePoster2,
+  device = "pdf",
+  path = file.path(PlotOutputFolder, "poster"),
+  scale = 1,
+  width = 14.26,
+  height = 4.6,
+  units = c("cm")
 )
 ```
 

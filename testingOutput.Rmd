@@ -60,7 +60,10 @@ allDFs <- GetDataReadyFunc(
   KNDy_clusterData, 
   rateForQuiet, 
   KNDy_TimingData,
-  KNDy_Senktide
+  KNDy_Senktide,
+  KNDy_cycles,
+  KNDy_VO,
+  KNDy_AGD
   )
 
 KNDyDATA <-  allDFs$KNDyDATA
@@ -70,6 +73,9 @@ KNDy_firingRate <- allDFs$KNDy_firingRate
 VBW_BurstsPerHour <- allDFs$VBW_BurstsPerHour
 VBW_BurstsPerHour_hour1 <- allDFs$VBW_BurstsPerHour_hour1
 KNDy_Senktide <- allDFs$KNDy_Senktide
+KNDy_cycles <- allDFs$KNDy_cycles
+KNDy_VO <- allDFs$KNDy_VO
+KNDy_AGD <- allDFs$KNDy_AGD
 
 #Store the dataframes as excel sheets
 KNDyAnalysisWB = createWorkbook()
@@ -1889,7 +1895,7 @@ senktide_long <- senktideTF %>%
     factor_key = TRUE
   ) %>%
   mutate(
-    time = ifelse(key == "tfbase", "baseline", "senktide")
+    time = ifelse(key == "tfbase", "C", "SK")
   )
 ```
 
@@ -2073,5 +2079,867 @@ senktide_long %>%
   )
 senktide_long
 .4149 / 12
+```
+
+# 2021-06-13
+
+## AGD
+
+```{r}
+KNDy_AGD_avg <- KNDy_AGD %>%
+  mutate(
+    AGD_avg = rowMeans(
+      KNDy_AGD[, c("AGD_day1", "AGD_day2", "AGD_day3")], 
+      na.rm = TRUE),
+    mass_avg = rowMeans(
+      KNDy_AGD[, c("Mass_day1", "Mass_day2", "Mass_day3")], 
+      na.rm = TRUE),
+    AGD_byMass = AGD_avg / mass_avg
+  ) %>%
+  filter(
+    !is.na(AGD_day1)
+  ) %>%
+  select(
+    MouseID,
+    GenTreatment,
+    Generation,
+    DamID,
+    AGD_avg,
+    mass_avg,
+    AGD_byMass,
+    AGD_day1:TreatxAge
+  )
+
+
+KNDy_AGD_avg <- getAGD_avgs(KNDy_AGD)
+KNDy_AGD_avg
+```
+
+Need to know which generations were in the final dataset
+```{r}
+# This needs to be already filtered 
+dataset_generations <- unique(bParams_spont_0.23$Generation)
+
+KNDy_AGD_dataset <- KNDy_AGD_avg %>%
+  filter(
+    Generation %in% dataset_generations
+  )
+
+doMeanSummaryForColumn(
+    c(AGD_avg, mass_avg, AGD_byMass),
+    df = KNDy_AGD_dataset %>%
+      group_by(
+        GenTreatment
+      )
+  )
+
+t_test(
+  KNDy_AGD_dataset,
+  AGD_avg ~ GenTreatment
+)
+t_test(
+  KNDy_AGD_dataset,
+  mass_avg ~ GenTreatment
+)
+t_test(
+  KNDy_AGD_dataset,
+  AGD_byMass ~ GenTreatment
+)
+
+
+```
+
+Error bar plot, no median, add stats
+```{r}
+df  <-  KNDy_AGD_dataset %>% AG_KNDyPNA_makeLowerCase()
+param <- "AGD_avg"
+ylab <- "anogenital distance (mm)"
+viz <- ggerrorplot(
+    df,
+    "GenTreatment",
+    param,
+    add = "jitter",
+    palette = c("white", "black"),
+    size = .4,
+    add.params = list(shape = 21, fill = "GenTreatment", size = 1, alpha = .8),
+    xlab = KNDy_VarNames[,"GenTreatment"],
+    ylab = ylab,
+    error.plot = "linerange",
+    font.x = c(size = 11, style = "bold"),
+    font.y = c(size = 11, style = "bold"),
+    font.family = "Arial",
+    font.tickslab = c(size = 11 ),
+    font.label = c(size = 11),
+    panel.labs.font = list(size = 11, face = "bold")
+  ) +
+    stat_summary(
+      geom = "errorbar", 
+      fun.min = mean, 
+      fun = mean, 
+      fun.max = mean, 
+      width = .3,
+      size = .4
+    ) +
+    # stat_summary(
+    #   geom = "errorbar", 
+    #   fun.min = median, 
+    #   fun = median, 
+    #   fun.max = median, 
+    #   width = .3,
+    #   size = .4,
+    #   color = "red",
+    #   alpha = .7
+    # ) +
+    expand_limits(y=0) +
+    rremove(
+      "legend"
+    ) 
+# +
+#     theme(
+#       element_blank()
+#     )
+
+viz +
+  stat_compare_means(method = "t.test", 
+                     label.y = max(df[, param], na.rm = TRUE) + .5,
+                     label = "p.signif", 
+                     ref.group = "control")
+  # return(viz)
+
+
+
+```
+
+```{r}
+df  <-  KNDy_AGD_dataset %>% AG_KNDyPNA_makeLowerCase()
+param <- "AGD_avg"
+ylab <- "anogenital distance (mm)"
+
+AG_KNDyPNA_manuscriptPlot_AGD(
+  df,
+  param,
+  ylab,
+  addSig = TRUE
+)
+
+param <- "mass_avg"
+ylab <- "body mass (g)"
+
+AG_KNDyPNA_manuscriptPlot_AGD(
+  df,
+  param,
+  ylab,
+  addSig = TRUE,
+  yAdd = 3
+)
+
+param <- "AGD_byMass"
+ylab <- "normalized AGD (AGD (mm) / body mass (g))"
+
+AG_KNDyPNA_manuscriptPlot_AGD(
+  df,
+  param,
+  ylab,
+  addSig = TRUE,
+  yAdd = 0.01
+)
+
+
+```
+
+```{r}
+AGD_plot +
+  rremove(
+    "xlab"
+  )
+```
+
+# 2021-06-14 
+
+## ISO Viable senktide plot
+
+```{r}
+# 2x2 faceted graph with age verticle
+ggpaired(
+  senktideTF %>% AG_KNDyPNA_makeLowerCase(),
+  "tfbase",
+  "tfsenk",
+  id = "CellID",
+  facet.by = c("AgeGroup", "GenTreatment"),
+  color = "GenTreatment",
+  line.color = "GenTreatment"
+)
+
+test <- ggpaired(
+  senktideTF %>% AG_KNDyPNA_makeLowerCase(),
+  "tfbase",
+  "tfsenk",
+  id = "CellID",
+  facet.by = c("GenTreatment", "AgeGroup"),
+  color = "GenTreatment",
+  line.color = "GenTreatment",
+  # palette = c("white", "black")
+) 
+test$layers
+
+remove_geom <- function(ggplot2_object, geom_type) {
+  # Delete layers that match the requested type.
+  layers <- lapply(ggplot2_object$layers, function(x) {
+    if (class(x$geom)[1] == geom_type) {
+      NULL
+    } else {
+      x
+    }
+  })
+  # Delete the unwanted layers.
+  layers <- layers[!sapply(layers, is.null)]
+  ggplot2_object$layers <- layers
+  ggplot2_object
+}
+
+test
+remove_geom(test, "geom_boxplot")
+
+test$layer[[2]]
+```
+
+
+```{r}
+
+viz = data %>%
+    ggplot(aes(Time_hr, !! var_to_plot, color = Treatment, group = interaction(Treatment, Stress_treatment))) +
+    geom_line(alpha = .4, aes(linetype = Stress_treatment, group = Mouse_ID)) +
+    expand_limits(y = -0.5)+ #set y axis to just before 0
+    labs(x = "Experimental Time (hr)")+
+    my_theme
+  
+  if(plotMean == TRUE){
+    viz = viz + 
+      stat_summary(fun = mean, geom = "line", aes(linetype = Stress_treatment), size = 1) +
+      stat_summary(fun = mean, geom = "point",  shape = 18, size = 3) +
+      stat_summary(geom = "errorbar", fun.data = mean_se, size = .7, width = .3)
+  }
+
+  if(is.null(ytitle)){
+    viz = viz
+  }else{viz = viz + labs(y = ytitle)}
+
+  if(is.null(title)){
+    viz = viz
+  }else{viz = viz + labs(title = title)}
+
+ggplot(
+  senktide_long %>% AG_KNDyPNA_makeLowerCase(),
+  aes(
+    x = time,
+    y = firingRate
+    # color = GenTreatment
+  )
+) +
+  geom_line(
+    alpha = 0.4,
+    color = "black",
+    aes(group = CellID),
+    position = position_dodge(0.4)
+  ) +
+  geom_point(shape = 21, alpha = 0.8, aes(fill=GenTreatment,group=CellID), position = position_dodge(0.4)) +
+  stat_summary(
+      geom = "errorbar", 
+      fun.min = mean, 
+      fun = mean, 
+      fun.max = mean, 
+      width = .7,
+      size = .4
+    ) +
+  stat_summary(
+    geom = "linerange",
+    fun.data = mean_se,
+    size = 0.4
+  ) +
+  scale_fill_manual(values = c("white", "black")) +
+  facet_wrap(
+    ~ AgeGroup + GenTreatment,
+    ncol = 4,
+    nrow = 1
+  ) + 
+  theme_pubr() +
+  rremove("xlab") +
+  labs(
+    y = "firing frequency (Hz)",
+    fill = "treatment"
+  )
+
+```
+
+```{r}
+senkPlot <- AG_KNDyPNA_baseSenkPlot(
+  senktide_long %>%
+    AG_KNDyPNA_makeLowerCase()
+  )
+
+senkPlot_3wk <- AG_KNDyPNA_baseSenkPlot(
+  senktide_long %>%
+    AG_KNDyPNA_makeLowerCase() %>% 
+    filter(AgeGroup == "3wk")
+  )
+senkPlot_ad <- AG_KNDyPNA_baseSenkPlot(
+  senktide_long %>%
+    AG_KNDyPNA_makeLowerCase() %>% 
+    filter(AgeGroup == "adult")
+  )
+
+senkPlot_ad + 
+  facet_wrap(~ GenTreatment, strip.position = "bottom")
+  theme(
+    strip.background = element_blank(),
+    strip.placement = "outside"
+  )+
+  rremove(
+    "legend"
+  )%>%
+  ggpar(
+    font.x = c(size = 11, style = "bold"),
+    font.y = c(size = 11, style = "bold"),
+    font.family = "Arial",
+    font.tickslab = c(size = 11 ),
+    font.label = c(size = 11),
+    panel.labs.font = list(size = 11, face = "bold")
+    )
+senkPlot_3wk
+
+
+```
+
+
+### 2x2 Graph
+
+```{r}
+senkPlot_grid <- senkPlot %>% 
+  facet(
+    c("GenTreatment", "AgeGroup"),
+    # strip.position = "bottom", 
+    panel.labs.font = list(face = "bold", size = 11)
+  )+
+  rremove(
+    "legend"
+  ) +
+  theme(
+    # strip.background = element_blank(),
+    strip.placement = "outside",
+    strip.text = element_text(size = 11, 
+                              family = "Arial",
+                              face = "bold"),
+    axis.text = element_text(size = 11, 
+                             # family = "Arial"
+                             ),
+    axis.title = element_text(
+      size = 11, 
+      # family = "Arial", 
+      face = "bold")
+  )
+senkPlot_grid
+```
+
+```{r}
+senkPlot_long2 <- senkPlot +
+  facet_wrap(
+    ~ AgeGroup + GenTreatment,
+    # strip.position = "bottom",
+    ncol = 4,
+    nrow = 1
+  )+
+  rremove(
+    "legend"
+  )+
+  theme(
+    strip.placement = "outside",
+    strip.text = element_text(size = 11, family = "Arial", face = "bold"),
+    axis.text = element_text(size = 11, family = "Arial"),
+    axis.title = element_text(size = 11, family = "Arial", face = "bold")
+  )
+senkPlot_long2
+
+senkPlot_long3 <- senkPlot +
+  facet_wrap(
+    ~ AgeGroup + GenTreatment,
+    strip.position = "bottom",
+    ncol = 4,
+    nrow = 1
+  )+
+  rremove(
+    "legend"
+  ) + 
+  theme(
+    strip.background = element_blank(),
+    strip.placement = "outside",
+    strip.text = element_text(size = 11, family = "Arial", face = "bold"),
+    axis.text = element_text(size = 11, family = "Arial"),
+    axis.title = element_text(size = 11, family = "Arial", face = "bold")
+  )
+senkPlot_long3
+```
+
+### Individual adult and juvenile
+
+```{r}
+senkPlot_ad_facet <- senkPlot_ad %>% 
+  facet(
+    c("GenTreatment"),
+    strip.position = "bottom",
+    panel.labs.font = list(face = "bold", size = 11)
+  )+
+  rremove(
+    "legend"
+  )%>%
+  ggpar(
+    font.x = c(size = 11, style = "bold"),
+    font.y = c(size = 11, style = "bold"),
+    font.family = "Arial",
+    font.tickslab = c(size = 11 ),
+    font.label = c(size = 11),
+    panel.labs.font = list(size = 22, face = "bold")
+    ) +
+  theme(
+    strip.background = element_blank(),
+    strip.placement = "outside"
+  )
+
+senkPlot_3wk_facet <- senkPlot_3wk %>% 
+  facet(
+    c("GenTreatment"),
+    strip.position = "bottom",
+    panel.labs.font = list(face = "bold", size = 11)
+  )+
+  rremove(
+    "legend"
+  )%>%
+  ggpar(
+    font.x = c(size = 11, style = "bold"),
+    font.y = c(size = 11, style = "bold"),
+    font.family = "Arial",
+    font.tickslab = c(size = 11 ),
+    font.label = c(size = 11),
+    panel.labs.font = list(size = 22, face = "bold")
+    ) +
+  theme(
+    strip.background = element_blank(),
+    strip.placement = "outside"
+  )
+```
+
+```{r}
+senkPlot_long <- ggarrange(
+  senkPlot_3wk_facet,
+  senkPlot_ad_facet + 
+   theme(
+     axis.text.y = element_blank(),
+     axis.ticks.y = element_blank(),
+     axis.title.y = element_blank() 
+     ),
+  ncol = 2
+)
+```
+
+```{r}
+ggsave(
+  "senktide_grid.pdf",
+  plot = senkPlot_grid,
+  device = "pdf",
+  path = file.path(PlotOutputFolder, "poster"),
+  scale = 1,
+  width = 7,
+  height = 10/2,
+  units = c("cm")
+)
+
+ggsave(
+  "senktide_longBad.pdf",
+  plot = senkPlot_long,
+  device = "pdf",
+  path = file.path(PlotOutputFolder, "poster"),
+  scale = 1,
+  width = 7,
+  height = 10/2,
+  units = c("cm")
+)
+ggsave(
+  "senktide_long.pdf",
+  plot = senkPlot_long3,
+  device = "pdf",
+  path = file.path(PlotOutputFolder, "poster"),
+  scale = 1,
+  width = 6,
+  height = 5,
+  units = c("cm")
+)
+```
+
+```{r}
+senkPlot_long +
+  # stat_compare_means(
+  #   paired = TRUE,
+  #   comparisons = c("C", "SK"),
+  #   hide.ns = TRUE,
+  #   label = "p.sig"
+  # ) +
+  stat_compare_means(label = "p.signif", paired = TRUE)
+
+AGD_Mass_plot
+
+AG_KNDyPNA_manuscriptPlot_AGD(
+  KNDy_AGD_dataset_lowercase,
+  "AGD_avg",
+  "test",
+  addSig = TRUE,
+  yAdd = 0.5 # for bumping up significance
+) 
+```
+
+```{r}
+bParams_spont_0.23 %>%
+  anova_test(
+    dv = "mbd",
+    wid = "CellID",
+    between = c("AgeGroup", "GenTreatment"),
+    type = 3
+  )
+?anova_test
+```
+
+# 2021-06-16
+
+## Make cycles plots
+
+```{r}
+KNDy_cycles
+```
+
+```{r}
+KNDy_cycles_dataset <- KNDy_cycles %>%
+  filter(
+    Generation %in% dataset_generations
+  )
+KNDy_cycles_dataset
+```
+
+```{r}
+KNDy_cycles_perc_long <- KNDy_cycles_dataset %>%
+  pivot_longer( # New version of gather
+    PercD:PercP,
+    names_to = "stage",
+    names_prefix = "Perc",
+    values_to = "percent",
+    values_drop_na = TRUE
+  ) %>%
+  select(
+    -(Day1:Day21)
+  ) %>% AG_KNDyPNA_makeLowerCase()
+
+KNDy_cycles_perc_long$stage <- factor(
+  KNDy_cycles_perc_long$stage,
+  levels = c("E", "D", "P"),
+  labels = c("estrus", "diestrus", "proestrus")
+)
+
+cycles_dist_plot <- KNDy_cycles_perc_long %>%
+  ggerrorplot(
+    x = "GenTreatment",
+    y = "percent",
+    palette = c("white", "black"),
+    add = "jitter",
+    facet.by = "stage",
+    add.params = list(
+      shape = 21,
+      fill = "GenTreatment",
+      size = 1, 
+      alpha = 0.8
+    ),
+    xlab = "",
+    ylab = "% days in stage",
+    error.plot = "linerange",
+    font.x = c(size = 11, style = "bold"),
+    font.y = c(size = 11, style = "bold"),
+    # font.family = "Arial",
+    font.tickslab = c(size = 11 ),
+    font.label = c(size = 11),
+    panel.labs.font = list(size = 11, face = "bold")
+  ) +
+  stat_summary(
+    geom = "errorbar", 
+    fun.min = mean, 
+    fun = mean, 
+    fun.max = mean, 
+    width = .7,
+    size = .4
+  ) +
+  expand_limits(y = 0) +
+  rremove(
+    "legend"
+  ) +
+  theme(
+    text = element_text(family = "Arial")
+  ) +
+  rremove("xlab")
+
+ggsave(
+  "AG_KNDyPNA_cyclesDistribution.png",
+  path = file.path(PlotOutputFolder),
+  width = 8,
+  height = 6
+)
+```
+
+```{r}
+colNames = c("PercE", "PercD", "PercP")
+niceRow = c("estrus", "diestrus", "proestrus")
+
+m <- matrix(
+  niceRow,
+  ncol = 3
+)
+colnames(m) <- colNames
+
+cycleNames <- as_data_frame(m)
+
+map_dfr(
+  exprs(PercE, PercD, PercP),
+  doMeanSummaryForColumn,
+  df = KNDy_cycles_dataset %>% group_by(GenTreatment),
+  addVarCol = TRUE,
+  niceNamesDF = cycleNames,
+  includeVarInColName = FALSE
+)
+
+doMeanSummaryForColumn(
+  PercE,
+  df = KNDy_cycles_dataset %>% group_by(GenTreatment),
+  addVarCol = FALSE,
+  niceNamesDF = cycleNames,
+  includeVarInColName = FALSE
+) %>% flextable() %>%
+  colformat_num(digits = 2)
+
+doMeanSummaryForColumn(
+  PercD,
+  df = KNDy_cycles_dataset %>% group_by(GenTreatment),
+  addVarCol = FALSE,
+  niceNamesDF = cycleNames,
+  includeVarInColName = FALSE
+) %>% flextable() %>%
+  colformat_num(digits = 2)
+
+doMeanSummaryForColumn(
+  PercP,
+  df = KNDy_cycles_dataset %>% group_by(GenTreatment),
+  addVarCol = FALSE,
+  niceNamesDF = cycleNames,
+  includeVarInColName = FALSE
+) %>% flextable() %>%
+  colformat_num(digits = 2)
+
+```
+
+```{r}
+KNDy_cycles_days_long <- KNDy_cycles_dataset %>%
+  filter(
+    !is.na(PercD) # quick way to see if meets criterion for num days rather than counting her
+  ) %>%
+  pivot_longer(
+    Day1:Day21,
+    names_to = "day",
+    names_prefix = "Day",
+    values_to = "stage",
+    values_drop_na = TRUE
+  )
+
+KNDy_cycles_days_long$stageFactor <- factor(
+  KNDy_cycles_days_long$stage,
+  levels = c("1", "2", "3"),
+  labels = c("estrus", "diestrus", "proestrus")
+)
+
+KNDy_cycles_days_long
+
+cont.table <- table(
+  KNDy_cycles_days_long$GenTreatment, 
+  KNDy_cycles_days_long$stageFactor
+)
+
+cont.table
+
+results <- chisq_test(
+  # x = KNDy_cycles_days_long$GenTreatment,
+  # y = KNDy_cycles_days_long$stageFactor
+  cont.table
+)
+
+results %>% flextable()
+
+chisq_descriptives(
+  results
+) %>% flextable() %>%
+  colformat_num(digits = 2)
+
+observed_freq(
+  results
+)
+
+pearson_residuals(
+  results
+)
+
+std_residuals(
+  results
+)
+```
+
+From https://www.datanovia.com/en/lessons/anova-in-r/#post-hoct-tests
+"Note that, if you have met the assumptions of the two-way ANOVA (e.g., homogeneity of variances), it is better to use the overall error term (from the two-way ANOVA) as input in the one-way ANOVA model. This will make it easier to detect any statistically significant differences if they exist (Keppel & Wickens, 2004; Maxwell & Delaney, 2004).
+
+When you have failed the homogeneity of variances assumptions, you might consider running separate one-way ANOVAs with separate error terms."
+
+```{r}
+KNDy_cycles_perc_long %>%
+  anova_test(
+    dv = "percent",
+    wid = "MouseID",
+    between = c("GenTreatment","stage"),
+    type = 3
+  ) %>%
+  flextable()
+
+# With separate error terms
+KNDy_cycles_perc_long %>%
+  group_by(
+    stage
+  ) %>%
+  anova_test(
+    dv = "percent",
+    wid = "MouseID",
+    between = c("GenTreatment")
+  )
+
+# With full model error - note that this matches the p-values from prism and the adjusted pwc values
+model <- lm(percent ~ stage * GenTreatment, data = KNDy_cycles_perc_long)
+KNDy_cycles_perc_long %>%
+  group_by(stage) %>%
+  anova_test(percent ~ GenTreatment, error = model) %>%
+  adjust_pvalue(method = "bonferroni")
+```
+
+```{r}
+library(emmeans)
+pwc <- KNDy_cycles_perc_long %>% 
+  group_by(stage) %>%
+  emmeans_test(percent ~ GenTreatment, p.adjust.method = "none") %>%
+  adjust_pvalue(
+    method = "bonferroni"
+  )
+pwc %>% select(-p) %>% flextable() %>% colformat_num(j = "p.adj", digits = 4)
+```
+
+```{r}
+KNDy_cycles_dataset
+cyclesWB = createWorkbook()
+writeToWorkbook("cycles", KNDy_cycles_dataset %>% filter(!is.na(PercD)), cyclesWB)
+saveWorkbook(
+  cyclesWB,
+  file.path(DataOutputFolder, paste0("AG_KNDyPNA_cyclesData-", dateToday, ".xlsx")),
+  overwrite = TRUE
+)
+DataOutputFolder
+```
+
+```{r}
+KNDy_cycles_days_long$day <- as.numeric(KNDy_cycles_days_long$day)
+
+KNDy_cycles_days_long %>%
+  AG_KNDyPNA_makeLowerCase() %>%
+  filter(GenTreatment == "CON") %>%
+  AG_KNDyPNA_plotCycleTraces()
+
+# ggsave(
+#   "controlCycles.png",
+#   plot,
+#   path = PlotOutputFolder,
+#   width = 13,
+#   height = 7
+# )
+
+firstPNA_IDs <- KNDy_cycles_days_long %>%
+  AG_KNDyPNA_makeLowerCase() %>%
+  filter(GenTreatment == "PNA") %>%
+  select(MouseID) %>%
+  unique() %>%
+  head(n = 20)
+
+lastPNA_IDs <- KNDy_cycles_days_long %>%
+  AG_KNDyPNA_makeLowerCase() %>%
+  filter(GenTreatment == "PNA") %>%
+  select(MouseID) %>%
+  unique() %>%
+  tail(n = 9)
+
+KNDy_cycles_days_long %>%
+  AG_KNDyPNA_makeLowerCase() %>%
+  filter(MouseID %in% firstPNA_IDs$MouseID) %>%
+  AG_KNDyPNA_plotCycleTraces()
+
+# ggsave(
+#   "pnaCycles1.png",
+#   plot,
+#   path = PlotOutputFolder,
+#   width = 13,
+#   height = 7
+# )
+
+KNDy_cycles_days_long %>%
+  AG_KNDyPNA_makeLowerCase() %>%
+  filter(MouseID %in% lastPNA_IDs$MouseID) %>%
+  AG_KNDyPNA_plotCycleTraces()
+
+# ggsave(
+#   "pnaCycles2.png",
+#   plot,
+#   path = PlotOutputFolder,
+#   width = 13/5*3,
+#   height = 7/4*3
+# )
+
+```
+
+```{r}
+testTransformDF <- bParams_spont_0.23 %>%
+  mutate(
+    times10 = mbd * 10
+  )
+
+testTransformDF %>%
+  anova_test(
+    mbd ~ AgeGroup * GenTreatment,
+    type = 3
+  )
+
+testTransformDF %>%
+  anova_test(
+    times10 ~ AgeGroup * GenTreatment,
+    type = 3
+  )
+```
+
+```{r}
+tf_large <- tf_plot + AG_KNDyPNA_textTheme(size = 18) +
+  scale_size_manual(c(4,4))
+
+ggsave(
+  "firingLarge.pdf",
+  plot = tf_large,
+  device = "pdf",
+  path = file.path(PlotOutputFolder, "poster"),
+  scale = 1,
+  width = 29,
+  height = 13,
+  units = c("cm")
+)
 ```
 
