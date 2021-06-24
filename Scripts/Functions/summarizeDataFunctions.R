@@ -223,6 +223,7 @@ countLittersCellsFiringBursting <- function(df, groupingVars, rateForQuiet){
       "%Bursting" = round((numBursting / numCells) * 100, 2),
       .groups = "drop"
     )
+  return(count)
 }
 
 
