@@ -42,6 +42,7 @@ BurstSheetName = "BurstData"
 ClusterSheetName = "ClusterData"
 TimingSheetName = "TimingData"
 SenktideSheetName = "Senktide"
+UpdatedFiringName = "updatedFiring" # pulled from Igor on 2021-06-24; this is events / min
 AGDSheetName = "AGD"
 VOSheetName = "VO"
 
@@ -114,6 +115,8 @@ KNDy_TimingData <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, TimingSheetName)
 KNDy_Senktide <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, SenktideSheetName)
 KNDy_VO <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, VOSheetName)
 KNDy_AGD <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, AGDSheetName)
+KNDy_eventsPerMin <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, UpdatedFiringName)
+
 
 burstAnalysisKey <- myXLSX_func(BurstOutputsFolder, "analysisTypesKey.xlsx", "Sheet1")
 burstAnalysisKey_inc2nd3rd <- myXLSX_func(BurstOutputsFolder, "analysisTypesKey.xlsx", "IncSecondThird")
