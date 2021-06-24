@@ -3010,3 +3010,43 @@ myimages
 ?image_data
 ```
 
+```{r}
+KNDy_eventsPerMin_demo <- bParams_spont_0.23 %>%
+  left_join(
+    KNDy_eventsPerMin,
+    by = "CellID"
+  )
+
+KNDy_firingLong <- KNDy_eventsPerMin_demo %>% 
+  pivot_longer(
+    cols = events_0:events_224,
+    names_to = "time",
+    names_transform = list(
+      time = as.integer
+    ),
+    names_prefix = "events_",
+    values_to = "eventsPerMin",
+    values_drop_na = TRUE
+  )
+
+KNDy_firingLong <- KNDy_firingLong %>%
+  mutate(
+    Hz = eventsPerMin / 60
+  )
+
+KNDy_firingLong <- KNDy_firingLong %>%
+  filter(
+    time >= StartTime_spont, time < EndTime_spont
+  )
+
+KNDy_firingLong %>%
+  filter(
+    Age_in_days == 18
+  ) %>%
+  ggplot(
+    aes(x = time, y = Hz)
+  ) +
+  geom_line() +
+  facet_wrap(~CellID)
+```
+
