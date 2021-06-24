@@ -2858,13 +2858,12 @@ KNDy_cycles_days_long %>%
   filter(GenTreatment == "CON") %>%
   AG_KNDyPNA_plotCycleTraces()
 
-# ggsave(
-#   "controlCycles.png",
-#   plot,
-#   path = PlotOutputFolder,
-#   width = 13,
-#   height = 7
-# )
+ggsave(
+  "controlCycles.png",
+  path = PlotOutputFolder,
+  width = 13,
+  height = 7
+)
 
 firstPNA_IDs <- KNDy_cycles_days_long %>%
   AG_KNDyPNA_makeLowerCase() %>%
@@ -2878,33 +2877,31 @@ lastPNA_IDs <- KNDy_cycles_days_long %>%
   filter(GenTreatment == "PNA") %>%
   select(MouseID) %>%
   unique() %>%
-  tail(n = 9)
+  tail(n = 13)
 
 KNDy_cycles_days_long %>%
   AG_KNDyPNA_makeLowerCase() %>%
   filter(MouseID %in% firstPNA_IDs$MouseID) %>%
   AG_KNDyPNA_plotCycleTraces()
 
-# ggsave(
-#   "pnaCycles1.png",
-#   plot,
-#   path = PlotOutputFolder,
-#   width = 13,
-#   height = 7
-# )
+ggsave(
+  "pnaCycles1.png",
+  path = PlotOutputFolder,
+  width = 13,
+  height = 7
+)
 
 KNDy_cycles_days_long %>%
   AG_KNDyPNA_makeLowerCase() %>%
   filter(MouseID %in% lastPNA_IDs$MouseID) %>%
   AG_KNDyPNA_plotCycleTraces()
 
-# ggsave(
-#   "pnaCycles2.png",
-#   plot,
-#   path = PlotOutputFolder,
-#   width = 13/5*3,
-#   height = 7/4*3
-# )
+ggsave(
+  "pnaCycles2.png",
+  path = PlotOutputFolder,
+  width = 13/5*4,
+  height = 7/4*4
+)
 
 ```
 
@@ -2941,5 +2938,75 @@ ggsave(
   height = 13,
   units = c("cm")
 )
+```
+
+```{r}
+bParams_spont_0.23 %>%
+  get_summary_stats(
+   bn:tf,
+    show = c("n", "mean")
+  )
+
+View(get_summary_stats)
+View(doo)
+```
+
+```{r}
+cycle <- load.image('/Users/amandagibson/OneDrive - Umich/Moenter lab/Experimental Data/Estrous Cycles/July2020Pics/_By mouse/1/2020-06-30_0001.jpg')
+plot(cycle)
+```
+
+```{r}
+imgs <- load.dir('/Users/amandagibson/OneDrive - Umich/Moenter lab/Experimental Data/Estrous Cycles/July2020Pics/_By mouse/1/', pattern = ".jpg")
+names(imgs)
+plot(imgs, axes = FALSE, xlab = "", ylab = "")
+?load.dir
+```
+```{r}
+myimages <- list.files("/Users/amandagibson/OneDrive - Umich/Moenter lab/Experimental Data/Estrous Cycles/July2020Pics/_By mouse/1/", pattern = ".jpg", full.names = TRUE)
+include_graphics(myimages)
+```
+
+```{r}
+gg_image <- function(img, imgTitle = NULL){
+  viz <- ggplot() +
+    background_image(img) +
+    labs(title = imgTitle) +
+    theme(
+      aspect.ratio = dim(img)[2] / dim(img)[1]
+    )
+    # coord_cartesian(xlim = c(0, dim(img)[1]), ylim = c(0, dim(img)[2]))
+    # coord_fixed()
+  # plot(img, main = imgTitle)
+  return(viz)
+}
+img_plots <- list()
+for(i in 1:length(imgs)){
+  img_plots[[i]] <- gg_image(imgs[[i]], names(imgs[i]))
+}
+names(img_plots) <- names(imgs)
+img_plots
+
+
+cyclePlots <- ggarrange(plotlist = img_plots, ncol = 5, nrow = ceiling(length(img_plots) / 5))
+cyclePlots
+ggsave(
+  "cyclesTest.pdf",
+  width = 11,
+  height = 8.5,
+  scale = 1,
+  units = "in"
+)
+```
+
+```{r}
+install.packages("magick")
+library(magick)
+image_read(myimages) %>%
+  image_montage(tile = "5")
+
+myimages
+
+?image_data
 ```
 

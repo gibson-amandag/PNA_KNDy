@@ -392,16 +392,44 @@ df_40_60 <- bParams_spont_40_60_0.23
 ```{r}
 df_plot <- df %>%
   AG_KNDyPNA_makeLowerCase()
+```
 
-tf_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "tf")
-bf_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "bf")
-mbd_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "mbd")
-spb_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "spb")
-intra_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "intra")
-ssf_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "ssf")
-inter_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "inter")
+```{r}
+
+tf_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, tf)
+bf_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, bf)
+mbd_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, mbd)
+spb_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, spb)
+intra_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, intra)
+ssf_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, ssf)
+inter_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, inter)
 
 ```
+
+```{r}
+firingDF <- df_plot %>%
+  mutate(
+    firing = ifelse(
+      tf < rateForQuiet,
+      FALSE,
+      TRUE
+    )
+  )
+
+firingDF$firing = factor(
+  firingDF$firing,
+  levels = c(FALSE, TRUE),
+  labels = c(
+    "quiescent",
+    "firing"
+    )
+)
+```
+
+```{r}
+firingProp_plot <- firingDF %>% AG_KNDyPNA_plotPropFiring()
+```
+
 
 ```{r}
 ggsave(
@@ -412,7 +440,8 @@ ggsave(
   scale = 1,
   width = 8,
   height = 20/3,
-  units = c("cm")
+  units = c("cm"),
+  useDingbats = FALSE
 )
 ggsave(
   "AG_KNDyPNA_meanFrequency.pdf",
@@ -422,14 +451,33 @@ ggsave(
   scale = 1,
   width = 20/3,
   height = 10/2,
-  units = c("cm")
+  units = c("cm"),
+  useDingbats = FALSE
+)
+firingPlots <- plot_grid(
+  firingProp_plot,
+  tf_plot,
+  ncol = 2,
+  nrow = 1,
+  align = "hv",
+  axis = "btlr"
+)
+ggsave(
+  "AG_KNDyPNA_firingFreq.pdf",
+  plot = firingPlots,
+  path = file.path(PlotOutputFolder, "manuscript"),
+  scale = 1,
+  width = 18/3 * 2,
+  height = 20/3,
+  units = c("cm"),
+  useDingbats = FALSE
 )
 ```
 
 
 ```{r}
 # Arrange the burst parameters into a 3x2 grid
-burstPlots3x2 <- ggarrange(
+burstPlots3x2 <- plot_grid(
   bf_plot,
   mbd_plot,
   spb_plot,
@@ -439,7 +487,8 @@ burstPlots3x2 <- ggarrange(
   labels = c("A", "B", "C", "D", "E", "F"), #Label each panel
   ncol = 2,
   nrow = 3,
-  align = "v"
+  align = "hv",
+  axis = "btlr"
 )
 
 ggsave(
@@ -450,7 +499,8 @@ ggsave(
   scale = 1,
   width = 18,
   height = 20,
-  units = c("cm")
+  units = c("cm"),
+  useDingbats = FALSE
 )
 ```
 
@@ -500,13 +550,13 @@ df_40_60 <- bParams_spont_40_60_0.37
 df_plot <- df %>%
   AG_KNDyPNA_makeLowerCase()
 
-tf_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "tf")
-bf_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "bf")
-mbd_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "mbd")
-spb_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "spb")
-intra_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "intra")
-ssf_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "ssf")
-inter_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, "inter")
+tf_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, tf)
+bf_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, bf)
+mbd_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, mbd)
+spb_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, spb)
+intra_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, intra)
+ssf_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, ssf)
+inter_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, inter)
 
 ```
 
@@ -519,14 +569,15 @@ ggsave(
   scale = 1,
   width = 8,
   height = 20/3,
-  units = c("cm")
+  units = c("cm"),
+  useDingbats = FALSE
 )
 ```
 
 
 ```{r}
 # Arrange the burst parameters into a 3x2 grid
-burstPlots3x2 <- ggarrange(
+burstPlots3x2 <- plot_grid(
   bf_plot,
   mbd_plot,
   spb_plot,
@@ -536,7 +587,8 @@ burstPlots3x2 <- ggarrange(
   labels = c("A", "B", "C", "D", "E", "F"), #Label each panel
   ncol = 2,
   nrow = 3,
-  align = "v"
+  align = "hv",
+  axis = "btlr"
 )
 
 ggsave(
@@ -547,7 +599,8 @@ ggsave(
   scale = 1,
   width = 18,
   height = 20,
-  units = c("cm")
+  units = c("cm"),
+  useDingbats = FALSE
 )
 ```
 
@@ -599,7 +652,7 @@ KNDy_AGD_dataset_lowercase  <-  KNDy_AGD_dataset %>% AG_KNDyPNA_makeLowerCase()
 
 AGD_plot <- AG_KNDyPNA_manuscriptPlot_AGD(
   KNDy_AGD_dataset_lowercase,
-  "AGD_avg",
+  AGD_avg,
   "AG distance (mm)",
   addSig = TRUE,
   yAdd = .2
@@ -607,43 +660,21 @@ AGD_plot <- AG_KNDyPNA_manuscriptPlot_AGD(
 
 AGD_Mass_plot <- AG_KNDyPNA_manuscriptPlot_AGD(
   KNDy_AGD_dataset_lowercase,
-  "mass_avg",
+  mass_avg,
   "body mass (g)",
   addSig = TRUE,
   yAdd = 3
 )
-AGD_Mass_plot
 
 normAGD_plot <- AG_KNDyPNA_manuscriptPlot_AGD(
   KNDy_AGD_dataset_lowercase,
-  "AGD_byMass",
+  AGD_byMass,
   "normalized AGD (AGD (mm) / body mass (g))",
   addSig = TRUE,
   yAdd = 0.01
 )
 ```
-```{r}
-# Arrange the phenotype parameters into a grid
-pnaPhenotype <- ggarrange(
-  AGD_plot,
-  AGD_Mass_plot,
-  labels = c("A", "B"), #Label each panel
-  ncol = 2,
-  nrow = 1,
-  align = "v"
-)
 
-ggsave(
-  "AG_KNDyPNA_PNA_phenotype.pdf",
-  plot = pnaPhenotype,
-  device = "pdf",
-  path = file.path(PlotOutputFolder, "manuscript"),
-  scale = 1,
-  width = 8,
-  height = 20 / 3,
-  units = c("cm")
-)
-```
 
 ```{r}
 ggsave(
@@ -654,7 +685,8 @@ ggsave(
   scale = 1,
   width = 3.8,
   height = 20/3,
-  units = c("cm")
+  units = c("cm"),
+  useDingbats = FALSE
 )
 ggsave(
   "AG_KNDyPNA_AGD.pdf",
@@ -664,7 +696,8 @@ ggsave(
   scale = 1,
   width = 20/3/2,
   height = 10/2,
-  units = c("cm")
+  units = c("cm"),
+  useDingbats = FALSE
 )
 pnaPhenotypePoster <- ggarrange(
   AGD_plot,
@@ -680,7 +713,8 @@ ggsave(
   scale = 1,
   width = 7,
   height = 10/2,
-  units = c("cm")
+  units = c("cm"),
+  useDingbats = FALSE
 )
 ```
 
@@ -750,7 +784,8 @@ senkPlot_long
 #   scale = 1,
 #   width = 20/3,
 #   height = 20/3,
-#   units = c("cm")
+#   units = c("cm"),
+#   useDingbats = FALSE
 # )
 # ggsave(
 #   "AG_KNDyPNA_senktideLong.pdf",
@@ -760,7 +795,8 @@ senkPlot_long
 #   scale = 1,
 #   width = 20/3,
 #   height = 10/2,
-#   units = c("cm")
+#   units = c("cm"),
+#   useDingbats = FALSE
 # )
 ```
 
@@ -772,7 +808,6 @@ posterPlots <- plot_grid(
   mbd_plot,
   spb_plot,
   senkPlot_long,
-  # + theme(strip.text = element_blank()),
   intra_plot,
   ssf_plot,
   inter_plot,
@@ -791,7 +826,8 @@ ggsave(
   scale = 1,
   width = 27/4,
   height = 10*4,
-  units = c("cm")
+  units = c("cm"),
+  useDingbats = FALSE
 )
 ```
 
@@ -864,6 +900,34 @@ cyclesPlot_exampleMice
 ```
 
 ```{r}
+# Arrange the phenotype parameters into a grid
+pnaPhenotype <- plot_grid(
+  AGD_plot,
+  cyclesPlot_exampleMice,
+  AGD_Mass_plot,
+  cyclesDistPlot,
+  labels = c("A", "C", "B", "D"), #Label each panel
+  ncol = 2,
+  nrow = 2,
+  align = "hv",
+  axis = "tb",
+  rel_widths = c(1, 1.5)
+)
+
+ggsave(
+  "AG_KNDyPNA_PNA_phenotype.pdf",
+  plot = pnaPhenotype,
+  device = "pdf",
+  path = file.path(PlotOutputFolder, "manuscript"),
+  scale = 1,
+  width = 18,
+  height = 20 / 3 * 2,
+  units = c("cm"),
+  useDingbats = FALSE
+)
+```
+
+```{r}
 pnaPhenotypePoster2 <- plot_grid(
   AGD_plot,
   AGD_Mass_plot,
@@ -881,7 +945,108 @@ ggsave(
   scale = 1,
   width = 14.26,
   height = 4.6,
-  units = c("cm")
+  units = c("cm"),
+  useDingbats = FALSE
 )
+```
+
+```{r}
+ggsave(
+  "AG_KNDyPNA_senktide.pdf",
+  plot = senkPlot_long,
+  device = "pdf",
+  path = file.path(PlotOutputFolder, "manuscript"),
+  scale = 1,
+  width = 8,
+  height = 20/3,
+  units = c("cm"),
+  useDingbats = FALSE
+)
+```
+
+# Statistical Tests
+```{r}
+t_test(
+  KNDy_AGD_dataset,
+  AGD_avg ~ GenTreatment
+)
+t_test(
+  KNDy_AGD_dataset,
+  mass_avg ~ GenTreatment
+)
+t_test(
+  KNDy_AGD_dataset,
+  AGD_byMass ~ GenTreatment
+)
+```
+
+```{r}
+df <- bParams_spont_0.23 %>% AG_KNDyPNA_makeLowerCase()
+
+tf_ANOVA <- anova_test(
+  df,
+  wid = "MouseID",
+  between = c("AgeGroup", "GenTreatment"),
+  dv = "tf",
+  type = 3
+)
+tf_ANOVA
+
+mbd_ANOVA <- anova_test(
+  df,
+  wid = "MouseID",
+  between = c("AgeGroup", "GenTreatment"),
+  dv = "mbd",
+  type = 3
+)
+mbd_ANOVA
+
+model_mbd <- lm(mbd ~ AgeGroup * GenTreatment, data = df)
+df %>% 
+  emmeans_test(
+    mbd ~ AgeGroup, p.adjust.method = "bonferroni",
+    model = model_mbd
+    )
+
+spb_ANOVA <- anova_test(
+  df,
+  wid = "MouseID",
+  between = c("AgeGroup", "GenTreatment"),
+  dv = "spb",
+  type = 3
+)
+spb_ANOVA
+
+intra_ANOVA <- anova_test(
+  df,
+  wid = "MouseID",
+  between = c("AgeGroup", "GenTreatment"),
+  dv = "intra",
+  type = 3
+)
+intra_ANOVA
+```
+
+```{r}
+bParams_spont_0.23 %>%
+  get_summary_stats(SpontLength_min, type = c("mean_se"))
+```
+
+```{r}
+bParams_spont_0.23 %>%
+  filter(GenTreatment != "PNA") %>%
+  anova_test(
+    dv = "tf",
+    wid = "CellID",
+    between = c("Treatment", "AgeGroup")
+  )
+
+bParams_spont_0.23 %>%
+  filter(GenTreatment != "PNA") %>%
+  group_by(Treatment)%>%
+  get_summary_stats(
+    tf,
+    type = c("full")
+  )
 ```
 
