@@ -1,4 +1,5 @@
 #### LOAD LIBRARIES ######################################
+library(imager)
 library(DT)
 library(shiny)
 library(tidyverse)
