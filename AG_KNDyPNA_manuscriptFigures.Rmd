@@ -1160,8 +1160,18 @@ cycles.Chi.Sq.res %>% flextable()
 
 chisq_descriptives(
   cycles.Chi.Sq.res
-) %>% flextable() %>%
-  colformat_num(digits = 2)
+) %>% flextable() 
+
+KNDy_cycles_contTable_flip <- table(
+  KNDy_cycles_days_long$stageName,
+  KNDy_cycles_days_long$GenTreatment
+)
+
+row_wise_fisher_test(
+  KNDy_cycles_contTable_flip,
+  p.adjust.method = "bonferroni",
+  detailed = TRUE
+)
 ```
 
 ```{r}
@@ -1258,18 +1268,94 @@ t_test(
   KNDy_AGD_dataset,
   AGD_avg ~ GenTreatment
 )
+
+cohens_d(
+  KNDy_AGD_dataset,
+  AGD_avg ~ GenTreatment
+)
+
 t_test(
   KNDy_AGD_dataset,
   mass_avg ~ GenTreatment
 )
+
+cohens_d(
+  KNDy_AGD_dataset,
+  mass_avg ~ GenTreatment
+)
+
 t_test(
   KNDy_AGD_dataset,
   AGD_byMass ~ GenTreatment
 )
+
+KNDy_AGD_dataset %>%
+  group_by(GenTreatment) %>%
+  filter(!is.na(AGD_avg)) %>%
+  summarize(
+    litters = length(unique(DamID))
+  )
+```
+```{r}
+t.test(
+  AGD_avg ~ GenTreatment,
+  KNDy_AGD_dataset
+)
+
+t.test(
+  mass_avg ~ GenTreatment,
+  KNDy_AGD_dataset
+)
+
+```
+
+
+## Count Cells, Mice, and Litters
+```{r}
+df <- bParams_spont_0.23 %>% AG_KNDyPNA_makeLowerCase()
+groupingVars2 <- exprs(AgeGroup, GenTreatment)
+```
+
+### AGD
+```{r}
+KNDy_AGD_dataset_lowercase %>%
+  countMiceAndLitters(AGD_avg, exprs(GenTreatment))
+```
+
+
+### total frequency
+```{r}
+df %>% 
+  countCellsMiceAndLitters(
+    filterByVar = tf, 
+    groupingVars = groupingVars
+  )
+```
+
+## Bursting Cells
+```{r}
+df %>% 
+  countCellsMiceAndLitters(
+    filterByVar = mbd, 
+    groupingVars = groupingVars
+  )
+```
+
+## Inter cells
+```{r}
+df %>% 
+  countCellsMiceAndLitters(
+    filterByVar = inter, 
+    groupingVars = groupingVars
+  )
+```
+## Senktide
+```{r}
+senktideTF %>%
+  countCellsMiceAndLitters(tfbase, groupingVars)
 ```
 
 ```{r}
-df <- bParams_spont_0.23 %>% AG_KNDyPNA_makeLowerCase()
 
 tf_ANOVA <- anova_test(
   df,
@@ -1320,6 +1406,8 @@ bParams_spont_0.23 %>%
   get_summary_stats(SpontLength_min, type = c("mean_se"))
 ```
 
+# Effect of control/vehicle on spontaneous firing frequency
+
 ```{r}
 bParams_spont_0.23 %>%
   filter(GenTreatment != "PNA") %>%
@@ -1338,34 +1426,105 @@ bParams_spont_0.23 %>%
   )
 ```
 
+# Proportion Firing
 
 ```{r}
-KNDy_eventsPerMin_demo <- bParams_spont_0.23 %>%
-  left_join(
-    KNDy_eventsPerMin,
-    by = "CellID"
-  )
+firingDF_3wk <- firingDF %>%
+  filter(AgeGroup == "3wk")
 
-KNDy_firingLong <- KNDy_eventsPerMin_demo %>% 
-  pivot_longer(
-    cols = events_0:events_224,
-    names_to = "time",
-    names_transform = list(
-      time = as.integer
-    ),
-    names_prefix = "events_",
-    values_to = "eventsPerMin",
-    values_drop_na = TRUE
-  )
+firing_contTable_3wk <- table(
+  firingDF_3wk$GenTreatment,
+  firingDF_3wk$firing
+)
 
-KNDy_firingLong <- KNDy_firingLong %>%
-  mutate(
-    Hz = eventsPerMin / 60
-  )
+fisher_test(
+  firing_contTable_3wk,
+  detailed = TRUE
+)
 
-KNDy_firingLong <- KNDy_firingLong %>%
-  filter(
-    time >= StartTime_spont, time < EndTime_spont
-  )
+firingDF_adult <- firingDF %>%
+  filter(AgeGroup == "adult")
+
+firing_contTable_adult <- table(
+  firingDF_adult$GenTreatment,
+  firingDF_adult$firing
+)
+
+fisher_test(
+  firing_contTable_adult,
+  detailed = TRUE
+)
+
+fisher_test(
+  table(firingDF$GenTreatment, firingDF$firing)
+)
+
+fisher_test(
+  table(firingDF$AgeGroup, firingDF$firing)
+)
 ```
+
+```{r}
+if(!require(DescTools)){
+  install.packages("DescTools")
+}
+library(DescTools)
+```
+
+https://stat.ethz.ch/R-manual/R-devel/library/stats/html/mantelhaen.test.html 
+```{r}
+firing_contTable <- table(
+  firingDF$GenTreatment, 
+  firingDF$firing,
+  firingDF$AgeGroup
+)
+
+
+# BreslowDayTest - is there independence?
+# https://link-springer-com.proxy.lib.umich.edu/content/pdf/10.1007%2F978-0-387-21727-7_8.pdf
+# https://cran.r-project.org/web/packages/samplesizeCMH/vignettes/samplesizeCMH-introduction.html
+BreslowDayTest(firing_contTable)
+
+# Mantel-Haenszel Test - does the level of a third variable affect the relationship between two others?
+# assumes there is no three-way interaction - shown by Breslow Day test that it's not there
+mantelhaen.test(
+  firing_contTable,
+  exact = FALSE
+)
+
+# # General Linear Model with Poisson for count data - no interactions/main effects
+# firing_contDF <- as.data.frame(firing_contTable)
+# firing_contDF <- firing_contDF %>%
+#   rename(
+#     GenTreatment = Var1,
+#     Firing = Var2,
+#     AgeGroup = Var3
+#   )
+# firing_contDF
+# 
+# glm_firing <- glm(firing_contDF$Freq ~ firing_contDF$GenTreatment * firing_contDF$Firing * firing_contDF$AgeGroup, family = poisson)
+# 
+# summary(glm_firing)
+# fitted_firing <- fitted(glm_firing)
+
+
+
+
+```
+
+# Senktide
+```{r}
+senktide_anova <- anova_test(
+  senktide_long,
+  dv = "firingRate",
+  wid = "CellID",
+  between = c("AgeGroup", "GenTreatment"),
+  within = "time",
+  type = 3,
+  detailed = TRUE
+)
+
+senktide_anova
+```
+
 
