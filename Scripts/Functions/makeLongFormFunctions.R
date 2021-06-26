@@ -525,3 +525,22 @@ add_Bin_col_forBox <- function(df){
   df$CellID <- as.factor(df$CellID)
   return(df)
 }
+
+pivot_longer_binnedFiring <- function (
+  df,
+  colStartString = "events_",
+  firingColName = "eventsPerMin"
+){
+  df_long <- df %>%
+    pivot_longer(
+      cols = starts_with(colStartString),
+      names_to = "time",
+      names_transform = list(
+        time = as.numeric
+      ),
+      names_prefix = colStartString,
+      values_to = firingColName,
+      values_drop_na = TRUE
+    )
+  return(df_long)
+} 

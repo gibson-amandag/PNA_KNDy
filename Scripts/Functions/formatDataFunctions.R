@@ -235,3 +235,17 @@ makeCyclesDayLong <- function(
   
   return(df_long)
 }
+
+# This adds the firing info (events/min was the initial purpose) to the existing dataset dataframe
+# Joins based on the exisiting dataset
+addFiringToDataset <- function(
+  df_firing,
+  df_dataset
+){
+  df_firing <- df_dataset %>%
+    left_join(
+      df_firing,
+      by = "CellID"
+    )
+  return(df_firing)
+}

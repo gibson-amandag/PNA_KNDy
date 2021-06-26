@@ -390,3 +390,85 @@ AG_KNDyPNA_plotPropFiring <- function(df) {
     rremove("xlab")
   return(viz)
 }
+
+AG_KNDyPNA_plotFiringTraces <- function(
+  df,
+  time = time, # col name
+  Hz = Hz,
+  CellID = CellID,
+  ncol = NULL,
+  nrow = NULL,
+  lineColorVar = NULL,
+  colorKey = c("CON" = "grey", "PNA" = "black"),
+  removeFacets = FALSE,
+  removeLegend = TRUE,
+  zoom_x = FALSE,
+  xmin = NULL,
+  xmax = NULL,
+  zoom_y = FALSE,
+  ymin = NULL,
+  ymax = NULL,
+  save = FALSE, #Save png
+  add_to_save_name = NULL, #append something additional to file name
+  toPPT = FALSE, #add to a powerpoint
+  ppt = NULL, #powerpoint object to add to
+  img_type = ".png",
+  figWidth = 10,
+  figHeight = NA,
+  thisCellName = "",
+  units = "cm"
+){
+  viz <- ggplot(df, aes(x = {{ time }}, y = {{ Hz }}, color = {{ lineColorVar }})) +
+    geom_line() +
+    facet_wrap(
+      vars( {{ CellID }} ),
+      ncol = ncol,
+      nrow = nrow
+    ) +
+    scale_x_continuous(
+      breaks = seq(0, 180, 30) #labels every 30 minutes
+    )+
+    expand_limits(y = 0) +
+    coord_cartesian(if(zoom_x){xlim = c(xmin, xmax)}, if(zoom_y){ylim = c(ymin, ymax)}) +
+    labs(x = "time (min)", y = "firing frequency (Hz)")
+  
+  viz <- viz +
+    theme_pubr() +
+    AG_KNDyPNA_textTheme() +
+    AG_KNDyPNA_boxTheme()
+
+  if(!is.null(enquo(lineColorVar))){
+    viz <- viz + scale_color_manual(values = colorKey)
+  }
+
+  if(removeLegend == TRUE) {
+    viz <- viz + rremove("legend")
+  }
+
+  if(removeFacets == TRUE) {
+    viz <- viz + theme(
+      strip.text = element_blank(),
+      strip.background = element_blank()
+    )
+  }
+
+  if(save){ #if save is true
+    my_ggsave(
+      plot_type = "firingRate",
+      var_to_plot = thisCellName,
+      add_to_save_name = add_to_save_name,
+      plot = viz,
+      width = figWidth,
+      height = figHeight,
+      img_type = img_type,
+      path = file.path(PlotOutputFolder, "firingRate"),
+      units = units
+    )
+  }
+
+  if(toPPT){
+    ppt_GraphFunc(ppt, viz)
+  }
+  
+  return(viz)
+}

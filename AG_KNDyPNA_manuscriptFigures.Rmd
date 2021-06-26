@@ -134,6 +134,15 @@ KNDy_VarNames <- KNDy_varNamesFunc(KNDyDATA)
 # if(doc.type == "docx"){flextable(df)} else {df}
 ```
 
+# Column Sizes
+```{r}
+# JNeuro values (in cm)
+twoCols <- 17.4
+oneAndHalfCols <- 11.5
+oneCol <- 8.5
+```
+
+
 # Filtering Information
 For this report, cells were not filtered by recording duration. Mice that were up to 160 days of age were included. Uterine mass up to 110 mg was included. There was no filtering of the dataset by order of cell recorded or order of mice recorded from one litter. Only cells that Amanda recorded were included, but this includes cells that were from animals that Jenn sliced. This dataset does not include main colony control mice, which therefore also excludes homozygous mice. Cells that had other technical reasons for exclusion are not included in this dataset.
 
@@ -430,7 +439,278 @@ firingDF$firing = factor(
 firingProp_plot <- firingDF %>% AG_KNDyPNA_plotPropFiring()
 ```
 
+# Firing Rate Over Time Plots 
+```{r}
+KNDy_eventsPerMin_demo <- addFiringToDataset(
+  KNDy_eventsPerMin,
+  bParams_spont_0.23
+) %>%
+  AG_KNDyPNA_makeLowerCase()
 
+KNDy_firingLong <- pivot_longer_binnedFiring(KNDy_eventsPerMin_demo)
+
+KNDy_firingLong <- KNDy_firingLong %>%
+  mutate(
+    Hz = eventsPerMin / 60
+  )
+
+KNDy_firingLong <- KNDy_firingLong %>%
+  filter(
+    time >= StartTime_spont, time < EndTime_spont
+  )
+```
+
+## All cells firing histograms 
+
+```{r}
+zoom_y = TRUE
+ymin = 0
+ymax = 15
+
+KNDy_firingRate_Adult_Con_plot <- KNDy_firingLong %>%
+  filter(AgeGroup == "adult" & GenTreatment == "CON") %>%
+  AG_KNDyPNA_plotFiringTraces(
+    ncol = 4,
+    lineColorVar = GenTreatment,
+    colorKey = c("CON" = "grey", "PNA" = "black"),
+    removeFacets = FALSE,
+    removeLegend = TRUE,
+    zoom_x = FALSE,
+    xmin = NULL,
+    xmax = NULL,
+    zoom_y = zoom_y,
+    ymin = ymin,
+    ymax = ymax,
+    save = TRUE, #Save file
+    add_to_save_name = NULL, #append something additional to file name
+    toPPT = FALSE, #add to a powerpoint
+    ppt = NULL, #powerpoint object to add to
+    img_type = ".pdf",
+    figWidth = 18,
+    figHeight = 20/6*4,
+    units = "cm",
+    thisCellName = "adult-con"
+  )
+
+KNDy_firingRate_Adult_PNA_plot <- KNDy_firingLong %>%
+  filter(AgeGroup == "adult" & GenTreatment == "PNA") %>%
+  AG_KNDyPNA_plotFiringTraces(
+    ncol = 4,
+    lineColorVar = GenTreatment,
+    colorKey = c("CON" = "grey", "PNA" = "black"),
+    removeFacets = FALSE,
+    removeLegend = TRUE,
+    zoom_x = FALSE,
+    xmin = NULL,
+    xmax = NULL,
+    zoom_y = zoom_y,
+    ymin = ymin,
+    ymax = ymax,
+    save = TRUE, #Save file
+    add_to_save_name = NULL, #append something additional to file name
+    toPPT = FALSE, #add to a powerpoint
+    ppt = NULL, #powerpoint object to add to
+    img_type = ".pdf",
+    figWidth = 18,
+    figHeight = 20,
+    units = "cm",
+    thisCellName = "adult-pna"
+  )
+
+# Juveniles
+KNDy_firingRate_Juv_Con_plot <- KNDy_firingLong %>%
+  filter(AgeGroup == "3wk" & GenTreatment == "CON") %>%
+  AG_KNDyPNA_plotFiringTraces(
+    ncol = 4,
+    lineColorVar = GenTreatment,
+    colorKey = c("CON" = "grey", "PNA" = "black"),
+    removeFacets = FALSE,
+    removeLegend = TRUE,
+    zoom_x = FALSE,
+    xmin = NULL,
+    xmax = NULL,
+    zoom_y = zoom_y,
+    ymin = ymin,
+    ymax = ymax,
+    save = TRUE, #Save file
+    add_to_save_name = NULL, #append something additional to file name
+    toPPT = FALSE, #add to a powerpoint
+    ppt = NULL, #powerpoint object to add to
+    img_type = ".pdf",
+    figWidth = 18,
+    figHeight = 20/2,
+    units = "cm",
+    thisCellName = "3wk-con"
+  )
+
+KNDy_firingRate_Juv_PNA_plot <- KNDy_firingLong %>%
+  filter(AgeGroup == "3wk" & GenTreatment == "PNA") %>%
+  AG_KNDyPNA_plotFiringTraces(
+    ncol = 4,
+    lineColorVar = GenTreatment,
+    colorKey = c("CON" = "grey", "PNA" = "black"),
+    removeFacets = FALSE,
+    removeLegend = TRUE,
+    zoom_x = FALSE,
+    xmin = NULL,
+    xmax = NULL,
+    zoom_y = zoom_y,
+    ymin = ymin,
+    ymax = ymax,
+    save = TRUE, #Save file
+    add_to_save_name = NULL, #append something additional to file name
+    toPPT = FALSE, #add to a powerpoint
+    ppt = NULL, #powerpoint object to add to
+    img_type = ".pdf",
+    figWidth = 18,
+    figHeight = 20,
+    units = "cm",
+    thisCellName = "3wk-pna"
+  )
+```
+
+```{r}
+zoom_y = TRUE
+ymin = 0
+ymax = 2
+
+KNDy_firingRate_Adult_Con_plot_2Hz <- KNDy_firingLong %>%
+  filter(AgeGroup == "adult" & GenTreatment == "CON") %>%
+  AG_KNDyPNA_plotFiringTraces(
+    ncol = 4,
+    lineColorVar = GenTreatment,
+    colorKey = c("CON" = "grey", "PNA" = "black"),
+    removeFacets = FALSE,
+    removeLegend = TRUE,
+    zoom_x = FALSE,
+    xmin = NULL,
+    xmax = NULL,
+    zoom_y = zoom_y,
+    ymin = ymin,
+    ymax = ymax,
+    save = TRUE, #Save file
+    add_to_save_name = "_2Hz", #append something additional to file name
+    toPPT = FALSE, #add to a powerpoint
+    ppt = NULL, #powerpoint object to add to
+    img_type = ".pdf",
+    figWidth = 18,
+    figHeight = 20/6*4,
+    units = "cm",
+    thisCellName = "adult-con"
+  )
+
+KNDy_firingRate_Adult_PNA_plot_2Hz <- KNDy_firingLong %>%
+  filter(AgeGroup == "adult" & GenTreatment == "PNA") %>%
+  AG_KNDyPNA_plotFiringTraces(
+    ncol = 4,
+    lineColorVar = GenTreatment,
+    colorKey = c("CON" = "grey", "PNA" = "black"),
+    removeFacets = FALSE,
+    removeLegend = TRUE,
+    zoom_x = FALSE,
+    xmin = NULL,
+    xmax = NULL,
+    zoom_y = zoom_y,
+    ymin = ymin,
+    ymax = ymax,
+    save = TRUE, #Save file
+    add_to_save_name = "_2Hz", #append something additional to file name
+    toPPT = FALSE, #add to a powerpoint
+    ppt = NULL, #powerpoint object to add to
+    img_type = ".pdf",
+    figWidth = 18,
+    figHeight = 20,
+    units = "cm",
+    thisCellName = "adult-pna"
+  )
+
+# Juveniles
+KNDy_firingRate_Juv_Con_plot_2Hz <- KNDy_firingLong %>%
+  filter(AgeGroup == "3wk" & GenTreatment == "CON") %>%
+  AG_KNDyPNA_plotFiringTraces(
+    ncol = 4,
+    lineColorVar = GenTreatment,
+    colorKey = c("CON" = "grey", "PNA" = "black"),
+    removeFacets = FALSE,
+    removeLegend = TRUE,
+    zoom_x = FALSE,
+    xmin = NULL,
+    xmax = NULL,
+    zoom_y = zoom_y,
+    ymin = ymin,
+    ymax = ymax,
+    save = TRUE, #Save file
+    add_to_save_name = "_2Hz", #append something additional to file name
+    toPPT = FALSE, #add to a powerpoint
+    ppt = NULL, #powerpoint object to add to
+    img_type = ".pdf",
+    figWidth = 18,
+    figHeight = 20/2,
+    units = "cm",
+    thisCellName = "3wk-con"
+  )
+
+KNDy_firingRate_Juv_PNA_plot_Hz <- KNDy_firingLong %>%
+  filter(AgeGroup == "3wk" & GenTreatment == "PNA") %>%
+  AG_KNDyPNA_plotFiringTraces(
+    ncol = 4,
+    lineColorVar = GenTreatment,
+    colorKey = c("CON" = "grey", "PNA" = "black"),
+    removeFacets = FALSE,
+    removeLegend = TRUE,
+    zoom_x = FALSE,
+    xmin = NULL,
+    xmax = NULL,
+    zoom_y = zoom_y,
+    ymin = ymin,
+    ymax = ymax,
+    save = TRUE, #Save file
+    add_to_save_name = "_2Hz", #append something additional to file name
+    toPPT = FALSE, #add to a powerpoint
+    ppt = NULL, #powerpoint object to add to
+    img_type = ".pdf",
+    figWidth = 18,
+    figHeight = 20,
+    units = "cm",
+    thisCellName = "3wk-pna"
+  )
+```
+
+## Example Firing
+```{r}
+exampleCells <- c(
+  "20200928c", 
+  "20190816c", 
+  "20200806c", 
+  "20190725b"
+  )
+
+firingExampleCells <- KNDy_firingLong %>%
+  filter(
+    CellID %in% exampleCells
+  )
+
+firingExampleCells$CellID <- factor(
+  firingExampleCells$CellID,
+  levels = exampleCells
+)
+
+firingPlot_exampleCells <- firingExampleCells %>%
+  AG_KNDyPNA_plotFiringTraces(
+    ncol = 2,
+    lineColorVar = GenTreatment,
+    colorKey = c("CON" = "grey50", "PNA" = "black"),
+    removeFacets = TRUE,
+    removeLegend = TRUE,
+    save = TRUE, #Save file
+    img_type = ".pdf",
+    figWidth = 8,
+    units = "cm",
+    thisCellName = "exampleCells"
+  )
+```
+
+# Firing Plots Saving
 ```{r}
 ggsave(
   "AG_KNDyPNA_meanFrequency.pdf",
@@ -438,7 +718,7 @@ ggsave(
   device = "pdf",
   path = file.path(PlotOutputFolder, "manuscript"),
   scale = 1,
-  width = 8,
+  width = oneCol,
   height = 20/3,
   units = c("cm"),
   useDingbats = FALSE
@@ -455,10 +735,14 @@ ggsave(
   useDingbats = FALSE
 )
 firingPlots <- plot_grid(
+  firingPlot_exampleCells, # standin for traces
+  firingPlot_exampleCells,
   firingProp_plot,
   tf_plot,
   ncol = 2,
-  nrow = 1,
+  nrow = 2,
+  rel_heights = c(1.3, 1),
+  labels = c("A", "B", "C", "D"),
   align = "hv",
   axis = "btlr"
 )
@@ -467,8 +751,8 @@ ggsave(
   plot = firingPlots,
   path = file.path(PlotOutputFolder, "manuscript"),
   scale = 1,
-  width = 18/3 * 2,
-  height = 20/3,
+  width = twoCols,
+  height = 20/3 * 2,
   units = c("cm"),
   useDingbats = FALSE
 )
@@ -497,7 +781,7 @@ ggsave(
   device = "pdf",
   path = file.path(PlotOutputFolder, "manuscript"),
   scale = 1,
-  width = 18,
+  width = twoCols,
   height = 20,
   units = c("cm"),
   useDingbats = FALSE
@@ -561,17 +845,17 @@ inter_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, inter)
 ```
 
 ```{r}
-ggsave(
-  "AG_KNDyPNA_meanFrequency.pdf",
-  plot = tf_plot,
-  device = "pdf",
-  path = file.path(PlotOutputFolder, "manuscript"),
-  scale = 1,
-  width = 8,
-  height = 20/3,
-  units = c("cm"),
-  useDingbats = FALSE
-)
+# ggsave(
+#   "AG_KNDyPNA_meanFrequency.pdf",
+#   plot = tf_plot,
+#   device = "pdf",
+#   path = file.path(PlotOutputFolder, "manuscript"),
+#   scale = 1,
+#   width = 8,
+#   height = 20/3,
+#   units = c("cm"),
+#   useDingbats = FALSE
+# )
 ```
 
 
@@ -597,7 +881,7 @@ ggsave(
   device = "pdf",
   path = file.path(PlotOutputFolder, "manuscript"),
   scale = 1,
-  width = 18,
+  width = twoCols,
   height = 20,
   units = c("cm"),
   useDingbats = FALSE
@@ -752,7 +1036,11 @@ senktideTF <- senktideRespDF %>%
     tfbase,
     tfsenk,
     Quiet,
-    TreatxAge
+    TreatxAge,
+    MouseID,
+    Cage,
+    Generation,
+    DamID
   ) %>%
   mutate(
     foldChange = ifelse(tfbase > 0, (tfsenk - tfbase) / tfbase, NA)
@@ -920,7 +1208,7 @@ ggsave(
   device = "pdf",
   path = file.path(PlotOutputFolder, "manuscript"),
   scale = 1,
-  width = 18,
+  width = twoCols,
   height = 20 / 3 * 2,
   units = c("cm"),
   useDingbats = FALSE
@@ -957,7 +1245,7 @@ ggsave(
   device = "pdf",
   path = file.path(PlotOutputFolder, "manuscript"),
   scale = 1,
-  width = 8,
+  width = oneCol,
   height = 20/3,
   units = c("cm"),
   useDingbats = FALSE

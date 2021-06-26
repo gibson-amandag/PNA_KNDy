@@ -9,6 +9,7 @@ my_ggsave = function(
   plot, #plot to be saved
   img_type = ".png", #type of image to save
   path = PlotOutputFolder, #PlotOutputFolder defined in set up and .Renviron
+  units = "in",
   ...
 ){
   plot_name = naming_plot(
@@ -23,6 +24,6 @@ my_ggsave = function(
     plot = plot, 
     path = path, 
     bg = "transparent", 
-    units = "in", ...
+    units = units, ...
   )
 }
