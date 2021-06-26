@@ -162,6 +162,45 @@ countCellsAndLitters <- function(df, filterByVar, groupingVars){
     )
   return(count)
 }
+countCellsMiceAndLitters <- function(df, filterByVar, groupingVars){
+  count <- df %>%
+    filter(
+      !is.na({{ filterByVar }})
+    ) %>%
+    group_by(!!! groupingVars)%>%
+    select(
+      CellID,
+      MouseID,
+      DamID,
+      !!! groupingVars
+    ) %>%
+    summarise(
+      numCells = length(unique(CellID)),
+      numMice = length(unique(MouseID)),
+      numLitters = length(unique(DamID)),
+      .groups = "drop"
+    )
+  return(count)
+}
+
+countMiceAndLitters <- function(df, filterByVar, groupingVars){
+  count <- df %>%
+    filter(
+      !is.na({{ filterByVar }})
+    ) %>%
+    group_by(!!! groupingVars)%>%
+    select(
+      MouseID,
+      DamID,
+      !!! groupingVars
+    ) %>%
+    summarise(
+      numMice = length(unique(MouseID)),
+      numLitters = length(unique(DamID)),
+      .groups = "drop"
+    )
+  return(count)
+}
 
 countPercFiring <- function(df, groupingVars, rateForQuiet){
   count <- df %>%
