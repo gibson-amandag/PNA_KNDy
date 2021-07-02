@@ -688,6 +688,9 @@ exampleCells <- c(
 firingExampleCells <- KNDy_firingLong %>%
   filter(
     CellID %in% exampleCells
+  ) %>%
+  mutate(
+    time = time - StartTime_spont
   )
 
 firingExampleCells$CellID <- factor(
@@ -1208,7 +1211,7 @@ pnaPhenotype <- plot_grid(
   ncol = 2,
   nrow = 2,
   align = "hv",
-  axis = "tb",
+  axis = "tblr",
   rel_widths = c(1, 1.5)
 )
 
