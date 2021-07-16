@@ -1530,4 +1530,291 @@ senktide_anova <- anova_test(
 senktide_anova
 ```
 
+# RNA
+```{r}
+RNAdf <- myXLSX_func(DataFolder, KNDyPNA_Data_Excel, "RNA")
+RNAdf
+df <- RNAdf
+
+KNDy_VarNames <- KNDy_VarNames %>%
+  mutate(
+    Actb = "normalized relative expression (Actb and Syn1)",
+    Syn1 = "normalized relative expression (Actb and Syn1)",
+    Kiss1 = "normalized relative expression (Actb and Syn1)",
+    Kiss1r = "normalized relative expression (Actb and Syn1)",
+    Tac2 = "normalized relative expression (Actb and Syn1)",
+    Tac3r = "normalized relative expression (Actb and Syn1)",
+    Pdyn = "normalized relative expression (Actb and Syn1)",
+    Oprk1 = "normalized relative expression (Actb and Syn1)",
+    Ar = "normalized relative expression (Actb and Syn1)",
+    Esr1 = "normalized relative expression (Actb and Syn1)",
+    Pgr = "normalized relative expression (Actb and Syn1)"
+  )
+```
+
+```{r}
+summary_rna <- df %>%
+  group_by(
+    AgeGroup, GenTreatment
+  ) %>%
+  get_summary_stats(show = c("n", "mean", "se", "sd")) %>%
+  rename(
+    sem = se
+  )
+
+rna_wb <- createWorkbook()
+writeToWorkbook("rna", summary_rna, rna_wb)
+fileName <- paste0(file_prefix, "RNA_", dateToday, ".xlsx")
+filePath <- file.path(DataOutputFolder, fileName)
+saveWorkbook(rna_wb, filePath, overwrite = TRUE)
+```
+
+## Actb
+```{r}
+actb_ANOVA <- anova_test(
+  df,
+  between = c("AgeGroup", "GenTreatment"),
+  dv = "Actb",
+  type = 3
+)
+
+actb_ANOVA %>%
+  flextable()
+
+actb_plot <- AG_KNDyPNA_manuscriptPlot(
+  df,
+  param = Actb,
+  addMedian = FALSE
+)
+actb_plot
+```
+## Syn1
+```{r}
+syn1_ANOVA <- anova_test(
+  df,
+  between = c("AgeGroup", "GenTreatment"),
+  dv = "Syn1",
+  type = 3
+)
+syn1_ANOVA%>%
+  flextable()
+
+syn1_plot <- AG_KNDyPNA_manuscriptPlot(
+  df,
+  param = Syn1,
+  addMedian = FALSE
+)
+syn1_plot
+```
+
+## Kiss1
+```{r}
+Kiss1_ANOVA <- anova_test(
+  df,
+  between = c("AgeGroup", "GenTreatment"),
+  dv = "Kiss1",
+  type = 3
+)
+Kiss1_ANOVA%>%
+  flextable()
+
+Kiss1_plot <- AG_KNDyPNA_manuscriptPlot(
+  df,
+  param = Kiss1,
+  addMedian = FALSE
+)
+Kiss1_plot
+```
+
+## Kiss1r
+```{r}
+Kiss1r_ANOVA <- anova_test(
+  df,
+  between = c("AgeGroup", "GenTreatment"),
+  dv = "Kiss1r",
+  type = 3
+)
+Kiss1r_ANOVA%>%
+  flextable()
+
+Kiss1r_plot <- AG_KNDyPNA_manuscriptPlot(
+  df,
+  param = Kiss1r,
+  addMedian = FALSE
+)
+Kiss1r_plot
+```
+
+## Tac2
+```{r}
+Tac2_ANOVA <- anova_test(
+  df,
+  between = c("AgeGroup", "GenTreatment"),
+  dv = "Tac2",
+  type = 3
+)
+Tac2_ANOVA%>%
+  flextable()
+
+Tac2_plot <- AG_KNDyPNA_manuscriptPlot(
+  df,
+  param = Tac2,
+  addMedian = FALSE
+)
+Tac2_plot
+```
+
+## Tac3r
+```{r}
+Tac3r_ANOVA <- anova_test(
+  df,
+  between = c("AgeGroup", "GenTreatment"),
+  dv = "Tac3r",
+  type = 3
+)
+Tac3r_ANOVA%>%
+  flextable()
+
+Tac3r_plot <- AG_KNDyPNA_manuscriptPlot(
+  df,
+  param = Tac3r,
+  addMedian = FALSE
+)
+Tac3r_plot
+```
+
+## Pdyn
+```{r}
+Pdyn_ANOVA <- anova_test(
+  df,
+  between = c("AgeGroup", "GenTreatment"),
+  dv = "Pdyn",
+  type = 3
+)
+Pdyn_ANOVA%>%
+  flextable()
+
+Pdyn_plot <- AG_KNDyPNA_manuscriptPlot(
+  df,
+  param = Pdyn,
+  addMedian = FALSE
+)
+Pdyn_plot
+```
+
+## Oprk1
+```{r}
+Oprk1_ANOVA <- anova_test(
+  df,
+  between = c("AgeGroup", "GenTreatment"),
+  dv = "Oprk1",
+  type = 3
+)
+Oprk1_ANOVA%>%
+  flextable()
+
+Oprk1_plot <- AG_KNDyPNA_manuscriptPlot(
+  df,
+  param = Oprk1,
+  addMedian = FALSE
+)
+Oprk1_plot
+```
+
+## Ar
+```{r}
+Ar_ANOVA <- anova_test(
+  df,
+  between = c("AgeGroup", "GenTreatment"),
+  dv = "Ar",
+  type = 3
+)
+Ar_ANOVA%>%
+  flextable()
+
+Ar_plot <- AG_KNDyPNA_manuscriptPlot(
+  df,
+  param = Ar,
+  addMedian = FALSE
+)
+Ar_plot
+```
+
+## Esr1
+```{r}
+Esr1_ANOVA <- anova_test(
+  df,
+  between = c("AgeGroup", "GenTreatment"),
+  dv = "Esr1",
+  type = 3
+)
+Esr1_ANOVA%>%
+  flextable()
+
+Esr1_plot <- AG_KNDyPNA_manuscriptPlot(
+  df,
+  param = Esr1,
+  addMedian = FALSE
+)
+Esr1_plot
+```
+
+## Pgr
+```{r}
+Pgr_ANOVA <- anova_test(
+  df,
+  between = c("AgeGroup", "GenTreatment"),
+  dv = "Pgr",
+  type = 3
+)
+Pgr_ANOVA%>%
+  flextable()
+
+Pgr_plot <- AG_KNDyPNA_manuscriptPlot(
+  df,
+  param = Pgr,
+  addMedian = FALSE
+)
+Pgr_plot
+```
+
+```{r}
+removeYAxis <- theme(
+  axis.line.y = element_blank(),
+  axis.title.y = element_blank(),
+  axis.ticks.y = element_blank(),
+  axis.text.y = element_blank()
+)
+
+noMargins <- theme(
+  plot.margin = unit(c(0,0,0,0), "cm")
+)
+
+rna_plots <- plot_grid(
+  actb_plot + expand_limits(y = 4.7),
+  syn1_plot + expand_limits(y = 4.7) + removeYAxis,
+  Kiss1_plot + expand_limits(y = 4.7) + removeYAxis,
+  Kiss1r_plot + expand_limits(y = 4.7) + removeYAxis,
+  Tac2_plot + expand_limits(y = 4.7) + removeYAxis,
+  Tac3r_plot + expand_limits(y = 4.7) + removeYAxis,
+  Pdyn_plot + expand_limits(y = 4.7),
+  Oprk1_plot + expand_limits(y = 4.7) + removeYAxis,
+  Ar_plot + expand_limits(y = 4.7) + removeYAxis,
+  Esr1_plot + expand_limits(y = 4.7) + removeYAxis,
+  Pgr_plot + expand_limits(y = 4.7) + removeYAxis,
+  NULL,
+  nrow = 2,
+  labels = c("Actb", "Syn1", "Kiss1", "Kiss1r", "Tac2", "Tac3r", "Pdyn", "Oprk1", "Ar", "Esr1", "Pgr")
+)
+ggsave(
+  "AG_KNDyPNA_RNA.pdf",
+  plot = rna_plots,
+  path = file.path(PlotOutputFolder, "manuscript"),
+  scale = 1,
+  width = twoCols,
+  height = 20/3 * 2,
+  units = c("cm"),
+  useDingbats = FALSE
+)
+```
 

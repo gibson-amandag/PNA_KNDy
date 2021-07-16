@@ -57,7 +57,13 @@ plotBurstParamBox <- function(
 }
 
 # param as character
-AG_KNDyPNA_manuscriptPlot <- function(df, param, strip.position = "bottom", niceNames = KNDy_VarNames){
+AG_KNDyPNA_manuscriptPlot <- function(
+  df, 
+  param, 
+  addMedian = TRUE,
+  strip.position = "bottom", 
+  niceNames = KNDy_VarNames
+){
   viz <- df %>%
     ggplot(
       aes(x = GenTreatment, y = {{param}}, fill = GenTreatment)
@@ -70,7 +76,13 @@ AG_KNDyPNA_manuscriptPlot <- function(df, param, strip.position = "bottom", nice
     scale_fill_manual(values = c("white", "black"))+
     addMeanHorizontalBar(width = 0.85, size = 0.4) +
     addMeanSE_vertBar(size = 0.4)+
-    addMedianHorizontalBar(width = 0.85, size = 0.4)+
+    
+  if(addMedian == TRUE){
+    viz <- viz + 
+      addMedianHorizontalBar(width = 0.85, size = 0.4)
+  }
+  
+  viz <- viz + 
     AG_KNDyPNA_jitterGeom()+
     expand_limits(y = 0) +
     theme_pubr()+
