@@ -75,7 +75,7 @@ AG_KNDyPNA_manuscriptPlot <- function(
     labs(y = niceNames %>% select({{ param }}))+
     scale_fill_manual(values = c("white", "black"))+
     addMeanHorizontalBar(width = 0.85, size = 0.4) +
-    addMeanSE_vertBar(size = 0.4)+
+    addMeanSE_vertBar(size = 0.4)
     
   if(addMedian == TRUE){
     viz <- viz + 
