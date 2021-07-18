@@ -679,7 +679,7 @@ KNDy_firingRate_Juv_PNA_plot_Hz <- KNDy_firingLong %>%
 ## Example Firing
 ```{r}
 exampleCells <- c(
-  "20200928c", 
+  "20200802c", 
   "20190816c", 
   "20200806c", 
   "20190725b"
@@ -738,8 +738,8 @@ ggsave(
   useDingbats = FALSE
 )
 firingPlots <- plot_grid(
+  firingPlot_exampleCells, 
   firingPlot_exampleCells, # standin for traces
-  firingPlot_exampleCells,
   firingProp_plot,
   tf_plot,
   ncol = 2,
@@ -1786,25 +1786,31 @@ removeYAxis <- theme(
   axis.text.y = element_blank()
 )
 
+removeXLabels <- theme(
+  axis.ticks.x = element_blank(),
+  axis.text.x = element_blank()
+)
+
 noMargins <- theme(
   plot.margin = unit(c(0,0,0,0), "cm")
 )
 
 rna_plots <- plot_grid(
-  actb_plot + expand_limits(y = 4.7),
-  syn1_plot + expand_limits(y = 4.7) + removeYAxis,
-  Kiss1_plot + expand_limits(y = 4.7) + removeYAxis,
-  Kiss1r_plot + expand_limits(y = 4.7) + removeYAxis,
-  Tac2_plot + expand_limits(y = 4.7) + removeYAxis,
-  Tac3r_plot + expand_limits(y = 4.7) + removeYAxis,
-  Pdyn_plot + expand_limits(y = 4.7),
-  Oprk1_plot + expand_limits(y = 4.7) + removeYAxis,
-  Ar_plot + expand_limits(y = 4.7) + removeYAxis,
-  Esr1_plot + expand_limits(y = 4.7) + removeYAxis,
-  Pgr_plot + expand_limits(y = 4.7) + removeYAxis,
+  actb_plot + expand_limits(y = 4.7) + removeXLabels,
+  syn1_plot + expand_limits(y = 4.7) + removeYAxis + removeXLabels,
+  Kiss1_plot + expand_limits(y = 4.7) + removeYAxis + removeXLabels,
+  Kiss1r_plot + expand_limits(y = 4.7) + removeYAxis + removeXLabels,
+  Tac2_plot + expand_limits(y = 4.7) + removeYAxis + removeXLabels,
+  Tac3r_plot + expand_limits(y = 4.7) + removeYAxis + removeXLabels,
+  Pdyn_plot + expand_limits(y = 4.7) + removeXLabels,
+  Oprk1_plot + expand_limits(y = 4.7) + removeYAxis + removeXLabels,
+  Ar_plot + expand_limits(y = 4.7) + removeYAxis + removeXLabels,
+  Esr1_plot + expand_limits(y = 4.7) + removeYAxis + removeXLabels,
+  Pgr_plot + expand_limits(y = 4.7) + removeYAxis + removeXLabels,
   NULL,
   nrow = 2,
-  labels = c("Actb", "Syn1", "Kiss1", "Kiss1r", "Tac2", "Tac3r", "Pdyn", "Oprk1", "Ar", "Esr1", "Pgr")
+  labels = c("Actb", "Syn1", "Kiss1", "Kiss1r", "Tac2", "Tac3r", "Pdyn", "Oprk1", "Ar", "Esr1", "Pgr"),
+  rel_widths = c(1.2, 1, 1, 1, 1, 1, 1.2, 1, 1, 1, 1, 1)
 )
 ggsave(
   "AG_KNDyPNA_RNA.pdf",
