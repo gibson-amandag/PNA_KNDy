@@ -110,6 +110,56 @@ sourceModule("cellCountModule.R")
 
 sourceModule("burstSummaryTableModule.R")
 
+# https://gist.github.com/wch/5436415/#gistcomment-1646351 
+get_plot_bootstrapjs_div <- function(plot_object_list, id_prefix) {
+  #### local_function
+  get_col_div <- function(plot_object_list, id_prefix, index, css_class = 'col-xs-12 col-sm-6')  {
+    col_div <- div(class = css_class)
+    
+    if(length(plot_object_list) >= index) {
+      plot_name <- paste0(id_prefix, '_', index)
+      plot_output_object <- plotOutput(plot_name)
+      plot_output_object <- renderPlot(plot_object_list[[index]])
+      col_div <- tagAppendChild(col_div, plot_output_object)
+    }
+    return(col_div)
+  }
+  #
+  get_plot_div <- function(plot_object_list, id_prefix) {
+    result_div <- div(class = 'container-fluid')
+    
+    for(i in 1:length(plot_object_list)) {
+      row_div <- div(class = 'row')
+      row_div <- tagAppendChild(row_div, get_col_div(plot_object_list, id_prefix, i))
+      row_div <- tagAppendChild(row_div, get_col_div(plot_object_list, id_prefix, i+1))    
+      result_div <- tagAppendChild(result_div, row_div)
+    }
+    return(result_div)
+  }
+  ####
+  plot_output_list_div <- get_plot_div(plot_object_list, id_prefix)
+  
+  return(plot_output_list_div)
+}
+
+get_plot_object_list <- function(max_plots, input_n) {
+  result_plot_list <- lapply(1:input_n, function(i) {
+    plot(1:i, 1:i,
+         xlim = c(1, max_plots), ylim = c(1, max_plots),
+         main = paste("1:", i, ".  n is ", input_n, sep = "")
+    )
+  })
+  return(result_plot_list)
+}
+
+get_plot_output_list_div <- function(max_plots, input_n) {
+  plot_object_list <- get_plot_object_list(max_plots, input_n)
+  plot_output_div <- get_plot_bootstrapjs_div(plot_object_list, 'ui_plot')
+  return(plot_output_div)
+}
+
+
+
 # Define UI for application
 ui <- fluidPage(
   titlePanel("PNA KNDy Data"),
@@ -179,6 +229,16 @@ ui <- fluidPage(
     tabPanel(
       "Firing Rate",
       firingRateUI("firingRate", KNDyDATA)
+    ),
+    tabPanel(
+      "Cycle Images",
+      titlePanel("Uploading Files"),
+      fileInput(inputId = 'files', 
+                label = 'Select an Image',
+                multiple = TRUE,
+                accept=c('image/png', 'image/jpeg', 'image/tif')),
+      uiOutput('images'),
+      # tableOutput('files')
     )
   ),
 )
@@ -228,6 +288,67 @@ server <- function(input, output) {
   
   ### FIRING RATE SERVER -----------
   firingRateServer("firingRate", KNDy_firingRate = KNDy_firingRate, KNDyDATA)
+  
+  
+  output$files <- renderTable(input$files)
+  
+  files <- reactive({
+    files <- input$files
+    files$datapath <- gsub("\\\\", "/", files$datapath)
+    files
+  })
+  
+  
+  output$images <- renderUI({
+    if(is.null(input$files)) return(NULL)
+    image_output_list <- 
+      lapply(1:nrow(files()),
+             function(i)
+             {
+               fileName <- paste0("name", i)
+               imagename <- paste0("image", i)
+               tags$div(
+                 class = "col-sm-3",
+                 textOutput(fileName, container = h4),
+                 imageOutput(imagename, height = "auto") # auto fixes the overlap
+               )
+             })
+    
+    
+    div(
+      class = "container-fluid",
+      div(
+        class = "row",
+        do.call(tagList, image_output_list)
+      )
+    )
+  })
+  
+  observe({
+    if(is.null(input$files)) return(NULL)
+    for (i in 1:nrow(files()))
+    {
+      print(i)
+      local({
+        my_i <- i
+        imagename = paste0("image", my_i)
+        fileName <- paste0("name", my_i)
+        outputWidth <- paste0("output_", imagename, "_width")
+        outputHeight <- paste0("output_", imagename, "_height")
+        print(imagename)
+        output[[fileName]] <- renderText({
+          files()$name[my_i]
+        })
+        output[[imagename]] <- 
+          renderImage({
+            list(src = files()$datapath[my_i],
+                 width = "100%",
+                 height = "auto",
+                 alt = "Image failed to render")
+          }, deleteFile = FALSE)
+      })
+    }
+  })
 }
 # Run the application 
 shinyApp(ui = ui, server = server)

@@ -412,7 +412,6 @@ spb_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, spb)
 intra_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, intra)
 ssf_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, ssf)
 inter_plot <- AG_KNDyPNA_manuscriptPlot(df_plot, inter)
-
 ```
 
 ```{r}
@@ -1047,6 +1046,38 @@ senktideTF <- senktideRespDF %>%
   ) %>%
   mutate(
     foldChange = ifelse(tfbase > 0, (tfsenk - tfbase) / tfbase, NA)
+  )
+
+senktideTF %>%
+  filter(
+    Quiet == TRUE
+  )%>%
+  arrange(
+    tfsenk
+  )
+
+senktideTF %>%
+  filter(
+    AgeGroup == "Juvenile",
+    Quiet == "TRUE"
+  ) %>%
+  group_by(
+    GenTreatment,
+  ) %>%
+  summarise(
+    n()
+  )
+
+bParams_spont_0.23%>%
+  filter(
+    AgeGroup == "Juvenile"
+  ) %>%
+  group_by(
+    GenTreatment,
+    Quiet
+  ) %>%
+  summarise(
+    n()
   )
 
 senktide_long <- makeSenktideLong(senktideTF)
@@ -1822,5 +1853,118 @@ ggsave(
   units = c("cm"),
   useDingbats = FALSE
 )
+```
+
+
+# Analysis to address reviewer comments
+
+Trying to assess the variability between cells from the same mouse
+
+```{r}
+bParams_spont_0.23 %>%
+  relocate(
+    tf,
+    .after = CellID
+  ) %>%
+  arrange(
+    MouseID
+  )
+
+tf_groupedByMouse <- bParams_spont_0.23 %>%
+  group_by(
+    MouseID
+  )%>%
+  summarize(
+    n = n(),
+    meanTF = mean(tf, na.rm = TRUE),
+    sdTF = sd(tf, na.rm = TRUE),
+    cvTF = meanTF/sdTF * 100,
+    diffTF = max(tf, na.rm = TRUE) - min(tf, na.rm = TRUE)
+  ) %>%
+  filter(
+    n != 1
+  )
+tf_groupedByMouse %>%
+  arrange(
+    diffTF
+  )
+
+tf_groupedByMouse %>%
+  summarize(
+    meanDiff = mean(diffTF, na.rm = TRUE),
+    medianDiff = median(diffTF, na.rm = TRUE),
+    semDiff = sd(diffTF, na.rm = TRUE) /sqrt(n()),
+    meanCV = mean(cvTF, na.rm = TRUE),
+    medianCV = median(cvTF, na.rm = TRUE),
+    semCV = sd(cvTF, na.rm = TRUE) / sqrt(n())
+  )
+
+ggplot(
+  tf_groupedByMouse,
+  aes(
+    x = diffTF
+  )
+) +
+  geom_histogram(binwidth = 0.005)
+
+ggplot(
+  bParams_spont_0.23,
+  aes(
+    x = CellNum,
+    y = tf,
+    group = MouseID
+  )
+)+geom_line(
+  aes(color = AgeGroup,
+      linetype = GenTreatment)
+) + my_theme
+bParams_spont_0.23
+```
+
+```{r}
+bParams_spont_0.23 %>%
+  filter(
+    bn > 0
+  ) %>%
+  arrange(
+    intra
+  ) %>%
+  relocate(
+    intra,
+    .after = bn
+  )
+
+bParams_spont_0.23 %>%
+  filter(
+    bf >0
+  )%>%
+  arrange(
+    bf
+  )
+
+bParams_spont_0.23 %>%
+  filter(
+    bf > 0,
+    bf < 0.02
+  ) %>%
+  group_by(
+    AgeGroup,
+    GenTreatment
+  ) %>%
+  summarise(
+    n()
+  )
+```
+
+Intraburst intervals near 0
+```{r}
+bParams_spont_0.23 %>%
+  arrange(
+    intra
+  ) %>%
+  relocate(
+    intra,
+    .after = bn
+  )
 ```
 
